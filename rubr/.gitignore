@@ -1,0 +1,88 @@
+# Go-specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+/vendor/
+/go.sum
+*.test
+*.out
+*.prof
+
+# Fyne-specific
+*.app
+*.dmg
+*.deb
+*.rpm
+*.apk
+*.tar.gz
+*.zip
+fyne-cross/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.sql.gz
+*.sql.dump
+*.postgres
+
+# Environment variables and secrets
+.env
+*.env.local
+*.env.development
+*.env.test
+*.env.production
+*.secret
+config.yaml
+config.json
+
+# Logs
+*.log
+logs/
+*.log.gz
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Dependency directories (if not vendored)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+coverage/
+*.cover
+*.cov
+
+# Documentation build artifacts
+docs/_build/
+*.md
+# Keep specific markdown files
+!README.md
+!CONTRIBUTING.md
+!LICENSE.md
+
+# Miscellaneous
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.lock
