@@ -1,14 +1,9 @@
 package main
 
-import (
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/widget"
-)
+import "rubr/frontend"
 
 func main() {
-	a := app.New()
-	w := a.NewWindow("hi world!")
-
-	w.SetContent(widget.NewLabel("Hello World!"))
-	w.ShowAndRun()
+	//frontend.GreetingPage()
+	frontend.RegistrationPage()
+	//frontend.AuthorizationPage()
 }
