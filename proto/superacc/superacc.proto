@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package superacc;
+option go_package = "./proto;superacc";
+
+service SuperAccService {
+  rpc UpdateUserRole (UpdateRoleRequest) returns (UpdateRoleResponse) {}
+  rpc ManageGroup (ManageGroupRequest) returns (ManageGroupResponse) {}
+  rpc ManageDiscipline (ManageDisciplineRequest) returns (ManageDisciplineResponse) {}
+}
+
+message UpdateRoleRequest {
+  int32 user_id = 1;
+  string role = 2;
+}
+
+message UpdateRoleResponse {
+  string message = 1;
+  bool success = 2;
+}
+
+message ManageGroupRequest {
+  int32 group_id = 1;
+  string action = 2;
+  int32 user_id = 3;
+  string role = 4;
+}
+
+message ManageGroupResponse {
+  string message = 1;
+  bool success = 2;
+}
+
+message ManageDisciplineRequest {
+  int32 discipline_id = 1;
+  int32 group_id = 2;
+  int32 seminarist_id = 3;
+  int32 assistant_id = 4;
+}
+
+message ManageDisciplineResponse {
+  string message = 1;
+  bool success = 2;
+}
