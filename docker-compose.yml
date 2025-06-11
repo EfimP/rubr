@@ -30,8 +30,8 @@ services:
 
   apigateway:
     build:
-      context: ./cmd/apigateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/apigateway/Dockerfile
     ports:
       - "8080:8080"
     depends_on:
@@ -54,8 +54,8 @@ services:
 
   userservice:
     build:
-      context: ./cmd/userservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/userservice/Dockerfile
     ports:
       - "50051:50051"
     depends_on:
@@ -69,8 +69,8 @@ services:
 
   workservice:
     build:
-      context: ./cmd/workservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/workservice/Dockerfile
     ports:
       - "50052:50052"
     depends_on:
@@ -84,8 +84,8 @@ services:
 
   rubricservice:
     build:
-      context: ./cmd/rubricservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/rubricservice/Dockerfile
     ports:
       - "50053:50053"
     depends_on:
@@ -99,8 +99,8 @@ services:
 
   gradingservice:
     build:
-      context: ./cmd/gradingservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/gradingservice/Dockerfile
     ports:
       - "50054:50054"
     depends_on:
@@ -114,8 +114,8 @@ services:
 
   workassignmentservice:
     build:
-      context: ./cmd/workassignmentservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/workassignmentservice/Dockerfile
     ports:
       - "50055:50055"
     depends_on:
@@ -129,8 +129,8 @@ services:
 
   notificationservice:
     build:
-      context: ./cmd/notificationservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/notificationservice/Dockerfile
     ports:
       - "50056:50056"
     depends_on:
@@ -144,8 +144,8 @@ services:
 
   superaccservice:
     build:
-      context: ./cmd/superaccservice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./cmd/superaccservice/Dockerfile
     ports:
       - "50057:50057"
     depends_on:
