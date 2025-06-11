@@ -1,4 +1,4 @@
-package main
+package superaccservice
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"log"
 	"net"
 
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
-	//"github.com/lib/pq"
 	pb "rubr/proto/superacc"
 )
 
@@ -70,9 +70,23 @@ func NewService(repo *Repository) *Service {
 }
 
 func (s *Service) UpdateUserRole(ctx context.Context, req *pb.UpdateRoleRequest) (*pb.UpdateRoleResponse, error) {
-	if req.UserId <= 0 || req.Role == "" {
-		return &pb.UpdateRoleResponse{Message: "invalid user ID or role", Success: false}, nil
+	validRoles := map[string]bool{
+		"student":    true,
+		"assistant":  true,
+		"seminarist": true,
+		"lecturer":   true,
 	}
+
+	if req.UserId <= 0 {
+		return &pb.UpdateRoleResponse{Message: "invalid user ID", Success: false}, nil
+	}
+	if req.Role == "" {
+		return &pb.UpdateRoleResponse{Message: "role cannot be empty", Success: false}, nil
+	}
+	if !validRoles[req.Role] {
+		return &pb.UpdateRoleResponse{Message: "invalid role, must be one of: student, assistant, seminarist, lecturer, superaccount", Success: false}, nil
+	}
+
 	err := s.repo.UpdateUserRole(ctx, int(req.UserId), req.Role)
 	if err != nil {
 		return &pb.UpdateRoleResponse{Message: err.Error(), Success: false}, err
@@ -106,8 +120,8 @@ func (s *Service) ManageDiscipline(ctx context.Context, req *pb.ManageDiscipline
 }
 
 func main() {
-	// Подключение к базе данных
-	db, err := sql.Open("postgres", "postgres://user:password@localhost:5432/rubr?sslmode=disable")
+	connStr := "user=postgres password=postgres dbname=rubrlocal sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -116,7 +130,7 @@ func main() {
 	repo := NewRepository(db)
 	svc := NewService(repo)
 
-	lis, err := net.Listen("tcp", ":8085")
+	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
