@@ -1,14 +1,16 @@
-package userservice
+package main
 
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"os"
 	pb "rubr/proto/user"
 	"time"
 )
@@ -80,7 +82,12 @@ func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 
 func main() {
 	// Подключение к базе данных
-	connStr := "user=postgres password=postgres dbname=rubrlocal sslmode=disable"
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"))
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
