@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	pb "rubr/proto/user"
+	"strconv"
 	"time"
 )
 
@@ -21,7 +22,8 @@ type server struct {
 }
 
 func (s *server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) (*pb.RegisterUserResponse, error) {
-	if req.Name == "" || req.Surname == "" || req.Patronymic == "" || req.Email == "" || req.Password == "" {
+	if req.Name == "" || req.Surname == "" ||
+		req.Patronymic == "" || req.Email == "" || req.Password == "" {
 		return &pb.RegisterUserResponse{Error: "All fields must be filled"}, nil
 	}
 
@@ -81,20 +83,29 @@ func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 }
 
 func main() {
-	// Подключение к базе данных
+
+	dbHost := os.Getenv("DB_HOST")
+	dbPortStr := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	// конвертируем порт из строки в число, чтобы работал sql.open
+	dbPort, err := strconv.Atoi(dbPortStr)
+	if err != nil {
+		log.Fatalf("Invalid DB_PORT value: %v", err)
+	}
+
+	// Формирование строки подключения
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"))
+		dbHost, dbPort, dbUser, dbPassword, dbName)
+	log.Printf("Trying to connect to: %s", connStr) // Для отладки
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
 
-	// Настройка сервера gRPC
+	// Настройка сервера gRPC (остальной код остается без изменений)
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

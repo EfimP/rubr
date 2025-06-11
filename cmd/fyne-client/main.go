@@ -111,7 +111,7 @@ func createAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 			log.Println("Login error:", resp.Error)
 			return
 		}
-		log.Println("Login successful, Token:", resp.Token)
+		log.Println("Login successful, Token:", resp.Token, " user id: ", resp.UserId)
 		// Здесь можно сохранить токен и перейти на страницу профиля
 	})
 	enterButton.Importance = widget.HighImportance
@@ -176,7 +176,7 @@ func createRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 			log.Println("Registration error:", resp.Error)
 			return
 		}
-		log.Println("Registration successful, UserID:", resp.UserId)
+		log.Printf("Registration successful, UserID: %s", resp.UserId)
 		// Здесь можно вернуться на GreetingPage или перейти на профиль
 		state.currentPage = "greeting"
 		state.window.SetContent(createContent(state))

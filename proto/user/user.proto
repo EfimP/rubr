@@ -16,17 +16,17 @@ message RegisterUserRequest {
   string Password = 5;
 }
 message RegisterUserResponse {
-  string user_id = 1;
-  string error = 2;
+  string UserId = 1;
+  string Error = 2;
 }
 
 message LoginRequest {
-  string email = 1;
-  string password = 2;
+  string Email = 1;
+  string Password = 2;
 }
 message LoginResponse {
-  string user_id = 1;
-  string token = 2; // JWT токен
-  string error = 3;
+  string UserId = 1;
+  string Token = 2; // JWT токен
+  string Error = 3;
 }
 

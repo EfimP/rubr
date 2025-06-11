@@ -99,8 +99,8 @@ func (x *RegisterUserRequest) GetPassword() string {
 
 type RegisterUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=UserId,proto3" json:"UserId,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=Error,proto3" json:"Error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -151,8 +151,8 @@ func (x *RegisterUserResponse) GetError() string {
 
 type LoginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Email         string                 `protobuf:"bytes,1,opt,name=Email,proto3" json:"Email,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=Password,proto3" json:"Password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -203,9 +203,9 @@ func (x *LoginRequest) GetPassword() string {
 
 type LoginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"` // JWT токен
-	Error         string                 `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=UserId,proto3" json:"UserId,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=Token,proto3" json:"Token,omitempty"` // JWT токен
+	Error         string                 `protobuf:"bytes,3,opt,name=Error,proto3" json:"Error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -273,17 +273,17 @@ const file_proto_user_user_proto_rawDesc = "" +
 	"Patronymic\x18\x03 \x01(\tR\n" +
 	"Patronymic\x12\x14\n" +
 	"\x05Email\x18\x04 \x01(\tR\x05Email\x12\x1a\n" +
-	"\bPassword\x18\x05 \x01(\tR\bPassword\"E\n" +
-	"\x14RegisterUserResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error\"@\n" +
+	"\bPassword\x18\x05 \x01(\tR\bPassword\"D\n" +
+	"\x14RegisterUserResponse\x12\x16\n" +
+	"\x06UserId\x18\x01 \x01(\tR\x06UserId\x12\x14\n" +
+	"\x05Error\x18\x02 \x01(\tR\x05Error\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"T\n" +
-	"\rLoginResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token\x12\x14\n" +
-	"\x05error\x18\x03 \x01(\tR\x05error2\x8a\x01\n" +
+	"\x05Email\x18\x01 \x01(\tR\x05Email\x12\x1a\n" +
+	"\bPassword\x18\x02 \x01(\tR\bPassword\"S\n" +
+	"\rLoginResponse\x12\x16\n" +
+	"\x06UserId\x18\x01 \x01(\tR\x06UserId\x12\x14\n" +
+	"\x05Token\x18\x02 \x01(\tR\x05Token\x12\x14\n" +
+	"\x05Error\x18\x03 \x01(\tR\x05Error2\x8a\x01\n" +
 	"\vUserService\x12G\n" +
 	"\fRegisterUser\x12\x19.user.RegisterUserRequest\x1a\x1a.user.RegisterUserResponse\"\x00\x122\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\"\x00B\x13Z\x11./proto/user;userb\x06proto3"

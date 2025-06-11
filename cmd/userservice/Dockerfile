@@ -4,7 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-# Явно указываем архитектуру linux/amd64
+# Сборка для linux/amd64
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o userservice ./cmd/userservice/main.go
 RUN chmod +x ./userservice
 
