@@ -1,13 +1,10 @@
 package main
 
-import (
-	"rubr/frontend/lector"
-)
-
 func main() {
 	//everybody.GreetingPage()
 	//everybody.RegistrationPage()
 	//everybody.AuthorizationPage()
-	lector.LectorWorksPage()
-	//	lector.CreateWorkPage()
+	//lector.CreateWorkPage()
+	//lector.LectorWorksPage()
+	//lector.ShowBlockingCriteriaPage()
 }
