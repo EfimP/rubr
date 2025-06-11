@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: proto/user.proto
+// source: proto/user/user.proto
 
 package user
 
@@ -21,7 +21,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	UserService_RegisterUser_FullMethodName = "/user.UserService/RegisterUser"
 	UserService_Login_FullMethodName        = "/user.UserService/Login"
-	UserService_GetUserData_FullMethodName  = "/user.UserService/GetUserData"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -29,9 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	RegisterUser(ctx context.Context, in *RegisterUserRequest, opts ...grpc.CallOption) (*RegisterUserResponse, error)
-	// Авторизация пользователя с выдачей JWT
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	GetUserData(ctx context.Context, in *GetUserDataRequest, opts ...grpc.CallOption) (*GetUserDataResponse, error)
 }
 
 type userServiceClient struct {
@@ -62,24 +59,12 @@ func (c *userServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserData(ctx context.Context, in *GetUserDataRequest, opts ...grpc.CallOption) (*GetUserDataResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserDataResponse)
-	err := c.cc.Invoke(ctx, UserService_GetUserData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
 	RegisterUser(context.Context, *RegisterUserRequest) (*RegisterUserResponse, error)
-	// Авторизация пользователя с выдачей JWT
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	GetUserData(context.Context, *GetUserDataRequest) (*GetUserDataResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -95,9 +80,6 @@ func (UnimplementedUserServiceServer) RegisterUser(context.Context, *RegisterUse
 }
 func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (UnimplementedUserServiceServer) GetUserData(context.Context, *GetUserDataRequest) (*GetUserDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserData not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -156,24 +138,6 @@ func _UserService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_GetUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserDataRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserData(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetUserData_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserData(ctx, req.(*GetUserDataRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -189,11 +153,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Login",
 			Handler:    _UserService_Login_Handler,
 		},
-		{
-			MethodName: "GetUserData",
-			Handler:    _UserService_GetUserData_Handler,
-		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/user.proto",
+	Metadata: "proto/user/user.proto",
 }

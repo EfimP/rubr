@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	pb "rubr/proto"
+	pb "rubr/proto/user"
 	"time"
 )
 
@@ -86,7 +86,7 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
-	
+
 	// Настройка сервера gRPC
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {

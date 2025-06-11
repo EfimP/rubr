@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v6.31.1
-// source: proto/superacc.proto
+// source: proto/superacc/superacc.proto
 
 package superacc
 
@@ -31,7 +31,7 @@ type UpdateRoleRequest struct {
 
 func (x *UpdateRoleRequest) Reset() {
 	*x = UpdateRoleRequest{}
-	mi := &file_proto_superacc_proto_msgTypes[0]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +43,7 @@ func (x *UpdateRoleRequest) String() string {
 func (*UpdateRoleRequest) ProtoMessage() {}
 
 func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_superacc_proto_msgTypes[0]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +56,7 @@ func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRoleRequest) Descriptor() ([]byte, []int) {
-	return file_proto_superacc_proto_rawDescGZIP(), []int{0}
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *UpdateRoleRequest) GetUserId() int32 {
@@ -83,7 +83,7 @@ type UpdateRoleResponse struct {
 
 func (x *UpdateRoleResponse) Reset() {
 	*x = UpdateRoleResponse{}
-	mi := &file_proto_superacc_proto_msgTypes[1]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -95,7 +95,7 @@ func (x *UpdateRoleResponse) String() string {
 func (*UpdateRoleResponse) ProtoMessage() {}
 
 func (x *UpdateRoleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_superacc_proto_msgTypes[1]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,7 +108,7 @@ func (x *UpdateRoleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRoleResponse) Descriptor() ([]byte, []int) {
-	return file_proto_superacc_proto_rawDescGZIP(), []int{1}
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateRoleResponse) GetMessage() string {
@@ -137,7 +137,7 @@ type ManageGroupRequest struct {
 
 func (x *ManageGroupRequest) Reset() {
 	*x = ManageGroupRequest{}
-	mi := &file_proto_superacc_proto_msgTypes[2]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -149,7 +149,7 @@ func (x *ManageGroupRequest) String() string {
 func (*ManageGroupRequest) ProtoMessage() {}
 
 func (x *ManageGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_superacc_proto_msgTypes[2]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -162,7 +162,7 @@ func (x *ManageGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ManageGroupRequest.ProtoReflect.Descriptor instead.
 func (*ManageGroupRequest) Descriptor() ([]byte, []int) {
-	return file_proto_superacc_proto_rawDescGZIP(), []int{2}
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ManageGroupRequest) GetGroupId() int32 {
@@ -203,7 +203,7 @@ type ManageGroupResponse struct {
 
 func (x *ManageGroupResponse) Reset() {
 	*x = ManageGroupResponse{}
-	mi := &file_proto_superacc_proto_msgTypes[3]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -215,7 +215,7 @@ func (x *ManageGroupResponse) String() string {
 func (*ManageGroupResponse) ProtoMessage() {}
 
 func (x *ManageGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_superacc_proto_msgTypes[3]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -228,7 +228,7 @@ func (x *ManageGroupResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ManageGroupResponse.ProtoReflect.Descriptor instead.
 func (*ManageGroupResponse) Descriptor() ([]byte, []int) {
-	return file_proto_superacc_proto_rawDescGZIP(), []int{3}
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ManageGroupResponse) GetMessage() string {
@@ -257,7 +257,7 @@ type ManageDisciplineRequest struct {
 
 func (x *ManageDisciplineRequest) Reset() {
 	*x = ManageDisciplineRequest{}
-	mi := &file_proto_superacc_proto_msgTypes[4]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -269,7 +269,7 @@ func (x *ManageDisciplineRequest) String() string {
 func (*ManageDisciplineRequest) ProtoMessage() {}
 
 func (x *ManageDisciplineRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_superacc_proto_msgTypes[4]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -282,7 +282,7 @@ func (x *ManageDisciplineRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ManageDisciplineRequest.ProtoReflect.Descriptor instead.
 func (*ManageDisciplineRequest) Descriptor() ([]byte, []int) {
-	return file_proto_superacc_proto_rawDescGZIP(), []int{4}
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ManageDisciplineRequest) GetDisciplineId() int32 {
@@ -323,7 +323,7 @@ type ManageDisciplineResponse struct {
 
 func (x *ManageDisciplineResponse) Reset() {
 	*x = ManageDisciplineResponse{}
-	mi := &file_proto_superacc_proto_msgTypes[5]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -335,7 +335,7 @@ func (x *ManageDisciplineResponse) String() string {
 func (*ManageDisciplineResponse) ProtoMessage() {}
 
 func (x *ManageDisciplineResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_superacc_proto_msgTypes[5]
+	mi := &file_proto_superacc_superacc_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -348,7 +348,7 @@ func (x *ManageDisciplineResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ManageDisciplineResponse.ProtoReflect.Descriptor instead.
 func (*ManageDisciplineResponse) Descriptor() ([]byte, []int) {
-	return file_proto_superacc_proto_rawDescGZIP(), []int{5}
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ManageDisciplineResponse) GetMessage() string {
@@ -365,11 +365,11 @@ func (x *ManageDisciplineResponse) GetSuccess() bool {
 	return false
 }
 
-var File_proto_superacc_proto protoreflect.FileDescriptor
+var File_proto_superacc_superacc_proto protoreflect.FileDescriptor
 
-const file_proto_superacc_proto_rawDesc = "" +
+const file_proto_superacc_superacc_proto_rawDesc = "" +
 	"\n" +
-	"\x14proto/superacc.proto\x12\bsuperacc\"@\n" +
+	"\x1dproto/superacc/superacc.proto\x12\bsuperacc\"@\n" +
 	"\x11UpdateRoleRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x12\n" +
 	"\x04role\x18\x02 \x01(\tR\x04role\"H\n" +
@@ -395,22 +395,22 @@ const file_proto_superacc_proto_rawDesc = "" +
 	"\x0fSuperAccService\x12M\n" +
 	"\x0eUpdateUserRole\x12\x1b.superacc.UpdateRoleRequest\x1a\x1c.superacc.UpdateRoleResponse\"\x00\x12L\n" +
 	"\vManageGroup\x12\x1c.superacc.ManageGroupRequest\x1a\x1d.superacc.ManageGroupResponse\"\x00\x12[\n" +
-	"\x10ManageDiscipline\x12!.superacc.ManageDisciplineRequest\x1a\".superacc.ManageDisciplineResponse\"\x00B\x12Z\x10./proto;superaccb\x06proto3"
+	"\x10ManageDiscipline\x12!.superacc.ManageDisciplineRequest\x1a\".superacc.ManageDisciplineResponse\"\x00B\x1bZ\x19./proto/superacc;superaccb\x06proto3"
 
 var (
-	file_proto_superacc_proto_rawDescOnce sync.Once
-	file_proto_superacc_proto_rawDescData []byte
+	file_proto_superacc_superacc_proto_rawDescOnce sync.Once
+	file_proto_superacc_superacc_proto_rawDescData []byte
 )
 
-func file_proto_superacc_proto_rawDescGZIP() []byte {
-	file_proto_superacc_proto_rawDescOnce.Do(func() {
-		file_proto_superacc_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_superacc_proto_rawDesc), len(file_proto_superacc_proto_rawDesc)))
+func file_proto_superacc_superacc_proto_rawDescGZIP() []byte {
+	file_proto_superacc_superacc_proto_rawDescOnce.Do(func() {
+		file_proto_superacc_superacc_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_superacc_superacc_proto_rawDesc), len(file_proto_superacc_superacc_proto_rawDesc)))
 	})
-	return file_proto_superacc_proto_rawDescData
+	return file_proto_superacc_superacc_proto_rawDescData
 }
 
-var file_proto_superacc_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
-var file_proto_superacc_proto_goTypes = []any{
+var file_proto_superacc_superacc_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proto_superacc_superacc_proto_goTypes = []any{
 	(*UpdateRoleRequest)(nil),        // 0: superacc.UpdateRoleRequest
 	(*UpdateRoleResponse)(nil),       // 1: superacc.UpdateRoleResponse
 	(*ManageGroupRequest)(nil),       // 2: superacc.ManageGroupRequest
@@ -418,7 +418,7 @@ var file_proto_superacc_proto_goTypes = []any{
 	(*ManageDisciplineRequest)(nil),  // 4: superacc.ManageDisciplineRequest
 	(*ManageDisciplineResponse)(nil), // 5: superacc.ManageDisciplineResponse
 }
-var file_proto_superacc_proto_depIdxs = []int32{
+var file_proto_superacc_superacc_proto_depIdxs = []int32{
 	0, // 0: superacc.SuperAccService.UpdateUserRole:input_type -> superacc.UpdateRoleRequest
 	2, // 1: superacc.SuperAccService.ManageGroup:input_type -> superacc.ManageGroupRequest
 	4, // 2: superacc.SuperAccService.ManageDiscipline:input_type -> superacc.ManageDisciplineRequest
@@ -432,26 +432,26 @@ var file_proto_superacc_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_proto_superacc_proto_init() }
-func file_proto_superacc_proto_init() {
-	if File_proto_superacc_proto != nil {
+func init() { file_proto_superacc_superacc_proto_init() }
+func file_proto_superacc_superacc_proto_init() {
+	if File_proto_superacc_superacc_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_superacc_proto_rawDesc), len(file_proto_superacc_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_superacc_superacc_proto_rawDesc), len(file_proto_superacc_superacc_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_superacc_proto_goTypes,
-		DependencyIndexes: file_proto_superacc_proto_depIdxs,
-		MessageInfos:      file_proto_superacc_proto_msgTypes,
+		GoTypes:           file_proto_superacc_superacc_proto_goTypes,
+		DependencyIndexes: file_proto_superacc_superacc_proto_depIdxs,
+		MessageInfos:      file_proto_superacc_superacc_proto_msgTypes,
 	}.Build()
-	File_proto_superacc_proto = out.File
-	file_proto_superacc_proto_goTypes = nil
-	file_proto_superacc_proto_depIdxs = nil
+	File_proto_superacc_superacc_proto = out.File
+	file_proto_superacc_superacc_proto_goTypes = nil
+	file_proto_superacc_superacc_proto_depIdxs = nil
 }
