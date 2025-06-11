@@ -1,4 +1,4 @@
-package frontend
+package everybody
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"image/color"
 )
 
-func GreetingPage() {
+func AuthorizationPage() {
 	a := app.New()
 	w := a.NewWindow("Greeting page")
 
@@ -19,22 +19,24 @@ func GreetingPage() {
 	leftBackground := canvas.NewImageFromFile("bin/logo/hse_logo.svg")
 	leftBackground.FillMode = canvas.ImageFillStretch // Растягиваем изображение для заполнения области
 
-	// Создаем кнопки
-	loginButton := widget.NewButton("Авторизоваться", func() {
-		fmt.Println("authorization button clicked")
-	})
-	loginButton.Importance = widget.HighImportance
+	// Создаем поля ввода и кнопку
+	loginEntry := widget.NewEntry()
+	loginEntry.SetPlaceHolder("Введите логин")
 
-	registerButton := widget.NewButton("Зарегистрироваться", func() {
-		fmt.Println("registration button clicked")
+	passwordEntry := widget.NewPasswordEntry()
+	passwordEntry.SetPlaceHolder("Введите пароль")
+
+	EnterButton := widget.NewButton("Войти в аккаунт", func() {
+		fmt.Printf("Login: %s\nPassword: %s\n", loginEntry.Text, passwordEntry.Text)
 	})
-	registerButton.Importance = widget.MediumImportance
+	EnterButton.Importance = widget.HighImportance
 
 	// Центрируем кнопки вертикально в левой части
 	leftContent := container.NewVBox(
 		layout.NewSpacer(),
-		loginButton,
-		registerButton,
+		loginEntry,
+		passwordEntry,
+		EnterButton,
 		layout.NewSpacer(),
 	)
 	leftContainer := container.NewStack(leftBackground, container.NewCenter(leftContent))
@@ -43,9 +45,8 @@ func GreetingPage() {
 	rightBackground := canvas.NewRectangle(color.RGBA{23, 44, 101, 255})
 
 	// Создаем надпись
-	rightText := widget.NewLabel("Вход в систему оценивания")
+	rightText := widget.NewLabel("Войдите в аккаунт")
 	rightText.TextStyle = fyne.TextStyle{Bold: true}
-
 	// Центрируем надпись в правой части
 	rightContent := container.NewCenter(rightText)
 	rightContainer := container.NewStack(rightBackground, rightContent)

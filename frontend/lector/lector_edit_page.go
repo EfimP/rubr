@@ -1,4 +1,4 @@
-package pages // Объявление пакета `pages`. Этот пакет, вероятно, содержит функции для создания различных страниц или представлений в вашем приложении Fyne.
+package lector // Объявление пакета `pages`. Этот пакет, вероятно, содержит функции для создания различных страниц или представлений в вашем приложении Fyne.
 
 import (
 	"fmt"         // Импорт пакета `fmt` для форматированного ввода/вывода (например, для печати в консоль).
@@ -103,8 +103,8 @@ func CreateWorkPage() {
 		// `layout.NewSpacer()` будет отталкивать `titleEntry` от `dateTimeInputContainer`.
 		container.New(layout.NewHBoxLayout(),
 			container.New(layout.NewGridLayoutWithColumns(1), titleEntry), // titleEntry здесь в колонке 1x1.
-			layout.NewSpacer(),     // Растягивающийся пробел между полями.
-			dateTimeInputContainer, // Контейнер с полем дедлайна и кнопкой.
+			layout.NewSpacer(),                                            // Растягивающийся пробел между полями.
+			dateTimeInputContainer,                                        // Контейнер с полем дедлайна и кнопкой.
 		),
 		scrollableDescription, // Контейнер с прокручиваемым описанием работы.
 	)
@@ -231,10 +231,10 @@ func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSel
 	// Собираем все компоненты диалогового окна выбора даты и времени вертикально.
 	dialogContent := container.NewVBox(
 		widget.NewLabelWithStyle("Choose date and time", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), // Заголовок диалога.
-		widget.NewSeparator(), // Горизонтальный разделитель.
-		calendar,              // Календарь.
-		widget.NewSeparator(), // Еще один разделитель.
-		timeLayoutWithPadding, // Контейнер с выбором времени.
+		widget.NewSeparator(),                                                                              // Горизонтальный разделитель.
+		calendar,                                                                                           // Календарь.
+		widget.NewSeparator(),                                                                              // Еще один разделитель.
+		timeLayoutWithPadding,                                                                              // Контейнер с выбором времени.
 	)
 
 	// Создаем кастомное диалоговое окно подтверждения.
@@ -244,7 +244,7 @@ func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSel
 		"Cancel",      // Текст для кнопки отмены.
 		dialogContent, // Содержимое диалогового окна.
 		func(ok bool) { // Функция обратного вызова при закрытии диалога.
-			if ok { // Если пользователь нажал "Ok".
+			if ok {     // Если пользователь нажал "Ok".
 				h, _ := strconv.Atoi(currentHour)   // Преобразуем час из строки в число.
 				m, _ := strconv.Atoi(currentMinute) // Преобразуем минуты из строки в число.
 
