@@ -22,7 +22,7 @@ CREATE TABLE student_groups (
 );
 
 -- 3) users_groups
-CREATE TABLE users_groups (
+CREATE TABLE users_in_groups (
     id SERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     group_id BIGINT NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE disciplines (
 );
 
 -- 5) disciplines_in_groups
-CREATE TABLE disciplines_in_groups (
+CREATE TABLE groups_in_disciplines (
     id SERIAL PRIMARY KEY,
     group_id BIGINT NOT NULL,
     discipline_id BIGINT NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE criteria_mark_distribution (
 CREATE TABLE student_works (
     id SERIAL PRIMARY KEY,
     student_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     status TEXT NOT NULL CHECK (status IN ('pending', 'submitted', 'graded by assistant', 'graded by seminarist')),
     task_id BIGINT NOT NULL,
 	assistant_id BIGINT,
@@ -129,7 +129,7 @@ CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     message TEXT NOT NULL,
-    delivered_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delivered_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
