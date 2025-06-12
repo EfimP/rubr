@@ -76,7 +76,7 @@ func (s *Service) UpdateUserRole(ctx context.Context, req *pb.UpdateRoleRequest)
 		"student":    true,
 		"assistant":  true,
 		"seminarist": true,
-		"lecturer":   false,
+		"lecturer":   true,
 	}
 
 	if req.UserId <= 0 {
