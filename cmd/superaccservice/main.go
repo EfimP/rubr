@@ -1,10 +1,12 @@
-package superaccservice
+package main
 
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net"
+	"os"
 
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
@@ -60,6 +62,65 @@ func (r *Repository) ManageDiscipline(ctx context.Context, disciplineID, groupID
 	return err
 }
 
+func (r *Repository) ListGroups(ctx context.Context) ([]*pb.Group, error) {
+	rows, err := r.db.QueryContext(ctx, "SELECT id, name, description FROM student_groups")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []*pb.Group
+	for rows.Next() {
+		var id int32
+		var name, description string
+		if err := rows.Scan(&id, &name, &description); err != nil {
+			return nil, err
+		}
+		groups = append(groups, &pb.Group{Id: id, Name: name, Description: description})
+	}
+	return groups, nil
+}
+
+func (r *Repository) ManageGroupEntity(ctx context.Context, groupID int32, name, description, action string) (int32, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	var newGroupID int32
+	if action == "create" {
+		if name == "" {
+			return 0, fmt.Errorf("name is required for creating a group")
+		}
+		query := "INSERT INTO student_groups (name, description) VALUES ($1, $2) RETURNING id"
+		err = tx.QueryRowContext(ctx, query, name, description).Scan(&newGroupID)
+		if err != nil {
+			return 0, err
+		}
+	} else if action == "delete" {
+		if groupID <= 0 {
+			return 0, fmt.Errorf("invalid group ID for deletion")
+		}
+		query := "DELETE FROM student_groups WHERE id = $1"
+		result, err := tx.ExecContext(ctx, query, groupID)
+		if err != nil {
+			return 0, err
+		}
+		if affected, _ := result.RowsAffected(); affected == 0 {
+			return 0, fmt.Errorf("group with ID %d not found", groupID)
+		}
+		newGroupID = 0 // Нет нового ID при удалении
+	} else {
+		return 0, fmt.Errorf("invalid action, must be 'create' or 'delete'")
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return newGroupID, nil
+}
+
 type Service struct {
 	repo *Repository
 	pb.UnimplementedSuperAccServiceServer
@@ -71,10 +132,11 @@ func NewService(repo *Repository) *Service {
 
 func (s *Service) UpdateUserRole(ctx context.Context, req *pb.UpdateRoleRequest) (*pb.UpdateRoleResponse, error) {
 	validRoles := map[string]bool{
-		"student":    true,
-		"assistant":  true,
-		"seminarist": true,
-		"lecturer":   true,
+		"student":      true,
+		"assistant":    true,
+		"seminarist":   true,
+		"lecturer":     true,
+		"superaccount": true,
 	}
 
 	if req.UserId <= 0 {
@@ -119,13 +181,40 @@ func (s *Service) ManageDiscipline(ctx context.Context, req *pb.ManageDiscipline
 	return &pb.ManageDisciplineResponse{Message: "Discipline managed successfully", Success: true}, nil
 }
 
+func (s *Service) ListGroups(ctx context.Context, req *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {
+	groups, err := s.repo.ListGroups(ctx)
+	if err != nil {
+		return &pb.ListGroupsResponse{Message: err.Error(), Success: false}, err
+	}
+	return &pb.ListGroupsResponse{Success: true, Groups: groups}, nil
+}
+
+func (s *Service) ManageGroupEntity(ctx context.Context, req *pb.ManageGroupEntityRequest) (*pb.ManageGroupEntityResponse, error) {
+	newGroupID, err := s.repo.ManageGroupEntity(ctx, req.GroupId, req.Name, req.Description, req.Action)
+	if err != nil {
+		return &pb.ManageGroupEntityResponse{Message: err.Error(), Success: false}, err
+	}
+	return &pb.ManageGroupEntityResponse{Message: "Group entity managed successfully", Success: true, GroupId: newGroupID}, nil
+}
+
 func main() {
-	connStr := "user=postgres password=postgres dbname=rubrlocal sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	dbURI := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		dbUser, dbPassword, dbHost, dbPort, dbName)
+	db, err := sql.Open("postgres", dbURI)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Database ping failed: %v", err)
+	}
 
 	repo := NewRepository(db)
 	svc := NewService(repo)

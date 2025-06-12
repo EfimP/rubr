@@ -7,6 +7,8 @@ service SuperAccService {
   rpc UpdateUserRole (UpdateRoleRequest) returns (UpdateRoleResponse) {}
   rpc ManageGroup (ManageGroupRequest) returns (ManageGroupResponse) {}
   rpc ManageDiscipline (ManageDisciplineRequest) returns (ManageDisciplineResponse) {}
+  rpc ListGroups (ListGroupsRequest) returns (ListGroupsResponse) {}
+  rpc ManageGroupEntity (ManageGroupEntityRequest) returns (ManageGroupEntityResponse) {} // Новый метод
 }
 
 message UpdateRoleRequest {
@@ -41,4 +43,31 @@ message ManageDisciplineRequest {
 message ManageDisciplineResponse {
   string message = 1;
   bool success = 2;
+}
+
+message ListGroupsRequest {}
+
+message Group {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message ListGroupsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Group groups = 3;
+}
+
+message ManageGroupEntityRequest {
+  int32 group_id = 1; // ID группы (0 для создания новой)
+  string name = 2;    // Название группы (обязательно для создания)
+  string description = 3; // Описание группы (опционально для создания)
+  string action = 4;  // "create" или "delete"
+}
+
+message ManageGroupEntityResponse {
+  string message = 1;
+  bool success = 2;
+  int32 group_id = 3; // Возвращается ID созданной группы
 }

@@ -365,6 +365,290 @@ func (x *ManageDisciplineResponse) GetSuccess() bool {
 	return false
 }
 
+type ListGroupsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupsRequest) Reset() {
+	*x = ListGroupsRequest{}
+	mi := &file_proto_superacc_superacc_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupsRequest) ProtoMessage() {}
+
+func (x *ListGroupsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_superacc_superacc_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupsRequest.ProtoReflect.Descriptor instead.
+func (*ListGroupsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{6}
+}
+
+type Group struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Group) Reset() {
+	*x = Group{}
+	mi := &file_proto_superacc_superacc_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Group) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Group) ProtoMessage() {}
+
+func (x *Group) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_superacc_superacc_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Group.ProtoReflect.Descriptor instead.
+func (*Group) Descriptor() ([]byte, []int) {
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Group) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Group) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Group) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type ListGroupsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Groups        []*Group               `protobuf:"bytes,3,rep,name=groups,proto3" json:"groups,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListGroupsResponse) Reset() {
+	*x = ListGroupsResponse{}
+	mi := &file_proto_superacc_superacc_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGroupsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGroupsResponse) ProtoMessage() {}
+
+func (x *ListGroupsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_superacc_superacc_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListGroupsResponse.ProtoReflect.Descriptor instead.
+func (*ListGroupsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListGroupsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListGroupsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListGroupsResponse) GetGroups() []*Group {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+type ManageGroupEntityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       int32                  `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // ID группы (0 для создания новой)
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                       // Название группы (обязательно для создания)
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`         // Описание группы (опционально для создания)
+	Action        string                 `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`                   // "create" или "delete"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ManageGroupEntityRequest) Reset() {
+	*x = ManageGroupEntityRequest{}
+	mi := &file_proto_superacc_superacc_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ManageGroupEntityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ManageGroupEntityRequest) ProtoMessage() {}
+
+func (x *ManageGroupEntityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_superacc_superacc_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ManageGroupEntityRequest.ProtoReflect.Descriptor instead.
+func (*ManageGroupEntityRequest) Descriptor() ([]byte, []int) {
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ManageGroupEntityRequest) GetGroupId() int32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+func (x *ManageGroupEntityRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ManageGroupEntityRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *ManageGroupEntityRequest) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+type ManageGroupEntityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	GroupId       int32                  `protobuf:"varint,3,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // Возвращается ID созданной группы
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ManageGroupEntityResponse) Reset() {
+	*x = ManageGroupEntityResponse{}
+	mi := &file_proto_superacc_superacc_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ManageGroupEntityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ManageGroupEntityResponse) ProtoMessage() {}
+
+func (x *ManageGroupEntityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_superacc_superacc_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ManageGroupEntityResponse.ProtoReflect.Descriptor instead.
+func (*ManageGroupEntityResponse) Descriptor() ([]byte, []int) {
+	return file_proto_superacc_superacc_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ManageGroupEntityResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ManageGroupEntityResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ManageGroupEntityResponse) GetGroupId() int32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
 var File_proto_superacc_superacc_proto protoreflect.FileDescriptor
 
 const file_proto_superacc_superacc_proto_rawDesc = "" +
@@ -391,11 +675,32 @@ const file_proto_superacc_superacc_proto_rawDesc = "" +
 	"\fassistant_id\x18\x04 \x01(\x05R\vassistantId\"N\n" +
 	"\x18ManageDisciplineResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess2\x8b\x02\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\"\x13\n" +
+	"\x11ListGroupsRequest\"M\n" +
+	"\x05Group\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"q\n" +
+	"\x12ListGroupsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12'\n" +
+	"\x06groups\x18\x03 \x03(\v2\x0f.superacc.GroupR\x06groups\"\x83\x01\n" +
+	"\x18ManageGroupEntityRequest\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\x05R\agroupId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06action\x18\x04 \x01(\tR\x06action\"j\n" +
+	"\x19ManageGroupEntityResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x19\n" +
+	"\bgroup_id\x18\x03 \x01(\x05R\agroupId2\xb6\x03\n" +
 	"\x0fSuperAccService\x12M\n" +
 	"\x0eUpdateUserRole\x12\x1b.superacc.UpdateRoleRequest\x1a\x1c.superacc.UpdateRoleResponse\"\x00\x12L\n" +
 	"\vManageGroup\x12\x1c.superacc.ManageGroupRequest\x1a\x1d.superacc.ManageGroupResponse\"\x00\x12[\n" +
-	"\x10ManageDiscipline\x12!.superacc.ManageDisciplineRequest\x1a\".superacc.ManageDisciplineResponse\"\x00B\x1bZ\x19./proto/superacc;superaccb\x06proto3"
+	"\x10ManageDiscipline\x12!.superacc.ManageDisciplineRequest\x1a\".superacc.ManageDisciplineResponse\"\x00\x12I\n" +
+	"\n" +
+	"ListGroups\x12\x1b.superacc.ListGroupsRequest\x1a\x1c.superacc.ListGroupsResponse\"\x00\x12^\n" +
+	"\x11ManageGroupEntity\x12\".superacc.ManageGroupEntityRequest\x1a#.superacc.ManageGroupEntityResponse\"\x00B\x1bZ\x19./proto/superacc;superaccb\x06proto3"
 
 var (
 	file_proto_superacc_superacc_proto_rawDescOnce sync.Once
@@ -409,27 +714,37 @@ func file_proto_superacc_superacc_proto_rawDescGZIP() []byte {
 	return file_proto_superacc_superacc_proto_rawDescData
 }
 
-var file_proto_superacc_superacc_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proto_superacc_superacc_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_proto_superacc_superacc_proto_goTypes = []any{
-	(*UpdateRoleRequest)(nil),        // 0: superacc.UpdateRoleRequest
-	(*UpdateRoleResponse)(nil),       // 1: superacc.UpdateRoleResponse
-	(*ManageGroupRequest)(nil),       // 2: superacc.ManageGroupRequest
-	(*ManageGroupResponse)(nil),      // 3: superacc.ManageGroupResponse
-	(*ManageDisciplineRequest)(nil),  // 4: superacc.ManageDisciplineRequest
-	(*ManageDisciplineResponse)(nil), // 5: superacc.ManageDisciplineResponse
+	(*UpdateRoleRequest)(nil),         // 0: superacc.UpdateRoleRequest
+	(*UpdateRoleResponse)(nil),        // 1: superacc.UpdateRoleResponse
+	(*ManageGroupRequest)(nil),        // 2: superacc.ManageGroupRequest
+	(*ManageGroupResponse)(nil),       // 3: superacc.ManageGroupResponse
+	(*ManageDisciplineRequest)(nil),   // 4: superacc.ManageDisciplineRequest
+	(*ManageDisciplineResponse)(nil),  // 5: superacc.ManageDisciplineResponse
+	(*ListGroupsRequest)(nil),         // 6: superacc.ListGroupsRequest
+	(*Group)(nil),                     // 7: superacc.Group
+	(*ListGroupsResponse)(nil),        // 8: superacc.ListGroupsResponse
+	(*ManageGroupEntityRequest)(nil),  // 9: superacc.ManageGroupEntityRequest
+	(*ManageGroupEntityResponse)(nil), // 10: superacc.ManageGroupEntityResponse
 }
 var file_proto_superacc_superacc_proto_depIdxs = []int32{
-	0, // 0: superacc.SuperAccService.UpdateUserRole:input_type -> superacc.UpdateRoleRequest
-	2, // 1: superacc.SuperAccService.ManageGroup:input_type -> superacc.ManageGroupRequest
-	4, // 2: superacc.SuperAccService.ManageDiscipline:input_type -> superacc.ManageDisciplineRequest
-	1, // 3: superacc.SuperAccService.UpdateUserRole:output_type -> superacc.UpdateRoleResponse
-	3, // 4: superacc.SuperAccService.ManageGroup:output_type -> superacc.ManageGroupResponse
-	5, // 5: superacc.SuperAccService.ManageDiscipline:output_type -> superacc.ManageDisciplineResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	7,  // 0: superacc.ListGroupsResponse.groups:type_name -> superacc.Group
+	0,  // 1: superacc.SuperAccService.UpdateUserRole:input_type -> superacc.UpdateRoleRequest
+	2,  // 2: superacc.SuperAccService.ManageGroup:input_type -> superacc.ManageGroupRequest
+	4,  // 3: superacc.SuperAccService.ManageDiscipline:input_type -> superacc.ManageDisciplineRequest
+	6,  // 4: superacc.SuperAccService.ListGroups:input_type -> superacc.ListGroupsRequest
+	9,  // 5: superacc.SuperAccService.ManageGroupEntity:input_type -> superacc.ManageGroupEntityRequest
+	1,  // 6: superacc.SuperAccService.UpdateUserRole:output_type -> superacc.UpdateRoleResponse
+	3,  // 7: superacc.SuperAccService.ManageGroup:output_type -> superacc.ManageGroupResponse
+	5,  // 8: superacc.SuperAccService.ManageDiscipline:output_type -> superacc.ManageDisciplineResponse
+	8,  // 9: superacc.SuperAccService.ListGroups:output_type -> superacc.ListGroupsResponse
+	10, // 10: superacc.SuperAccService.ManageGroupEntity:output_type -> superacc.ManageGroupEntityResponse
+	6,  // [6:11] is the sub-list for method output_type
+	1,  // [1:6] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_proto_superacc_superacc_proto_init() }
@@ -443,7 +758,7 @@ func file_proto_superacc_superacc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_superacc_superacc_proto_rawDesc), len(file_proto_superacc_superacc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

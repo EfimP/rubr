@@ -19,9 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SuperAccService_UpdateUserRole_FullMethodName   = "/superacc.SuperAccService/UpdateUserRole"
-	SuperAccService_ManageGroup_FullMethodName      = "/superacc.SuperAccService/ManageGroup"
-	SuperAccService_ManageDiscipline_FullMethodName = "/superacc.SuperAccService/ManageDiscipline"
+	SuperAccService_UpdateUserRole_FullMethodName    = "/superacc.SuperAccService/UpdateUserRole"
+	SuperAccService_ManageGroup_FullMethodName       = "/superacc.SuperAccService/ManageGroup"
+	SuperAccService_ManageDiscipline_FullMethodName  = "/superacc.SuperAccService/ManageDiscipline"
+	SuperAccService_ListGroups_FullMethodName        = "/superacc.SuperAccService/ListGroups"
+	SuperAccService_ManageGroupEntity_FullMethodName = "/superacc.SuperAccService/ManageGroupEntity"
 )
 
 // SuperAccServiceClient is the client API for SuperAccService service.
@@ -31,6 +33,8 @@ type SuperAccServiceClient interface {
 	UpdateUserRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error)
 	ManageGroup(ctx context.Context, in *ManageGroupRequest, opts ...grpc.CallOption) (*ManageGroupResponse, error)
 	ManageDiscipline(ctx context.Context, in *ManageDisciplineRequest, opts ...grpc.CallOption) (*ManageDisciplineResponse, error)
+	ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsResponse, error)
+	ManageGroupEntity(ctx context.Context, in *ManageGroupEntityRequest, opts ...grpc.CallOption) (*ManageGroupEntityResponse, error)
 }
 
 type superAccServiceClient struct {
@@ -71,6 +75,26 @@ func (c *superAccServiceClient) ManageDiscipline(ctx context.Context, in *Manage
 	return out, nil
 }
 
+func (c *superAccServiceClient) ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListGroupsResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_ListGroups_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *superAccServiceClient) ManageGroupEntity(ctx context.Context, in *ManageGroupEntityRequest, opts ...grpc.CallOption) (*ManageGroupEntityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ManageGroupEntityResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_ManageGroupEntity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SuperAccServiceServer is the server API for SuperAccService service.
 // All implementations must embed UnimplementedSuperAccServiceServer
 // for forward compatibility.
@@ -78,6 +102,8 @@ type SuperAccServiceServer interface {
 	UpdateUserRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
 	ManageGroup(context.Context, *ManageGroupRequest) (*ManageGroupResponse, error)
 	ManageDiscipline(context.Context, *ManageDisciplineRequest) (*ManageDisciplineResponse, error)
+	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsResponse, error)
+	ManageGroupEntity(context.Context, *ManageGroupEntityRequest) (*ManageGroupEntityResponse, error)
 	mustEmbedUnimplementedSuperAccServiceServer()
 }
 
@@ -96,6 +122,12 @@ func (UnimplementedSuperAccServiceServer) ManageGroup(context.Context, *ManageGr
 }
 func (UnimplementedSuperAccServiceServer) ManageDiscipline(context.Context, *ManageDisciplineRequest) (*ManageDisciplineResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ManageDiscipline not implemented")
+}
+func (UnimplementedSuperAccServiceServer) ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListGroups not implemented")
+}
+func (UnimplementedSuperAccServiceServer) ManageGroupEntity(context.Context, *ManageGroupEntityRequest) (*ManageGroupEntityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ManageGroupEntity not implemented")
 }
 func (UnimplementedSuperAccServiceServer) mustEmbedUnimplementedSuperAccServiceServer() {}
 func (UnimplementedSuperAccServiceServer) testEmbeddedByValue()                         {}
@@ -172,6 +204,42 @@ func _SuperAccService_ManageDiscipline_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SuperAccService_ListGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGroupsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).ListGroups(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_ListGroups_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).ListGroups(ctx, req.(*ListGroupsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SuperAccService_ManageGroupEntity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManageGroupEntityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).ManageGroupEntity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_ManageGroupEntity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).ManageGroupEntity(ctx, req.(*ManageGroupEntityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SuperAccService_ServiceDesc is the grpc.ServiceDesc for SuperAccService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +258,14 @@ var SuperAccService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ManageDiscipline",
 			Handler:    _SuperAccService_ManageDiscipline_Handler,
+		},
+		{
+			MethodName: "ListGroups",
+			Handler:    _SuperAccService_ListGroups_Handler,
+		},
+		{
+			MethodName: "ManageGroupEntity",
+			Handler:    _SuperAccService_ManageGroupEntity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
