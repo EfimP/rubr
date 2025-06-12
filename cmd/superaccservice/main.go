@@ -69,14 +69,12 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-// new comment in new branch
-
 func (s *Service) UpdateUserRole(ctx context.Context, req *pb.UpdateRoleRequest) (*pb.UpdateRoleResponse, error) {
 	validRoles := map[string]bool{
 		"student":    true,
 		"assistant":  true,
 		"seminarist": true,
-		"lecturer":   false,
+		"lecturer":   true,
 	}
 
 	if req.UserId <= 0 {

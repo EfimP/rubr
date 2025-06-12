@@ -35,6 +35,22 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
 
+  superaccservice:
+    build:
+      context: .
+      dockerfile: ./cmd/superaccservice/Dockerfile
+    ports:
+      - "50052:50052"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=rubrlocal
+
 networks:
   rubric-net:
     driver: bridge
