@@ -14,7 +14,6 @@ import (
 	userpb "rubr/proto/user"
 )
 
-// createGreetingPage создает страницу приветствия
 func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	loginButton := widget.NewButton("Авторизоваться", func() {
 		state.currentPage = "authorization"
@@ -45,7 +44,6 @@ func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.Canv
 	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
 }
 
-// createAuthorizationPage создает страницу авторизации
 func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	loginEntry := widget.NewEntry()
 	loginEntry.SetPlaceHolder("Введите логин")
@@ -77,6 +75,7 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 
 		state.userID = resp.UserId
 		state.role = resp.Role
+		// переход от авторизационного экрана к экранам по ролям
 		if state.role == "lecturer" {
 			state.currentPage = "lector_works"
 		} else if state.role == "superaccount" {
@@ -106,7 +105,6 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
 }
 
-// createRegistrationPage создает страницу регистрации
 func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	emailEntry := widget.NewEntry()
 	emailEntry.SetPlaceHolder("Введите почту")

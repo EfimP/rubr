@@ -21,28 +21,24 @@ import (
 type MyListItem struct {
 	ID      int32
 	Name    string
-	DueDate string
+	DueDate string // дедлайн
 }
 
 func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
-	// Не создаем соединение здесь, передаем клиента в CreateWorkPage
+
+	// меняем тип userID со строки на int32
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
 		log.Printf("Invalid user ID: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка: некорректный ID пользователя"))
 	}
 	userID := int32(userIDint64)
+	//
 
-	conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
-	if err != nil {
-		log.Printf("Failed to connect to gRPC: %v", err)
-		return container.NewVBox(widget.NewLabel("Ошибка подключения к серверу"))
-	}
-	workClient := workpb.NewWorkServiceClient(conn)
-
+	// получаем список работ из бека
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	resp, err := workClient.GetTasksForLector(ctx, &workpb.GetTasksForLectorRequest{LectorId: userID})
+	resp, err := state.workClient.GetTasksForLector(ctx, &workpb.GetTasksForLectorRequest{LectorId: userID})
 	if err != nil {
 		log.Printf("Failed to get tasks: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка загрузки работ"))
@@ -51,7 +47,9 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 		log.Println("GetTasksForLector error:", resp.Error)
 		return container.NewVBox(widget.NewLabel(resp.Error))
 	}
+	//
 
+	// конвертируем полученные с сервера данные в слайс
 	var data []MyListItem
 	for _, task := range resp.Tasks {
 		data = append(data, MyListItem{
@@ -60,6 +58,7 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 			DueDate: task.Deadline,
 		})
 	}
+	//
 
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
@@ -117,7 +116,7 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 					if confirmed {
 						ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 						defer cancel()
-						_, err := workClient.DeleteTask(ctx, &workpb.DeleteTaskRequest{TaskId: data[currentID].ID})
+						_, err := state.workClient.DeleteTask(ctx, &workpb.DeleteTaskRequest{TaskId: data[currentID].ID})
 						if err != nil {
 							log.Printf("Failed to delete task: %v", err)
 							return
@@ -138,7 +137,7 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 	)
 
 	addButton := widget.NewButton("Добавить", func() {
-		CreateWorkPage(state, workClient, conn, nil)
+		CreateWorkPage(state, nil)
 	})
 	addButtonContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), addButton)
 
@@ -157,13 +156,68 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 	)
 }
 
-func CreateWorkPage(state *AppState, workClient workpb.WorkServiceClient, conn *grpc.ClientConn, taskID *int32) {
+func CreateWorkPage(state *AppState, taskID *int32) {
 	w := state.window
 	var isNewWork bool
 	if taskID == nil {
 		isNewWork = true
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// преобразование userID из string в int32 для дальнейшей обработки
+	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
+	if err != nil {
+		log.Printf("Invalid user ID: %v", err)
+		dialog.ShowInformation("Ошибка", "Некорректный ID пользователя", w)
+		return
+	}
+	userID := int32(userIDint64)
+	//
+
+	// получение списка групп лектора
+	groupsResp, err := state.workClient.GetGroups(ctx, &workpb.GetGroupsRequest{LectorId: userID})
+	if err != nil {
+		log.Printf("Failed to get groups: %v", err)
+		dialog.ShowError(err, w)
+		return
+	}
+	if len(groupsResp.Groups) == 0 {
+		dialog.ShowInformation("Ошибка", "Нет доступных групп для этого лектора", w)
+		return
+	}
+	//
+
+	// получение списка дисциплин для данного лектора
+	disciplinesResp, err := state.workClient.GetDisciplines(ctx, &workpb.GetDisciplinesRequest{LectorId: userID})
+	if err != nil {
+		log.Printf("Failed to get disciplines: %v", err)
+		dialog.ShowError(err, w)
+		return
+	}
+	if len(disciplinesResp.Disciplines) == 0 {
+		dialog.ShowInformation("Ошибка", "Нет доступных дисциплин для этого лектора", w)
+		return
+	}
+	//
+
+	// Подготовка данных для выпадающих списков
+	groupOptions := make([]string, len(groupsResp.Groups))
+	groupIDs := make(map[string]int32)
+	for i, group := range groupsResp.Groups {
+		groupOptions[i] = group.Name
+		groupIDs[group.Name] = group.Id
+	}
+
+	disciplineOptions := make([]string, len(disciplinesResp.Disciplines))
+	disciplineIDs := make(map[string]int32)
+	for i, discipline := range disciplinesResp.Disciplines {
+		disciplineOptions[i] = discipline.Name
+		disciplineIDs[discipline.Name] = discipline.Id
+	}
+
+	// UI
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
 	logoText.TextStyle.Bold = true
@@ -189,6 +243,16 @@ func CreateWorkPage(state *AppState, workClient workpb.WorkServiceClient, conn *
 	scrollableDescription := container.NewVScroll(descriptionEntry)
 	scrollableDescription.SetMinSize(fyne.NewSize(0, descriptionEntry.MinSize().Height*5))
 
+	groupSelect := widget.NewSelect(groupOptions, func(string) {})
+	if len(groupOptions) > 0 {
+		groupSelect.SetSelected(groupOptions[0])
+	}
+
+	disciplineSelect := widget.NewSelect(disciplineOptions, func(string) {})
+	if len(disciplineOptions) > 0 {
+		disciplineSelect.SetSelected(disciplineOptions[0])
+	}
+
 	dateAndTimeEntry := widget.NewEntry()
 	dateAndTimeEntry.SetPlaceHolder("Выберите дату и время дедлайна")
 	dateAndTimeEntry.Disable()
@@ -211,6 +275,10 @@ func CreateWorkPage(state *AppState, workClient workpb.WorkServiceClient, conn *
 			layout.NewSpacer(),
 			dateTimeInputContainer,
 		),
+		container.NewPadded(widget.NewLabel("Группа")),
+		groupSelect,
+		container.NewPadded(widget.NewLabel("Дисциплина")),
+		disciplineSelect,
 		scrollableDescription,
 	)
 
@@ -219,26 +287,22 @@ func CreateWorkPage(state *AppState, workClient workpb.WorkServiceClient, conn *
 			dialog.ShowInformation("Ошибка", "Пожалуйста, выберите дедлайн", w)
 			return
 		}
-		deadline := selectedDateTime.Format(time.RFC3339)
-
-		userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
-		if err != nil {
-			log.Printf("Invalid user ID: %v", err)
-			dialog.ShowInformation("Ошибка", "Некорректный ID пользователя", w)
+		if groupSelect.Selected == "" || disciplineSelect.Selected == "" {
+			dialog.ShowInformation("Ошибка", "Пожалуйста, выберите группу и дисциплину", w)
 			return
 		}
-		userID := int32(userIDint64)
+		deadline := selectedDateTime.Format(time.RFC3339)
 
 		if isNewWork {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			resp, err := workClient.CreateWork(ctx, &workpb.CreateWorkRequest{
+			resp, err := state.workClient.CreateWork(ctx, &workpb.CreateWorkRequest{
 				LectorId:     userID,
-				GroupId:      1, // Замените на реальный group_id
+				GroupId:      groupIDs[groupSelect.Selected],
 				Title:        titleEntry.Text,
 				Description:  descriptionEntry.Text,
 				Deadline:     deadline,
-				DisciplineId: 1, // Замените на реальный discipline_id
+				DisciplineId: disciplineIDs[disciplineSelect.Selected],
 				ContentUrl:   "",
 			})
 			if err != nil {
@@ -246,13 +310,8 @@ func CreateWorkPage(state *AppState, workClient workpb.WorkServiceClient, conn *
 				dialog.ShowError(err, w)
 				return
 			}
-			if resp.Error != "" {
-				log.Println("CreateWork error:", resp.Error)
-				dialog.ShowInformation("Ошибка", resp.Error, w)
-				return
-			}
 			taskID := resp.TaskId
-			ShowBlockingCriteriaPage(state, workClient, conn, taskID)
+			ShowBlockingCriteriaPage(state, taskID) // Убраны лишние параметры
 		}
 	})
 	nextButtonContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), nextButton)
@@ -355,17 +414,18 @@ func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSel
 	d.Resize(fyne.NewSize(400, 500))
 	d.Show()
 }
-func ShowBlockingCriteriaPage(state *AppState, workClient workpb.WorkServiceClient, conn *grpc.ClientConn, taskID int32) {
+func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 	w := state.window
 
-	rubricConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	// подключение к сервису
+	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to gRPC: %v", err)
 		dialog.ShowError(err, w)
 		return
 	}
 	defer rubricConn.Close()
-	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+	//
 
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
@@ -385,7 +445,7 @@ func ShowBlockingCriteriaPage(state *AppState, workClient workpb.WorkServiceClie
 	)
 
 	backButton := widget.NewButton("Назад", func() {
-		CreateWorkPage(state, workClient, conn, &taskID)
+		CreateWorkPage(state, &taskID)
 	})
 	backButtonContainer := container.NewHBox(layout.NewSpacer(), backButton)
 
@@ -465,7 +525,7 @@ func ShowBlockingCriteriaPage(state *AppState, workClient workpb.WorkServiceClie
 				dialog.ShowInformation("Ошибка", "Оценка должна быть числом", w)
 				return
 			}
-			resp, err := rubricClient.CreateNewBlockingCriteria(ctx, &rubricpb.CreateNewBlockingCriteriaRequest{
+			resp, err := state.rubricClient.CreateNewBlockingCriteria(ctx, &rubricpb.CreateNewBlockingCriteriaRequest{
 				TaskId:      taskID,
 				Name:        criterion.NameEntry.Text,
 				Description: criterion.DescriptionEntry.Text,

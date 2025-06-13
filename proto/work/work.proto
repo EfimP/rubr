@@ -13,6 +13,8 @@ service WorkService {
   rpc LoadTaskName (LoadTaskNameRequest) returns (LoadTaskNameResponse) {}
   rpc LoadTaskDescription (LoadTaskDescriptionRequest) returns (LoadTaskDescriptionResponse) {}
   rpc LoadTaskDeadline (LoadTaskDeadlineRequest) returns (LoadTaskDeadlineResponse) {}
+  rpc GetGroups(GetGroupsRequest) returns (GetGroupsResponse);
+  rpc GetDisciplines(GetDisciplinesRequest) returns (GetDisciplinesResponse);
 }
 
 message GetTasksForLectorRequest {
@@ -108,5 +110,30 @@ message LoadTaskDeadlineRequest {
 
 message LoadTaskDeadlineResponse {
   string deadline = 1;
+  string error = 2;
+}
+message GetGroupsRequest {
+  int32 lector_id = 1;
+}
+
+message GetGroupsResponse {
+  message Group {
+    int32 id = 1;
+    string name = 2;
+  }
+  repeated Group groups = 1;
+  string error = 2;
+}
+
+message GetDisciplinesRequest {
+  int32 lector_id = 1;
+}
+
+message GetDisciplinesResponse {
+  message Discipline {
+    int32 id = 1;
+    string name = 2;
+  }
+  repeated Discipline disciplines = 1;
   string error = 2;
 }

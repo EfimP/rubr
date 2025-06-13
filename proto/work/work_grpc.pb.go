@@ -28,6 +28,8 @@ const (
 	WorkService_LoadTaskName_FullMethodName        = "/work.WorkService/LoadTaskName"
 	WorkService_LoadTaskDescription_FullMethodName = "/work.WorkService/LoadTaskDescription"
 	WorkService_LoadTaskDeadline_FullMethodName    = "/work.WorkService/LoadTaskDeadline"
+	WorkService_GetGroups_FullMethodName           = "/work.WorkService/GetGroups"
+	WorkService_GetDisciplines_FullMethodName      = "/work.WorkService/GetDisciplines"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -43,6 +45,8 @@ type WorkServiceClient interface {
 	LoadTaskName(ctx context.Context, in *LoadTaskNameRequest, opts ...grpc.CallOption) (*LoadTaskNameResponse, error)
 	LoadTaskDescription(ctx context.Context, in *LoadTaskDescriptionRequest, opts ...grpc.CallOption) (*LoadTaskDescriptionResponse, error)
 	LoadTaskDeadline(ctx context.Context, in *LoadTaskDeadlineRequest, opts ...grpc.CallOption) (*LoadTaskDeadlineResponse, error)
+	GetGroups(ctx context.Context, in *GetGroupsRequest, opts ...grpc.CallOption) (*GetGroupsResponse, error)
+	GetDisciplines(ctx context.Context, in *GetDisciplinesRequest, opts ...grpc.CallOption) (*GetDisciplinesResponse, error)
 }
 
 type workServiceClient struct {
@@ -143,6 +147,26 @@ func (c *workServiceClient) LoadTaskDeadline(ctx context.Context, in *LoadTaskDe
 	return out, nil
 }
 
+func (c *workServiceClient) GetGroups(ctx context.Context, in *GetGroupsRequest, opts ...grpc.CallOption) (*GetGroupsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetGroupsResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetGroups_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workServiceClient) GetDisciplines(ctx context.Context, in *GetDisciplinesRequest, opts ...grpc.CallOption) (*GetDisciplinesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDisciplinesResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetDisciplines_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -156,6 +180,8 @@ type WorkServiceServer interface {
 	LoadTaskName(context.Context, *LoadTaskNameRequest) (*LoadTaskNameResponse, error)
 	LoadTaskDescription(context.Context, *LoadTaskDescriptionRequest) (*LoadTaskDescriptionResponse, error)
 	LoadTaskDeadline(context.Context, *LoadTaskDeadlineRequest) (*LoadTaskDeadlineResponse, error)
+	GetGroups(context.Context, *GetGroupsRequest) (*GetGroupsResponse, error)
+	GetDisciplines(context.Context, *GetDisciplinesRequest) (*GetDisciplinesResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -192,6 +218,12 @@ func (UnimplementedWorkServiceServer) LoadTaskDescription(context.Context, *Load
 }
 func (UnimplementedWorkServiceServer) LoadTaskDeadline(context.Context, *LoadTaskDeadlineRequest) (*LoadTaskDeadlineResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoadTaskDeadline not implemented")
+}
+func (UnimplementedWorkServiceServer) GetGroups(context.Context, *GetGroupsRequest) (*GetGroupsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroups not implemented")
+}
+func (UnimplementedWorkServiceServer) GetDisciplines(context.Context, *GetDisciplinesRequest) (*GetDisciplinesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDisciplines not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -376,6 +408,42 @@ func _WorkService_LoadTaskDeadline_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_GetGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetGroups(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetGroups_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetGroups(ctx, req.(*GetGroupsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkService_GetDisciplines_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDisciplinesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetDisciplines(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetDisciplines_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetDisciplines(ctx, req.(*GetDisciplinesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +486,14 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LoadTaskDeadline",
 			Handler:    _WorkService_LoadTaskDeadline_Handler,
+		},
+		{
+			MethodName: "GetGroups",
+			Handler:    _WorkService_GetGroups_Handler,
+		},
+		{
+			MethodName: "GetDisciplines",
+			Handler:    _WorkService_GetDisciplines_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

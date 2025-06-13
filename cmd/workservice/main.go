@@ -118,6 +118,57 @@ func (s *server) LoadTaskDeadline(ctx context.Context, req *pb.LoadTaskDeadlineR
 	return &pb.LoadTaskDeadlineResponse{Deadline: deadline}, nil
 }
 
+// получение групп лектора
+func (s *server) GetGroups(ctx context.Context, req *pb.GetGroupsRequest) (*pb.GetGroupsResponse, error) {
+	var groups []*pb.GetGroupsResponse_Group
+	query := `
+        SELECT sg.id, sg.name
+        FROM student_groups sg
+        JOIN users_in_groups uig ON sg.id = uig.group_id
+        WHERE uig.user_id = $1
+    `
+	rows, err := s.db.Query(query, req.LectorId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query groups: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var group pb.GetGroupsResponse_Group
+		if err := rows.Scan(&group.Id, &group.Name); err != nil {
+			return nil, fmt.Errorf("failed to scan group: %v", err)
+		}
+		groups = append(groups, &group)
+	}
+
+	return &pb.GetGroupsResponse{Groups: groups}, nil
+}
+
+// получение дисциплин лектор
+func (s *server) GetDisciplines(ctx context.Context, req *pb.GetDisciplinesRequest) (*pb.GetDisciplinesResponse, error) {
+	var disciplines []*pb.GetDisciplinesResponse_Discipline
+	query := `
+        SELECT id, name
+        FROM disciplines
+        WHERE lector_id = $1
+    `
+	rows, err := s.db.Query(query, req.LectorId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query disciplines: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var discipline pb.GetDisciplinesResponse_Discipline
+		if err := rows.Scan(&discipline.Id, &discipline.Name); err != nil {
+			return nil, fmt.Errorf("failed to scan discipline: %v", err)
+		}
+		disciplines = append(disciplines, &discipline)
+	}
+
+	return &pb.GetDisciplinesResponse{Disciplines: disciplines}, nil
+}
+
 func main() {
 
 	dbHost := os.Getenv("DB_HOST")
