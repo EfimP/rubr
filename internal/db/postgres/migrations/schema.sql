@@ -1,6 +1,6 @@
 
 -- Создание ENUM
-CREATE TYPE user_role AS ENUM ('student', 'assistant', 'seminarist', 'lecturer', 'superaccount');
+--CREATE TYPE user_role AS ENUM ('student', 'assistant', 'seminarist', 'lecturer', 'superaccount');
 
 -- 1) USERS
 CREATE TABLE users (

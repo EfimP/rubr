@@ -1,7 +1,5 @@
 package main
 
-import "rubr/cmd/frontend/superacc"
-
 func main() {
 	//everybody.GreetingPage()
 	//everybody.RegistrationPage()
@@ -9,6 +7,7 @@ func main() {
 	//lector.CreateWorkPage()
 	//lector.LectorWorksPage()
 	//lector.ShowBlockingCriteriaPage()
-	superacc.ShowBlockingCriteriaPage()
-	//superacc.ShowUsersListPage("")
+	//superacc.ShowUsersListPage()
+	//superacc.ShowGroupUsersPage("")
+	//superacc.GroupListPage()
 }

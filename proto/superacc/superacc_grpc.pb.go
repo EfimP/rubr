@@ -19,11 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SuperAccService_UpdateUserRole_FullMethodName    = "/superacc.SuperAccService/UpdateUserRole"
-	SuperAccService_ManageGroup_FullMethodName       = "/superacc.SuperAccService/ManageGroup"
-	SuperAccService_ManageDiscipline_FullMethodName  = "/superacc.SuperAccService/ManageDiscipline"
-	SuperAccService_ListGroups_FullMethodName        = "/superacc.SuperAccService/ListGroups"
-	SuperAccService_ManageGroupEntity_FullMethodName = "/superacc.SuperAccService/ManageGroupEntity"
+	SuperAccService_UpdateUserRole_FullMethodName         = "/superacc.SuperAccService/UpdateUserRole"
+	SuperAccService_ManageGroup_FullMethodName            = "/superacc.SuperAccService/ManageGroup"
+	SuperAccService_ManageDiscipline_FullMethodName       = "/superacc.SuperAccService/ManageDiscipline"
+	SuperAccService_ListGroups_FullMethodName             = "/superacc.SuperAccService/ListGroups"
+	SuperAccService_ManageGroupEntity_FullMethodName      = "/superacc.SuperAccService/ManageGroupEntity"
+	SuperAccService_ListAllUsers_FullMethodName           = "/superacc.SuperAccService/ListAllUsers"
+	SuperAccService_ListUsersByGroup_FullMethodName       = "/superacc.SuperAccService/ListUsersByGroup"
+	SuperAccService_RemoveUser_FullMethodName             = "/superacc.SuperAccService/RemoveUser"
+	SuperAccService_AddUser_FullMethodName                = "/superacc.SuperAccService/AddUser"
+	SuperAccService_ManageDisciplineEntity_FullMethodName = "/superacc.SuperAccService/ManageDisciplineEntity"
+	SuperAccService_ListDisciplines_FullMethodName        = "/superacc.SuperAccService/ListDisciplines"
 )
 
 // SuperAccServiceClient is the client API for SuperAccService service.
@@ -35,6 +41,12 @@ type SuperAccServiceClient interface {
 	ManageDiscipline(ctx context.Context, in *ManageDisciplineRequest, opts ...grpc.CallOption) (*ManageDisciplineResponse, error)
 	ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsResponse, error)
 	ManageGroupEntity(ctx context.Context, in *ManageGroupEntityRequest, opts ...grpc.CallOption) (*ManageGroupEntityResponse, error)
+	ListAllUsers(ctx context.Context, in *ListAllUsersRequest, opts ...grpc.CallOption) (*ListAllUsersResponse, error)
+	ListUsersByGroup(ctx context.Context, in *ListUsersByGroupRequest, opts ...grpc.CallOption) (*ListUsersByGroupResponse, error)
+	RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error)
+	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error)
+	ManageDisciplineEntity(ctx context.Context, in *ManageDisciplineEntityRequest, opts ...grpc.CallOption) (*ManageDisciplineEntityResponse, error)
+	ListDisciplines(ctx context.Context, in *ListDisciplinesRequest, opts ...grpc.CallOption) (*ListDisciplinesResponse, error)
 }
 
 type superAccServiceClient struct {
@@ -95,6 +107,66 @@ func (c *superAccServiceClient) ManageGroupEntity(ctx context.Context, in *Manag
 	return out, nil
 }
 
+func (c *superAccServiceClient) ListAllUsers(ctx context.Context, in *ListAllUsersRequest, opts ...grpc.CallOption) (*ListAllUsersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAllUsersResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_ListAllUsers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *superAccServiceClient) ListUsersByGroup(ctx context.Context, in *ListUsersByGroupRequest, opts ...grpc.CallOption) (*ListUsersByGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUsersByGroupResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_ListUsersByGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *superAccServiceClient) RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveUserResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_RemoveUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *superAccServiceClient) AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddUserResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_AddUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *superAccServiceClient) ManageDisciplineEntity(ctx context.Context, in *ManageDisciplineEntityRequest, opts ...grpc.CallOption) (*ManageDisciplineEntityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ManageDisciplineEntityResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_ManageDisciplineEntity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *superAccServiceClient) ListDisciplines(ctx context.Context, in *ListDisciplinesRequest, opts ...grpc.CallOption) (*ListDisciplinesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDisciplinesResponse)
+	err := c.cc.Invoke(ctx, SuperAccService_ListDisciplines_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SuperAccServiceServer is the server API for SuperAccService service.
 // All implementations must embed UnimplementedSuperAccServiceServer
 // for forward compatibility.
@@ -104,6 +176,12 @@ type SuperAccServiceServer interface {
 	ManageDiscipline(context.Context, *ManageDisciplineRequest) (*ManageDisciplineResponse, error)
 	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsResponse, error)
 	ManageGroupEntity(context.Context, *ManageGroupEntityRequest) (*ManageGroupEntityResponse, error)
+	ListAllUsers(context.Context, *ListAllUsersRequest) (*ListAllUsersResponse, error)
+	ListUsersByGroup(context.Context, *ListUsersByGroupRequest) (*ListUsersByGroupResponse, error)
+	RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error)
+	AddUser(context.Context, *AddUserRequest) (*AddUserResponse, error)
+	ManageDisciplineEntity(context.Context, *ManageDisciplineEntityRequest) (*ManageDisciplineEntityResponse, error)
+	ListDisciplines(context.Context, *ListDisciplinesRequest) (*ListDisciplinesResponse, error)
 	mustEmbedUnimplementedSuperAccServiceServer()
 }
 
@@ -128,6 +206,24 @@ func (UnimplementedSuperAccServiceServer) ListGroups(context.Context, *ListGroup
 }
 func (UnimplementedSuperAccServiceServer) ManageGroupEntity(context.Context, *ManageGroupEntityRequest) (*ManageGroupEntityResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ManageGroupEntity not implemented")
+}
+func (UnimplementedSuperAccServiceServer) ListAllUsers(context.Context, *ListAllUsersRequest) (*ListAllUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAllUsers not implemented")
+}
+func (UnimplementedSuperAccServiceServer) ListUsersByGroup(context.Context, *ListUsersByGroupRequest) (*ListUsersByGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUsersByGroup not implemented")
+}
+func (UnimplementedSuperAccServiceServer) RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveUser not implemented")
+}
+func (UnimplementedSuperAccServiceServer) AddUser(context.Context, *AddUserRequest) (*AddUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUser not implemented")
+}
+func (UnimplementedSuperAccServiceServer) ManageDisciplineEntity(context.Context, *ManageDisciplineEntityRequest) (*ManageDisciplineEntityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ManageDisciplineEntity not implemented")
+}
+func (UnimplementedSuperAccServiceServer) ListDisciplines(context.Context, *ListDisciplinesRequest) (*ListDisciplinesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDisciplines not implemented")
 }
 func (UnimplementedSuperAccServiceServer) mustEmbedUnimplementedSuperAccServiceServer() {}
 func (UnimplementedSuperAccServiceServer) testEmbeddedByValue()                         {}
@@ -240,6 +336,114 @@ func _SuperAccService_ManageGroupEntity_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SuperAccService_ListAllUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAllUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).ListAllUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_ListAllUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).ListAllUsers(ctx, req.(*ListAllUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SuperAccService_ListUsersByGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUsersByGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).ListUsersByGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_ListUsersByGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).ListUsersByGroup(ctx, req.(*ListUsersByGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SuperAccService_RemoveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).RemoveUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_RemoveUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).RemoveUser(ctx, req.(*RemoveUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SuperAccService_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).AddUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_AddUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).AddUser(ctx, req.(*AddUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SuperAccService_ManageDisciplineEntity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManageDisciplineEntityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).ManageDisciplineEntity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_ManageDisciplineEntity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).ManageDisciplineEntity(ctx, req.(*ManageDisciplineEntityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SuperAccService_ListDisciplines_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDisciplinesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SuperAccServiceServer).ListDisciplines(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SuperAccService_ListDisciplines_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SuperAccServiceServer).ListDisciplines(ctx, req.(*ListDisciplinesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SuperAccService_ServiceDesc is the grpc.ServiceDesc for SuperAccService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +470,30 @@ var SuperAccService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ManageGroupEntity",
 			Handler:    _SuperAccService_ManageGroupEntity_Handler,
+		},
+		{
+			MethodName: "ListAllUsers",
+			Handler:    _SuperAccService_ListAllUsers_Handler,
+		},
+		{
+			MethodName: "ListUsersByGroup",
+			Handler:    _SuperAccService_ListUsersByGroup_Handler,
+		},
+		{
+			MethodName: "RemoveUser",
+			Handler:    _SuperAccService_RemoveUser_Handler,
+		},
+		{
+			MethodName: "AddUser",
+			Handler:    _SuperAccService_AddUser_Handler,
+		},
+		{
+			MethodName: "ManageDisciplineEntity",
+			Handler:    _SuperAccService_ManageDisciplineEntity_Handler,
+		},
+		{
+			MethodName: "ListDisciplines",
+			Handler:    _SuperAccService_ListDisciplines_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

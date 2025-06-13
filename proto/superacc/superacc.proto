@@ -8,7 +8,13 @@ service SuperAccService {
   rpc ManageGroup (ManageGroupRequest) returns (ManageGroupResponse) {}
   rpc ManageDiscipline (ManageDisciplineRequest) returns (ManageDisciplineResponse) {}
   rpc ListGroups (ListGroupsRequest) returns (ListGroupsResponse) {}
-  rpc ManageGroupEntity (ManageGroupEntityRequest) returns (ManageGroupEntityResponse) {} // Новый метод
+  rpc ManageGroupEntity (ManageGroupEntityRequest) returns (ManageGroupEntityResponse) {}
+  rpc ListAllUsers (ListAllUsersRequest) returns (ListAllUsersResponse) {}
+  rpc ListUsersByGroup (ListUsersByGroupRequest) returns (ListUsersByGroupResponse) {}
+  rpc RemoveUser (RemoveUserRequest) returns (RemoveUserResponse) {}
+  rpc AddUser (AddUserRequest) returns (AddUserResponse) {}
+  rpc ManageDisciplineEntity (ManageDisciplineEntityRequest) returns (ManageDisciplineEntityResponse) {}
+  rpc ListDisciplines (ListDisciplinesRequest) returns (ListDisciplinesResponse) {}
 }
 
 message UpdateRoleRequest {
@@ -45,13 +51,14 @@ message ManageDisciplineResponse {
   bool success = 2;
 }
 
-message ListGroupsRequest {}
-
 message Group {
   int32 id = 1;
   string name = 2;
   string description = 3;
+  repeated string disciplines = 4; // Добавляем список дисциплин
 }
+
+message ListGroupsRequest {}
 
 message ListGroupsResponse {
   bool success = 1;
@@ -71,3 +78,91 @@ message ManageGroupEntityResponse {
   bool success = 2;
   int32 group_id = 3; // Возвращается ID созданной группы
 }
+
+message ListAllUsersRequest {}
+
+message User {
+  int32 id = 1;
+  string fio = 2;
+  string email = 3;
+  string group = 4;
+  string status = 5;
+}
+
+message ListAllUsersResponse {
+  bool success = 1;
+  string message = 2;
+  repeated User users = 3;
+}
+
+message ListUsersByGroupRequest {
+  string group_name = 1;
+}
+
+message ListUsersByGroupResponse {
+  bool success = 1;
+  string message = 2;
+  repeated User users = 3;
+}
+
+message RemoveUserRequest {
+  string email = 1; // Уникальный идентификатор пользователя
+}
+
+message RemoveUserResponse {
+  string message = 1;
+  bool success = 2;
+}
+
+message AddUserRequest {
+  string fio = 1;
+  string email = 2;
+  string group = 3;
+  string status = 4;
+}
+
+message AddUserResponse {
+  string message = 1;
+  bool success = 2;
+  int32 user_id = 3; // ID созданного пользователя
+}
+
+message Discipline {
+  int32 id = 1;
+  string name = 2;
+}
+
+message ListDisciplinesRequest {}
+
+message ListDisciplinesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Discipline disciplines = 3;
+}
+
+message ManageDisciplineEntityRequest {
+  string action = 1;      // "create" или "attach"
+  int32 group_id = 2;     // ID группы
+  repeated int32 discipline_ids = 3; // IDs дисциплин для attach
+  string name = 4;        // Название дисциплины (для create)
+  int32 seminarist_id = 5; // ID семинариста (опционально)
+  int32 assistant_id = 6;  // ID ассистента (опционально)
+}
+
+message ManageDisciplineEntityResponse {
+  string message = 1;
+  bool success = 2;
+}
+
+//message ManageDisciplineEntityResponse {
+//  string message = 1;
+//  bool success = 2;
+//  int32 discipline_id = 3; // Возвращается ID созданной/прикреплённой дисциплины
+//}
+
+//message ManageDisciplineEntityRequest {
+//  int32 discipline_id = 1; // ID дисциплины (0 для создания новой)
+//  string name = 2;        // Название дисциплины (обязательно для создания)
+//  int32 group_id = 3;     // ID группы
+//  string action = 4;      // "create" или "attach"
+//}

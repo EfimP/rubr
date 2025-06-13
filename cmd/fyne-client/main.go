@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -16,6 +17,7 @@ type AppState struct {
 func main() {
 	// Инициализация приложения и окна
 	a := app.New()
+	a.Settings().SetTheme(theme.LightTheme())
 	w := a.NewWindow("Rubric Grader")
 	state := &AppState{currentPage: "greeting", window: w}
 
@@ -33,14 +35,20 @@ func createContent(state *AppState) fyne.CanvasObject {
 	leftBackground.FillMode = canvas.ImageFillStretch
 
 	switch state.currentPage {
+	//authorization
 	case "greeting":
 		return CreateGreetingPage(state, leftBackground)
 	case "authorization":
 		return CreateAuthorizationPage(state, leftBackground)
 	case "registration":
 		return CreateRegistrationPage(state, leftBackground)
-	case "superacc_usrs":
+	//superacc
+	case "superacc-groups":
 		return СreateGroupListPage(state, leftBackground)
+	case "superacc-users-of-group":
+		return СreateGroupUsersPage(state, leftBackground, GroupName)
+	case "superacc-all-users":
+		return СreateUsersListPage(state, leftBackground)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
 	}

@@ -76,7 +76,7 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 			return
 		}
 		if loginEntry.Text == "superacc" && passwordEntry.Text == "fimoz" {
-			state.currentPage = "superacc_usrs"
+			state.currentPage = "superacc-groups"
 			state.window.SetContent(createContent(state))
 			return
 		}
