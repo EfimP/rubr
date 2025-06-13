@@ -38,15 +38,22 @@ func createContent(state *AppState) fyne.CanvasObject {
 	leftBackground.FillMode = canvas.ImageFillStretch
 
 	switch state.currentPage {
+	//authorization
 	case "greeting":
 		return CreateGreetingPage(state, leftBackground)
 	case "authorization":
 		return CreateAuthorizationPage(state, leftBackground)
 	case "registration":
 		return CreateRegistrationPage(state, leftBackground)
-	case "superacc_usrs":
+	//superacc
+	case "superacc-groups":
 		return СreateGroupListPage(state, leftBackground)
-	case "lector_works":
+	case "superacc-users-of-group":
+		return СreateGroupUsersPage(state, leftBackground, GroupName)
+	case "superacc-all-users":
+		return СreateUsersListPage(state, leftBackground)
+  // lector
+  case "lector_works":
 		return CreateLectorWorksPage(state, leftBackground)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
