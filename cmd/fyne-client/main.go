@@ -10,19 +10,21 @@ import (
 
 type AppState struct {
 	currentPage string
+	userID      string
+	role        string
 	window      fyne.Window
 }
 
 func main() {
-	// Инициализация приложения и окна
 	a := app.New()
 	w := a.NewWindow("Rubric Grader")
-	state := &AppState{currentPage: "greeting", window: w}
-
-	// Установка начального содержимого
+	state := &AppState{
+		currentPage: "greeting",
+		userID:      "",
+		role:        "",
+		window:      w,
+	}
 	w.SetContent(createContent(state))
-
-	// Установка размера окна
 	w.Resize(fyne.NewSize(1280, 720))
 	w.ShowAndRun()
 }
@@ -41,6 +43,8 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return CreateRegistrationPage(state, leftBackground)
 	case "superacc_usrs":
 		return СreateGroupListPage(state, leftBackground)
+	case "lector_works":
+		return CreateLectorWorksPage(state, leftBackground)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
 	}

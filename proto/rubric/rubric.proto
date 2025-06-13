@@ -1,0 +1,111 @@
+syntax = "proto3";
+package rubric;
+
+option go_package = "./proto/rubric;rubric";
+
+service RubricService {
+  rpc CreateNewBlockingCriteria (CreateNewBlockingCriteriaRequest) returns (CreateNewBlockingCriteriaResponse) {}
+  rpc CreateNewCriteriaGroup (CreateNewCriteriaGroupRequest) returns (CreateNewCriteriaGroupResponse) {}
+  rpc CreateNewMainCriteria (CreateNewMainCriteriaRequest) returns (CreateNewMainCriteriaResponse) {}
+  rpc CreateCriteriaDescription (CreateCriteriaDescriptionRequest) returns (CreateCriteriaDescriptionResponse) {}
+  rpc SetCriteriaWeight (SetCriteriaWeightRequest) returns (SetCriteriaWeightResponse) {}
+  rpc LoadTaskBlockingCriterias (LoadTaskBlockingCriteriasRequest) returns (LoadTaskBlockingCriteriasResponse) {}
+  rpc LoadTaskMainCriterias (LoadTaskMainCriteriasRequest) returns (LoadTaskMainCriteriasResponse) {}
+}
+
+message CreateNewBlockingCriteriaRequest {
+  int32 task_id = 1;
+  string name = 2;
+  string description = 3;
+  string comment = 4;
+  int64 final_mark = 5;
+}
+
+message CreateNewBlockingCriteriaResponse {
+  int32 criteria_group_id = 1;
+  string error = 2;
+}
+
+message CreateNewCriteriaGroupRequest {
+  int32 task_id = 1;
+  string group_name = 2;
+}
+
+message CreateNewCriteriaGroupResponse {
+  int32 criteria_group_id = 1;
+  string error = 2;
+}
+
+message CreateNewMainCriteriaRequest {
+  int32 criteria_group_id = 1;
+  string name = 2;
+}
+
+message CreateNewMainCriteriaResponse {
+  int32 criteria_id = 1;
+  string error = 2;
+}
+
+message CreateCriteriaDescriptionRequest {
+  int32 criteria_id = 1;
+  string mark = 2; // "000", "025", "050", "075", "100"
+  string comment = 3;
+}
+
+message CreateCriteriaDescriptionResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message SetCriteriaWeightRequest {
+  int32 criteria_id = 1;
+  int64 weight = 2;
+}
+
+message SetCriteriaWeightResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message LoadTaskBlockingCriteriasRequest {
+  int32 task_id = 1;
+}
+
+message BlockingCriteria {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  string comment = 4;
+  int64 final_mark = 5;
+}
+
+message LoadTaskBlockingCriteriasResponse {
+  repeated BlockingCriteria criteria = 1;
+  string error = 2;
+}
+
+message LoadTaskMainCriteriasRequest {
+  int32 task_id = 1;
+}
+
+message CriteriaGroup {
+  int32 id = 1;
+  string group_name = 2;
+  repeated MainCriteria criteria = 3;
+}
+
+message MainCriteria {
+  int32 id = 1;
+  string name = 2;
+  int64 weight = 3;
+  string comment_000 = 4;
+  string comment_025 = 5;
+  string comment_050 = 6;
+  string comment_075 = 7;
+  string comment_100 = 8;
+}
+
+message LoadTaskMainCriteriasResponse {
+  repeated CriteriaGroup groups = 1;
+  string error = 2;
+}

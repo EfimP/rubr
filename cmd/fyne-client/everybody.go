@@ -54,7 +54,6 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 	passwordEntry.SetPlaceHolder("Введите пароль")
 
 	enterButton := widget.NewButton("Войти в аккаунт", func() {
-		// Вызов авторизации через gRPC
 		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to gRPC: %v", err)
@@ -75,13 +74,17 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 			log.Println("Login error:", resp.Error)
 			return
 		}
-		if loginEntry.Text == "superacc" && passwordEntry.Text == "fimoz" {
+
+		state.userID = resp.UserId
+		state.role = resp.Role
+		if state.role == "lecturer" {
+			state.currentPage = "lector_works"
+		} else if state.role == "superaccount" {
 			state.currentPage = "superacc_usrs"
-			state.window.SetContent(createContent(state))
-			return
+		} else {
+			state.currentPage = "greeting"
 		}
-		log.Println("Login successful, Token:", resp.Token, " user id: ", resp.UserId)
-		// Здесь можно сохранить токен и перейти на страницу профиля
+		state.window.SetContent(createContent(state))
 	})
 	enterButton.Importance = widget.HighImportance
 

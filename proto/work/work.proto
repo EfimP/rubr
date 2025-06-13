@@ -1,0 +1,112 @@
+syntax = "proto3";
+package work;
+
+option go_package = "./proto/work;work";
+
+service WorkService {
+  rpc GetTasksForLector (GetTasksForLectorRequest) returns (GetTasksForLectorResponse) {}
+  rpc DeleteTask (DeleteTaskRequest) returns (DeleteTaskResponse) {}
+  rpc SetTaskTitle (SetTaskTitleRequest) returns (SetTaskTitleResponse) {}
+  rpc SetTaskDescription (SetTaskDescriptionRequest) returns (SetTaskDescriptionResponse) {}
+  rpc SetTaskDeadline (SetTaskDeadlineRequest) returns (SetTaskDeadlineResponse) {}
+  rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse) {}
+  rpc LoadTaskName (LoadTaskNameRequest) returns (LoadTaskNameResponse) {}
+  rpc LoadTaskDescription (LoadTaskDescriptionRequest) returns (LoadTaskDescriptionResponse) {}
+  rpc LoadTaskDeadline (LoadTaskDeadlineRequest) returns (LoadTaskDeadlineResponse) {}
+}
+
+message GetTasksForLectorRequest {
+  int32 lector_id = 1;
+}
+
+message Task {
+  int32 id = 1;
+  string title = 2;
+  string deadline = 3;
+}
+
+message GetTasksForLectorResponse {
+  repeated Task tasks = 1;
+  string error = 2;
+}
+
+message DeleteTaskRequest {
+  int32 task_id = 1;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message SetTaskTitleRequest {
+  int32 task_id = 1;
+  string title = 2;
+}
+
+message SetTaskTitleResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message SetTaskDescriptionRequest {
+  int32 task_id = 1;
+  string description = 2;
+}
+
+message SetTaskDescriptionResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message SetTaskDeadlineRequest {
+  int32 task_id = 1;
+  string deadline = 2;
+}
+
+message SetTaskDeadlineResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message CreateWorkRequest {
+  int32 lector_id = 1;
+  int32 group_id = 2;
+  string title = 3;
+  string description = 4;
+  string deadline = 5;
+  int32 discipline_id = 6;
+  string content_url = 7;
+}
+
+message CreateWorkResponse {
+  int32 task_id = 1;
+  string error = 2;
+}
+
+message LoadTaskNameRequest {
+  int32 task_id = 1;
+}
+
+message LoadTaskNameResponse {
+  string title = 1;
+  string error = 2;
+}
+
+message LoadTaskDescriptionRequest {
+  int32 task_id = 1;
+}
+
+message LoadTaskDescriptionResponse {
+  string description = 1;
+  string error = 2;
+}
+
+message LoadTaskDeadlineRequest {
+  int32 task_id = 1;
+}
+
+message LoadTaskDeadlineResponse {
+  string deadline = 1;
+  string error = 2;
+}
