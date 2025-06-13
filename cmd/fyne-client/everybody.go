@@ -14,7 +14,6 @@ import (
 	userpb "rubr/proto/user"
 )
 
-// createGreetingPage создает страницу приветствия
 func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	loginButton := widget.NewButton("Авторизоваться", func() {
 		state.currentPage = "authorization"
@@ -45,7 +44,6 @@ func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.Canv
 	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
 }
 
-// createAuthorizationPage создает страницу авторизации
 func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	loginEntry := widget.NewEntry()
 	loginEntry.SetPlaceHolder("Введите логин")
@@ -54,10 +52,9 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 	passwordEntry.SetPlaceHolder("Введите пароль")
 
 	enterButton := widget.NewButton("Войти в аккаунт", func() {
-		// Вызов авторизации через gRPC
 		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to gRPC: %v", err)
+			log.Printf("Failed to connect to userservice: %v", err)
 			return
 		}
 		defer conn.Close()
@@ -75,13 +72,17 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 			log.Println("Login error:", resp.Error)
 			return
 		}
-		if loginEntry.Text == "superacc" && passwordEntry.Text == "fimoz" {
-			state.currentPage = "superacc-groups"
-			state.window.SetContent(createContent(state))
-			return
+
+		state.userID = resp.UserId
+		state.role = resp.Role
+		if state.role == "lecturer" {
+			state.currentPage = "lector_works"
+		} else if state.role == "superaccount" {
+			state.currentPage = "superacc_usrs"
+		} else {
+			state.currentPage = "greeting"
 		}
-		log.Println("Login successful, Token:", resp.Token, " user id: ", resp.UserId)
-		// Здесь можно сохранить токен и перейти на страницу профиля
+		state.window.SetContent(createContent(state))
 	})
 	enterButton.Importance = widget.HighImportance
 
@@ -103,7 +104,6 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
 }
 
-// createRegistrationPage создает страницу регистрации
 func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	emailEntry := widget.NewEntry()
 	emailEntry.SetPlaceHolder("Введите почту")
@@ -121,10 +121,9 @@ func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 	passwordEntry.SetPlaceHolder("Введите пароль")
 
 	enterButton := widget.NewButton("Зарегистрироваться", func() {
-		// Вызов регистрации через gRPC
 		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to gRPC: %v", err)
+			log.Printf("Failed to connect to userservice: %v", err)
 			return
 		}
 		defer conn.Close()
@@ -146,7 +145,6 @@ func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 			return
 		}
 		log.Printf("Registration successful, UserID: %s", resp.UserId)
-		// Здесь можно вернуться на GreetingPage или перейти на профиль
 		state.currentPage = "greeting"
 		state.window.SetContent(createContent(state))
 	})

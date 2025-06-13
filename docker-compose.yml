@@ -50,6 +50,36 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
+  workservice:
+    build:
+      context: .
+      dockerfile: ./cmd/workservice/Dockerfile
+    ports:
+      - "50053:50053"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=rubrlocal
+  rubricservice:
+    build:
+      context: .
+      dockerfile: ./cmd/rubricservice/Dockerfile
+    ports:
+      - "50055:50055"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=rubrlocal
 
 networks:
   rubric-net:
