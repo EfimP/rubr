@@ -1066,10 +1066,45 @@ func СreateUsersListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 		})
 		statusSelect.SetSelected(user.Status) // Устанавливаем текущий статус
 
+		deleteButton := widget.NewButton("Удалить", func() {
+			dialog.ShowConfirm(
+				"Подтверждение удаления",
+				fmt.Sprintf("Удалить пользователя '%s (%s)'?", user.FIO, user.Email),
+				func(confirmed bool) {
+					if confirmed {
+						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+						if err != nil {
+							log.Printf("Failed to connect to superaccservice: %v", err)
+							return
+						}
+						defer conn.Close()
+
+						client := superaccpb.NewSuperAccServiceClient(conn)
+						resp, err := client.RemoveUser(context.Background(), &superaccpb.RemoveUserRequest{
+							Email: user.Email,
+						})
+						if err != nil {
+							log.Printf("Failed to remove user: %v", err)
+							return
+						}
+						if !resp.Success {
+							log.Printf("Remove user failed: %s", resp.Message)
+						} else {
+							log.Printf("User %s (%s) successfully removed", user.FIO, user.Email)
+							// Обновляем список пользователей
+							updateUsersTableUI(searchEntry.Text)
+						}
+					}
+				},
+				w,
+			)
+		})
+
 		// Отступы и растягивание для ячеек
 		cellFIOEmail := container.NewPadded(container.NewMax(fioEmailCombinedLabel))
 		cellGroup := container.NewPadded(container.NewMax(groupLabel))
 		cellStatus := container.NewPadded(container.NewMax(statusSelect))
+		cellDelete := container.NewPadded(container.NewMax(deleteButton))
 
 		verticalCellDivider := canvas.NewRectangle(mediumGrayDivider)
 		verticalCellDivider.SetMinSize(fyne.NewSize(1, 0))
@@ -1080,6 +1115,7 @@ func СreateUsersListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 			cellGroup,
 			verticalCellDivider,
 			cellStatus,
+			cellDelete,
 		)
 		return rowContainer
 	}
