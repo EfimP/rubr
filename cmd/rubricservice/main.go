@@ -165,6 +165,59 @@ func (s *server) LoadTaskMainCriterias(ctx context.Context, req *pb.LoadTaskMain
 	return &pb.LoadTaskMainCriteriasResponse{Groups: groups}, nil
 }
 
+func (s *server) CreateCriteriaGroup(ctx context.Context, req *pb.CreateCriteriaGroupRequest) (*pb.CreateCriteriaGroupResponse, error) {
+	query := `INSERT INTO criteria_groups (task_id, group_name, block_flag) VALUES ($1, $2, false) RETURNING id`
+	var groupID int32
+	err := s.db.QueryRowContext(ctx, query, req.TaskId, req.GroupName).Scan(&groupID)
+	if err != nil {
+		return &pb.CreateCriteriaGroupResponse{Error: err.Error()}, nil
+	}
+	return &pb.CreateCriteriaGroupResponse{GroupId: groupID}, nil
+}
+
+func (s *server) CreateCriterion(ctx context.Context, req *pb.CreateCriterionRequest) (*pb.CreateCriterionResponse, error) {
+	query := `INSERT INTO criteria (name, criteria_group_id, weight) VALUES ($1, $2, 0) RETURNING id`
+	var criterionID int32
+	err := s.db.QueryRowContext(ctx, query, req.Name, req.GroupId).Scan(&criterionID)
+	if err != nil {
+		return &pb.CreateCriterionResponse{Error: err.Error()}, nil
+	}
+	return &pb.CreateCriterionResponse{CriterionId: criterionID}, nil
+}
+
+func (s *server) UpdateCriterionWeight(ctx context.Context, req *pb.UpdateCriterionWeightRequest) (*pb.UpdateCriterionWeightResponse, error) {
+	query := `UPDATE criteria SET weight = $1 WHERE id = $2`
+	_, err := s.db.ExecContext(ctx, query, req.Weight, req.CriterionId)
+	if err != nil {
+		return &pb.UpdateCriterionWeightResponse{Error: err.Error()}, nil
+	}
+	return &pb.UpdateCriterionWeightResponse{Success: true}, nil
+}
+
+func (s *server) UpdateCriterionComment(ctx context.Context, req *pb.UpdateCriterionCommentRequest) (*pb.UpdateCriterionCommentResponse, error) {
+	var column string
+	switch req.Mark {
+	case "000":
+		column = "comment_000"
+	case "025":
+		column = "comment_025"
+	case "050":
+		column = "comment_050"
+	case "075":
+		column = "comment_075"
+	case "100":
+		column = "comment_100"
+	default:
+		return &pb.UpdateCriterionCommentResponse{Error: "invalid mark value"}, nil
+	}
+	query := fmt.Sprintf("UPDATE criteria SET %s = $1 WHERE id = $2", column)
+	_, err := s.db.ExecContext(ctx, query, req.Comment, req.CriterionId)
+	if err != nil {
+		return &pb.UpdateCriterionCommentResponse{Error: err.Error()}, nil
+	}
+	return &pb.UpdateCriterionCommentResponse{Success: true}, nil
+}
+
 func main() {
 
 	dbHost := os.Getenv("DB_HOST")
@@ -188,7 +241,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// Настройка сервера gRPC (остальной код остается без изменений)
+	// Настройка сервера gRPC
 	lis, err := net.Listen("tcp", ":50055")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

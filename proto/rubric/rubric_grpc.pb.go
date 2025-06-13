@@ -26,6 +26,10 @@ const (
 	RubricService_SetCriteriaWeight_FullMethodName         = "/rubric.RubricService/SetCriteriaWeight"
 	RubricService_LoadTaskBlockingCriterias_FullMethodName = "/rubric.RubricService/LoadTaskBlockingCriterias"
 	RubricService_LoadTaskMainCriterias_FullMethodName     = "/rubric.RubricService/LoadTaskMainCriterias"
+	RubricService_CreateCriteriaGroup_FullMethodName       = "/rubric.RubricService/CreateCriteriaGroup"
+	RubricService_CreateCriterion_FullMethodName           = "/rubric.RubricService/CreateCriterion"
+	RubricService_UpdateCriterionWeight_FullMethodName     = "/rubric.RubricService/UpdateCriterionWeight"
+	RubricService_UpdateCriterionComment_FullMethodName    = "/rubric.RubricService/UpdateCriterionComment"
 )
 
 // RubricServiceClient is the client API for RubricService service.
@@ -39,6 +43,10 @@ type RubricServiceClient interface {
 	SetCriteriaWeight(ctx context.Context, in *SetCriteriaWeightRequest, opts ...grpc.CallOption) (*SetCriteriaWeightResponse, error)
 	LoadTaskBlockingCriterias(ctx context.Context, in *LoadTaskBlockingCriteriasRequest, opts ...grpc.CallOption) (*LoadTaskBlockingCriteriasResponse, error)
 	LoadTaskMainCriterias(ctx context.Context, in *LoadTaskMainCriteriasRequest, opts ...grpc.CallOption) (*LoadTaskMainCriteriasResponse, error)
+	CreateCriteriaGroup(ctx context.Context, in *CreateCriteriaGroupRequest, opts ...grpc.CallOption) (*CreateCriteriaGroupResponse, error)
+	CreateCriterion(ctx context.Context, in *CreateCriterionRequest, opts ...grpc.CallOption) (*CreateCriterionResponse, error)
+	UpdateCriterionWeight(ctx context.Context, in *UpdateCriterionWeightRequest, opts ...grpc.CallOption) (*UpdateCriterionWeightResponse, error)
+	UpdateCriterionComment(ctx context.Context, in *UpdateCriterionCommentRequest, opts ...grpc.CallOption) (*UpdateCriterionCommentResponse, error)
 }
 
 type rubricServiceClient struct {
@@ -119,6 +127,46 @@ func (c *rubricServiceClient) LoadTaskMainCriterias(ctx context.Context, in *Loa
 	return out, nil
 }
 
+func (c *rubricServiceClient) CreateCriteriaGroup(ctx context.Context, in *CreateCriteriaGroupRequest, opts ...grpc.CallOption) (*CreateCriteriaGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCriteriaGroupResponse)
+	err := c.cc.Invoke(ctx, RubricService_CreateCriteriaGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rubricServiceClient) CreateCriterion(ctx context.Context, in *CreateCriterionRequest, opts ...grpc.CallOption) (*CreateCriterionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCriterionResponse)
+	err := c.cc.Invoke(ctx, RubricService_CreateCriterion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rubricServiceClient) UpdateCriterionWeight(ctx context.Context, in *UpdateCriterionWeightRequest, opts ...grpc.CallOption) (*UpdateCriterionWeightResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCriterionWeightResponse)
+	err := c.cc.Invoke(ctx, RubricService_UpdateCriterionWeight_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rubricServiceClient) UpdateCriterionComment(ctx context.Context, in *UpdateCriterionCommentRequest, opts ...grpc.CallOption) (*UpdateCriterionCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCriterionCommentResponse)
+	err := c.cc.Invoke(ctx, RubricService_UpdateCriterionComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RubricServiceServer is the server API for RubricService service.
 // All implementations must embed UnimplementedRubricServiceServer
 // for forward compatibility.
@@ -130,6 +178,10 @@ type RubricServiceServer interface {
 	SetCriteriaWeight(context.Context, *SetCriteriaWeightRequest) (*SetCriteriaWeightResponse, error)
 	LoadTaskBlockingCriterias(context.Context, *LoadTaskBlockingCriteriasRequest) (*LoadTaskBlockingCriteriasResponse, error)
 	LoadTaskMainCriterias(context.Context, *LoadTaskMainCriteriasRequest) (*LoadTaskMainCriteriasResponse, error)
+	CreateCriteriaGroup(context.Context, *CreateCriteriaGroupRequest) (*CreateCriteriaGroupResponse, error)
+	CreateCriterion(context.Context, *CreateCriterionRequest) (*CreateCriterionResponse, error)
+	UpdateCriterionWeight(context.Context, *UpdateCriterionWeightRequest) (*UpdateCriterionWeightResponse, error)
+	UpdateCriterionComment(context.Context, *UpdateCriterionCommentRequest) (*UpdateCriterionCommentResponse, error)
 	mustEmbedUnimplementedRubricServiceServer()
 }
 
@@ -160,6 +212,18 @@ func (UnimplementedRubricServiceServer) LoadTaskBlockingCriterias(context.Contex
 }
 func (UnimplementedRubricServiceServer) LoadTaskMainCriterias(context.Context, *LoadTaskMainCriteriasRequest) (*LoadTaskMainCriteriasResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoadTaskMainCriterias not implemented")
+}
+func (UnimplementedRubricServiceServer) CreateCriteriaGroup(context.Context, *CreateCriteriaGroupRequest) (*CreateCriteriaGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCriteriaGroup not implemented")
+}
+func (UnimplementedRubricServiceServer) CreateCriterion(context.Context, *CreateCriterionRequest) (*CreateCriterionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCriterion not implemented")
+}
+func (UnimplementedRubricServiceServer) UpdateCriterionWeight(context.Context, *UpdateCriterionWeightRequest) (*UpdateCriterionWeightResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCriterionWeight not implemented")
+}
+func (UnimplementedRubricServiceServer) UpdateCriterionComment(context.Context, *UpdateCriterionCommentRequest) (*UpdateCriterionCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCriterionComment not implemented")
 }
 func (UnimplementedRubricServiceServer) mustEmbedUnimplementedRubricServiceServer() {}
 func (UnimplementedRubricServiceServer) testEmbeddedByValue()                       {}
@@ -308,6 +372,78 @@ func _RubricService_LoadTaskMainCriterias_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RubricService_CreateCriteriaGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCriteriaGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).CreateCriteriaGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_CreateCriteriaGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).CreateCriteriaGroup(ctx, req.(*CreateCriteriaGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RubricService_CreateCriterion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCriterionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).CreateCriterion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_CreateCriterion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).CreateCriterion(ctx, req.(*CreateCriterionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RubricService_UpdateCriterionWeight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCriterionWeightRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).UpdateCriterionWeight(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_UpdateCriterionWeight_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).UpdateCriterionWeight(ctx, req.(*UpdateCriterionWeightRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RubricService_UpdateCriterionComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCriterionCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).UpdateCriterionComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_UpdateCriterionComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).UpdateCriterionComment(ctx, req.(*UpdateCriterionCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RubricService_ServiceDesc is the grpc.ServiceDesc for RubricService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +478,22 @@ var RubricService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LoadTaskMainCriterias",
 			Handler:    _RubricService_LoadTaskMainCriterias_Handler,
+		},
+		{
+			MethodName: "CreateCriteriaGroup",
+			Handler:    _RubricService_CreateCriteriaGroup_Handler,
+		},
+		{
+			MethodName: "CreateCriterion",
+			Handler:    _RubricService_CreateCriterion_Handler,
+		},
+		{
+			MethodName: "UpdateCriterionWeight",
+			Handler:    _RubricService_UpdateCriterionWeight_Handler,
+		},
+		{
+			MethodName: "UpdateCriterionComment",
+			Handler:    _RubricService_UpdateCriterionComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

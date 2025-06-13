@@ -7,9 +7,9 @@ func main() {
 	//everybody.RegistrationPage()
 	//everybody.AuthorizationPage()
 	//lector.CreateWorkPage()
-
+	lector.Testpage()
 	//lector.LectorWorksPage()
-	lector.ShowBlockingCriteriaPage()
+	//lector.ShowBlockingCriteriaPage()
 	//superacc.ShowBlockingCriteriaPage()
 	//superacc.ShowUsersListPage("")
 }

@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"google.golang.org/grpc"
 	"image/color"
 	"log"
 	rubricpb "rubr/proto/rubric"
@@ -25,17 +24,13 @@ type MyListItem struct {
 }
 
 func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
-
-	// меняем тип userID со строки на int32
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
 		log.Printf("Invalid user ID: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка: некорректный ID пользователя"))
 	}
 	userID := int32(userIDint64)
-	//
 
-	// получаем список работ из бека
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	resp, err := state.workClient.GetTasksForLector(ctx, &workpb.GetTasksForLectorRequest{LectorId: userID})
@@ -47,9 +42,7 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 		log.Println("GetTasksForLector error:", resp.Error)
 		return container.NewVBox(widget.NewLabel(resp.Error))
 	}
-	//
 
-	// конвертируем полученные с сервера данные в слайс
 	var data []MyListItem
 	for _, task := range resp.Tasks {
 		data = append(data, MyListItem{
@@ -58,7 +51,6 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 			DueDate: task.Deadline,
 		})
 	}
-	//
 
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
@@ -105,7 +97,8 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 
 		currentID := id
 		changeButton.OnTapped = func() {
-			fmt.Printf("Изменение работы '%s' (ID: %d)\n", data[currentID].Name, data[currentID].ID)
+			taskID := data[currentID].ID
+			CreateWorkPage(state, &taskID)
 		}
 
 		deleteButton.OnTapped = func() {
@@ -166,7 +159,6 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// преобразование userID из string в int32 для дальнейшей обработки
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
 		log.Printf("Invalid user ID: %v", err)
@@ -174,9 +166,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		return
 	}
 	userID := int32(userIDint64)
-	//
 
-	// получение списка групп лектора
 	groupsResp, err := state.workClient.GetGroups(ctx, &workpb.GetGroupsRequest{LectorId: userID})
 	if err != nil {
 		log.Printf("Failed to get groups: %v", err)
@@ -187,9 +177,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		dialog.ShowInformation("Ошибка", "Нет доступных групп для этого лектора", w)
 		return
 	}
-	//
 
-	// получение списка дисциплин для данного лектора
 	disciplinesResp, err := state.workClient.GetDisciplines(ctx, &workpb.GetDisciplinesRequest{LectorId: userID})
 	if err != nil {
 		log.Printf("Failed to get disciplines: %v", err)
@@ -200,9 +188,22 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		dialog.ShowInformation("Ошибка", "Нет доступных дисциплин для этого лектора", w)
 		return
 	}
-	//
 
-	// Подготовка данных для выпадающих списков
+	var existingTask *workpb.GetTaskDetailsResponse
+	if !isNewWork {
+		resp, err := state.workClient.GetTaskDetails(ctx, &workpb.GetTaskDetailsRequest{TaskId: *taskID})
+		if err != nil {
+			log.Printf("Failed to get task details: %v", err)
+			dialog.ShowError(err, w)
+			return
+		}
+		if resp.Error != "" {
+			dialog.ShowInformation("Ошибка", resp.Error, w)
+			return
+		}
+		existingTask = resp
+	}
+
 	groupOptions := make([]string, len(groupsResp.Groups))
 	groupIDs := make(map[string]int32)
 	for i, group := range groupsResp.Groups {
@@ -217,7 +218,6 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		disciplineIDs[discipline.Name] = discipline.Id
 	}
 
-	// UI
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
 	logoText.TextStyle.Bold = true
@@ -225,7 +225,11 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 	logoText.Alignment = fyne.TextAlignCenter
 	leftHeaderObject := container.NewStack(logoText)
 
-	headerTitle := canvas.NewText("Создать работу", headerTextColor)
+	headerTitleText := "Создать работу"
+	if !isNewWork {
+		headerTitleText = "Изменить работу"
+	}
+	headerTitle := canvas.NewText(headerTitleText, headerTextColor)
 	headerTitle.TextStyle.Bold = true
 	headerTitle.TextSize = 20
 	headerTitle.Alignment = fyne.TextAlignCenter
@@ -236,21 +240,37 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 	)
 
 	titleEntry := widget.NewEntry()
-	titleEntry.SetPlaceHolder("Название")
+	if existingTask != nil {
+		titleEntry.SetText(existingTask.Title)
+	} else {
+		titleEntry.SetPlaceHolder("Название")
+	}
 
 	descriptionEntry := widget.NewMultiLineEntry()
-	descriptionEntry.SetPlaceHolder("Описание работы")
+	if existingTask != nil {
+		descriptionEntry.SetText(existingTask.Description)
+	} else {
+		descriptionEntry.SetPlaceHolder("Описание работы")
+	}
 	scrollableDescription := container.NewVScroll(descriptionEntry)
 	scrollableDescription.SetMinSize(fyne.NewSize(0, descriptionEntry.MinSize().Height*5))
 
 	groupSelect := widget.NewSelect(groupOptions, func(string) {})
 	if len(groupOptions) > 0 {
-		groupSelect.SetSelected(groupOptions[0])
+		if existingTask != nil {
+			groupSelect.SetSelected(existingTask.GroupName)
+		} else {
+			groupSelect.SetSelected(groupOptions[0])
+		}
 	}
 
 	disciplineSelect := widget.NewSelect(disciplineOptions, func(string) {})
 	if len(disciplineOptions) > 0 {
-		disciplineSelect.SetSelected(disciplineOptions[0])
+		if existingTask != nil {
+			disciplineSelect.SetSelected(existingTask.DisciplineName)
+		} else {
+			disciplineSelect.SetSelected(disciplineOptions[0])
+		}
 	}
 
 	dateAndTimeEntry := widget.NewEntry()
@@ -259,6 +279,17 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 
 	var selectedDateTime time.Time
 	var isDateTimeSelected bool
+	if existingTask != nil {
+		deadlineTime, err := time.Parse(time.RFC3339, existingTask.Deadline)
+		if err != nil {
+			log.Printf("Failed to parse deadline: %v", err)
+			dialog.ShowError(err, w)
+			return
+		}
+		selectedDateTime = deadlineTime
+		isDateTimeSelected = true
+		dateAndTimeEntry.SetText(deadlineTime.Format("02.01.2006 15:04"))
+	}
 
 	selectDateTimeButton := widget.NewButton("Выбрать", func() {
 		showDateTimePickerDialog(w, &selectedDateTime, &isDateTimeSelected, dateAndTimeEntry)
@@ -310,8 +341,74 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 				dialog.ShowError(err, w)
 				return
 			}
+			if resp.Error != "" {
+				dialog.ShowInformation("Ошибка", resp.Error, w)
+				return
+			}
 			taskID := resp.TaskId
-			ShowBlockingCriteriaPage(state, taskID) // Убраны лишние параметры
+			ShowBlockingCriteriaPage(state, taskID)
+		} else {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			respTitle, err := state.workClient.SetTaskTitle(ctx, &workpb.SetTaskTitleRequest{
+				TaskId: *taskID,
+				Title:  titleEntry.Text,
+			})
+			if err != nil {
+				log.Printf("Failed to set task title: %v", err)
+				dialog.ShowError(err, w)
+				return
+			}
+			if respTitle.Error != "" {
+				dialog.ShowInformation("Ошибка", respTitle.Error, w)
+				return
+			}
+
+			respDesc, err := state.workClient.SetTaskDescription(ctx, &workpb.SetTaskDescriptionRequest{
+				TaskId:      *taskID,
+				Description: descriptionEntry.Text,
+			})
+			if err != nil {
+				log.Printf("Failed to set task description: %v", err)
+				dialog.ShowError(err, w)
+				return
+			}
+			if respDesc.Error != "" {
+				dialog.ShowInformation("Ошибка", respDesc.Error, w)
+				return
+			}
+
+			respDeadline, err := state.workClient.SetTaskDeadline(ctx, &workpb.SetTaskDeadlineRequest{
+				TaskId:   *taskID,
+				Deadline: deadline,
+			})
+			if err != nil {
+				log.Printf("Failed to set task deadline: %v", err)
+				dialog.ShowError(err, w)
+				return
+			}
+			if respDeadline.Error != "" {
+				dialog.ShowInformation("Ошибка", respDeadline.Error, w)
+				return
+			}
+
+			respGroupDisc, err := state.workClient.UpdateTaskGroupAndDiscipline(ctx, &workpb.UpdateTaskGroupAndDisciplineRequest{
+				TaskId:       *taskID,
+				GroupId:      groupIDs[groupSelect.Selected],
+				DisciplineId: disciplineIDs[disciplineSelect.Selected],
+			})
+			if err != nil {
+				log.Printf("Failed to update task group and discipline: %v", err)
+				dialog.ShowError(err, w)
+				return
+			}
+			if respGroupDisc.Error != "" {
+				dialog.ShowInformation("Ошибка", respGroupDisc.Error, w)
+				return
+			}
+
+			ShowBlockingCriteriaPage(state, *taskID)
 		}
 	})
 	nextButtonContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), nextButton)
@@ -414,19 +511,26 @@ func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSel
 	d.Resize(fyne.NewSize(400, 500))
 	d.Show()
 }
+
 func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 	w := state.window
 
-	// подключение к сервису
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Загрузка блокирующих критериев
+	resp, err := state.rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: taskID})
 	if err != nil {
-		log.Printf("Failed to connect to gRPC: %v", err)
+		log.Printf("Failed to load blocking criteria: %v", err)
 		dialog.ShowError(err, w)
 		return
 	}
-	defer rubricConn.Close()
-	//
+	if resp.Error != "" {
+		dialog.ShowInformation("Ошибка", resp.Error, w)
+		return
+	}
 
+	// UI элементы
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
 	logoText.TextStyle.Bold = true
@@ -458,24 +562,40 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 	)
 
 	var activeCriteria []*CriterionEntry
-	addCriterionEntry := func() {
+	addCriterionEntry := func(crit *rubricpb.BlockingCriteria) {
 		nameEntry := widget.NewEntry()
-		nameEntry.SetPlaceHolder("Название")
+		if crit != nil {
+			nameEntry.SetText(crit.Name)
+		} else {
+			nameEntry.SetPlaceHolder("Название")
+		}
 		nameEntryContainer := container.NewMax(nameEntry)
 		nameEntryContainer.Resize(fyne.NewSize(250, 60))
 
 		descriptionEntry := widget.NewEntry()
-		descriptionEntry.SetPlaceHolder("Описание")
+		if crit != nil {
+			descriptionEntry.SetText(crit.Description)
+		} else {
+			descriptionEntry.SetPlaceHolder("Описание")
+		}
 		descriptionEntryContainer := container.NewMax(descriptionEntry)
 		descriptionEntryContainer.Resize(fyne.NewSize(250, 60))
 
 		commentEntry := widget.NewEntry()
-		commentEntry.SetPlaceHolder("Комментарий")
+		if crit != nil {
+			commentEntry.SetText(crit.Comment)
+		} else {
+			commentEntry.SetPlaceHolder("Комментарий")
+		}
 		commentEntryContainer := container.NewMax(commentEntry)
 		commentEntryContainer.Resize(fyne.NewSize(250, 60))
 
 		evaluationEntry := widget.NewEntry()
-		evaluationEntry.SetPlaceHolder("Оценка")
+		if crit != nil {
+			evaluationEntry.SetText(strconv.FormatInt(crit.FinalMark, 10))
+		} else {
+			evaluationEntry.SetPlaceHolder("Оценка")
+		}
 		evaluationEntryContainer := container.NewMax(evaluationEntry)
 		evaluationEntryContainer.Resize(fyne.NewSize(200, 60))
 
@@ -508,13 +628,21 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 		}
 	}
 
-	addCriterionEntry()
+	// Добавляем существующие критерии
+	for _, crit := range resp.Criteria {
+		addCriterionEntry(crit)
+	}
+
+	// Если критериев нет, добавляем одно пустое поле
+	if len(resp.Criteria) == 0 {
+		addCriterionEntry(nil)
+	}
 
 	listLabel := widget.NewLabelWithStyle("Список блокирующих критериев", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	scrollableCriteria := container.NewVScroll(criteriaListContainer)
 	scrollableCriteria.SetMinSize(fyne.NewSize(0, 400))
 
-	addButton := widget.NewButton("Добавить", func() { addCriterionEntry() })
+	addButton := widget.NewButton("Добавить", func() { addCriterionEntry(nil) })
 	deleteButton := widget.NewButton("Удалить", func() { deleteCriterionEntry() })
 	nextButton := widget.NewButton("Далее", func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -543,8 +671,7 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 				return
 			}
 		}
-		state.currentPage = "lector_works"
-		w.SetContent(createContent(state))
+		ShowMainCriteriaPage(state, taskID)
 	})
 
 	bottomButtons := container.New(layout.NewHBoxLayout(),
@@ -574,6 +701,373 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 			nil,
 			nil,
 			centralContent,
+		),
+	))
+}
+
+func ShowMainCriteriaPage(state *AppState, taskID int32) {
+	w := state.window
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Загрузка основных критериев
+	resp, err := state.rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: taskID})
+	if err != nil {
+		log.Printf("Failed to load main criteria: %v", err)
+		dialog.ShowError(err, w)
+		return
+	}
+	if resp.Error != "" {
+		dialog.ShowInformation("Ошибка", resp.Error, w)
+		return
+	}
+
+	// Данные групп и критериев
+	type Group struct {
+		Name        string
+		GroupID     int32
+		Criteria    []string
+		CriteriaIDs []int32
+	}
+	groups := make([]Group, len(resp.Groups))
+	for i, g := range resp.Groups {
+		groups[i] = Group{
+			Name:        g.GroupName,
+			GroupID:     g.Id,
+			Criteria:    make([]string, len(g.Criteria)),
+			CriteriaIDs: make([]int32, len(g.Criteria)),
+		}
+		for j, crit := range g.Criteria {
+			groups[i].Criteria[j] = crit.Name
+			groups[i].CriteriaIDs[j] = crit.Id
+		}
+	}
+
+	selectedGroupIndex := -1
+
+	// UI элементы
+	headerTextColor := color.White
+	logoText := canvas.NewText("ВШЭ", headerTextColor)
+	logoText.TextStyle.Bold = true
+	logoText.TextSize = 24
+	logoText.Alignment = fyne.TextAlignCenter
+	leftHeaderObject := container.NewStack(logoText)
+
+	headerTitle := canvas.NewText("Основные критерии", headerTextColor)
+	headerTitle.TextStyle.Bold = true
+	headerTitle.TextSize = 20
+	headerTitle.Alignment = fyne.TextAlignCenter
+
+	headerContent := container.New(layout.NewBorderLayout(nil, nil, leftHeaderObject, nil),
+		leftHeaderObject,
+		container.NewCenter(headerTitle),
+	)
+
+	contentContainer := container.New(layout.NewMaxLayout(), widget.NewLabel("Выберите группу и критерий"))
+
+	createButton := widget.NewButton("Создать", func() {
+		state.currentPage = "lector_works"
+		w.SetContent(createContent(state))
+	})
+
+	mainContent := container.NewBorder(nil, createButton, nil, nil, contentContainer)
+
+	groupList := widget.NewList(
+		func() int {
+			return len(groups)
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Template")
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			item.(*widget.Label).SetText(groups[id].Name)
+		},
+	)
+
+	addGroupButton := widget.NewButton("Добавить группу", func() {
+		entry := widget.NewEntry()
+		dialog.ShowForm("Новая группа", "Создать", "Отмена", []*widget.FormItem{
+			{Text: "Название группы", Widget: entry},
+		}, func(b bool) {
+			if b && entry.Text != "" {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				resp, err := state.rubricClient.CreateCriteriaGroup(ctx, &rubricpb.CreateCriteriaGroupRequest{
+					TaskId:    taskID,
+					GroupName: entry.Text,
+				})
+				if err != nil {
+					log.Printf("Failed to create criteria group: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				if resp.Error != "" {
+					dialog.ShowInformation("Ошибка", resp.Error, w)
+					return
+				}
+				groups = append(groups, Group{Name: entry.Text, GroupID: resp.GroupId, Criteria: []string{}, CriteriaIDs: []int32{}})
+				groupList.Refresh()
+			}
+		}, w)
+	})
+
+	criteriaList := widget.NewList(
+		func() int {
+			if selectedGroupIndex >= 0 && selectedGroupIndex < len(groups) {
+				return len(groups[selectedGroupIndex].Criteria)
+			}
+			return 0
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Template")
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			if selectedGroupIndex >= 0 && selectedGroupIndex < len(groups) {
+				item.(*widget.Label).SetText(groups[selectedGroupIndex].Criteria[id])
+			}
+		},
+	)
+
+	addCriterionButton := widget.NewButton("Добавить критерий", func() {
+		if selectedGroupIndex < 0 {
+			dialog.ShowInformation("Ошибка", "Сначала выберите группу", w)
+			return
+		}
+		entry := widget.NewEntry()
+		dialog.ShowForm("Новый критерий", "Создать", "Отмена", []*widget.FormItem{
+			{Text: "Название критерия", Widget: entry},
+		}, func(b bool) {
+			if b && entry.Text != "" {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				resp, err := state.rubricClient.CreateCriterion(ctx, &rubricpb.CreateCriterionRequest{
+					GroupId: groups[selectedGroupIndex].GroupID,
+					Name:    entry.Text,
+				})
+				if err != nil {
+					log.Printf("Failed to create criterion: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				if resp.Error != "" {
+					dialog.ShowInformation("Ошибка", resp.Error, w)
+					return
+				}
+				groups[selectedGroupIndex].Criteria = append(groups[selectedGroupIndex].Criteria, entry.Text)
+				groups[selectedGroupIndex].CriteriaIDs = append(groups[selectedGroupIndex].CriteriaIDs, resp.CriterionId)
+				criteriaList.Refresh()
+			}
+		}, w)
+	})
+
+	groupList.OnSelected = func(id widget.ListItemID) {
+		selectedGroupIndex = id
+		criteriaList.Refresh()
+		contentContainer.Objects = []fyne.CanvasObject{widget.NewLabel("Выберите критерий")}
+		contentContainer.Refresh()
+	}
+
+	criteriaList.OnSelected = func(id widget.ListItemID) {
+		if selectedGroupIndex >= 0 && selectedGroupIndex < len(groups) && id >= 0 && id < len(groups[selectedGroupIndex].Criteria) {
+			// Получаем criterionId
+			criterionId := groups[selectedGroupIndex].CriteriaIDs[id]
+
+			// Ищем критерий в resp.Groups
+			var crit *rubricpb.MainCriteria
+			for _, group := range resp.Groups {
+				if group.Id == groups[selectedGroupIndex].GroupID {
+					for _, c := range group.Criteria {
+						if c.Id == criterionId {
+							crit = c
+							break
+						}
+					}
+					break
+				}
+			}
+
+			// Если критерий не найден (новый), показываем пустую форму
+			if crit == nil {
+				weightEntry := widget.NewEntry()
+				weightEntry.SetPlaceHolder("Вес критерия")
+
+				entries := make(map[string]*widget.Entry)
+				scores := []string{"000", "025", "050", "075", "100"}
+				formItems := []*widget.FormItem{}
+				for _, score := range scores {
+					entry := widget.NewEntry()
+					entry.SetPlaceHolder(fmt.Sprintf("Комментарий для %s", score))
+					entries[score] = entry
+					formItems = append(formItems, &widget.FormItem{
+						Text:   fmt.Sprintf("Оценка %s", score),
+						Widget: entry,
+					})
+				}
+				formItems = append(formItems, &widget.FormItem{
+					Text:   "Вес",
+					Widget: weightEntry,
+				})
+
+				saveButton := widget.NewButton("Сохранить", func() {
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+
+					if weightEntry.Text != "" {
+						weight, err := strconv.Atoi(weightEntry.Text)
+						if err != nil {
+							dialog.ShowInformation("Ошибка", "Вес должен быть числом", w)
+							return
+						}
+						respWeight, err := state.rubricClient.UpdateCriterionWeight(ctx, &rubricpb.UpdateCriterionWeightRequest{
+							CriterionId: criterionId,
+							Weight:      int32(weight),
+						})
+						if err != nil {
+							log.Printf("Failed to update criterion weight: %v", err)
+							dialog.ShowError(err, w)
+							return
+						}
+						if respWeight.Error != "" {
+							dialog.ShowInformation("Ошибка", respWeight.Error, w)
+							return
+						}
+					}
+
+					for score, entry := range entries {
+						if entry.Text != "" {
+							respComment, err := state.rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
+								CriterionId: criterionId,
+								Mark:        score,
+								Comment:     entry.Text,
+							})
+							if err != nil {
+								log.Printf("Failed to update criterion comment: %v", err)
+								dialog.ShowError(err, w)
+								return
+							}
+							if respComment.Error != "" {
+								dialog.ShowInformation("Ошибка", respComment.Error, w)
+								return
+							}
+						}
+					}
+					dialog.ShowInformation("Успех", "Данные сохранены", w)
+				})
+
+				content := container.NewVBox(
+					widget.NewForm(formItems...),
+					saveButton,
+				)
+
+				contentContainer.Objects = []fyne.CanvasObject{content}
+				contentContainer.Refresh()
+				return
+			}
+
+			// Если критерий существует, отображаем его данные
+			weightEntry := widget.NewEntry()
+			weightEntry.SetText(strconv.FormatInt(crit.Weight, 10))
+
+			entries := make(map[string]*widget.Entry)
+			scores := []string{"000", "025", "050", "075", "100"}
+			formItems := []*widget.FormItem{}
+			for _, score := range scores {
+				entry := widget.NewEntry()
+				switch score {
+				case "000":
+					entry.SetText(crit.Comment_000)
+				case "025":
+					entry.SetText(crit.Comment_025)
+				case "050":
+					entry.SetText(crit.Comment_050)
+				case "075":
+					entry.SetText(crit.Comment_075)
+				case "100":
+					entry.SetText(crit.Comment_100)
+				}
+				entries[score] = entry
+				formItems = append(formItems, &widget.FormItem{
+					Text:   fmt.Sprintf("Оценка %s", score),
+					Widget: entry,
+				})
+			}
+			formItems = append(formItems, &widget.FormItem{
+				Text:   "Вес",
+				Widget: weightEntry,
+			})
+
+			saveButton := widget.NewButton("Сохранить", func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+
+				if weightEntry.Text != "" {
+					weight, err := strconv.Atoi(weightEntry.Text)
+					if err != nil {
+						dialog.ShowInformation("Ошибка", "Вес должен быть числом", w)
+						return
+					}
+					respWeight, err := state.rubricClient.UpdateCriterionWeight(ctx, &rubricpb.UpdateCriterionWeightRequest{
+						CriterionId: criterionId,
+						Weight:      int32(weight),
+					})
+					if err != nil {
+						log.Printf("Failed to update criterion weight: %v", err)
+						dialog.ShowError(err, w)
+						return
+					}
+					if respWeight.Error != "" {
+						dialog.ShowInformation("Ошибка", respWeight.Error, w)
+						return
+					}
+				}
+
+				for score, entry := range entries {
+					if entry.Text != "" {
+						respComment, err := state.rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
+							CriterionId: criterionId,
+							Mark:        score,
+							Comment:     entry.Text,
+						})
+						if err != nil {
+							log.Printf("Failed to update criterion comment: %v", err)
+							dialog.ShowError(err, w)
+							return
+						}
+						if respComment.Error != "" {
+							dialog.ShowInformation("Ошибка", respComment.Error, w)
+							return
+						}
+					}
+				}
+				dialog.ShowInformation("Успех", "Данные сохранены", w)
+			})
+
+			content := container.NewVBox(
+				widget.NewForm(formItems...),
+				saveButton,
+			)
+
+			contentContainer.Objects = []fyne.CanvasObject{content}
+			contentContainer.Refresh()
+		}
+	}
+
+	groupContainer := container.NewVBox(groupList, addGroupButton)
+	criteriaContainer := container.NewVBox(criteriaList, addCriterionButton)
+	leftPanel := container.NewHSplit(groupContainer, criteriaContainer)
+	leftPanel.SetOffset(0.5)
+	split := container.NewHSplit(leftPanel, mainContent)
+	split.SetOffset(0.3)
+
+	w.SetContent(container.NewStack(
+		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}),
+		container.NewBorder(
+			headerContent,
+			nil,
+			nil,
+			nil,
+			split,
 		),
 	))
 }

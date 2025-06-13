@@ -11,6 +11,51 @@ service RubricService {
   rpc SetCriteriaWeight (SetCriteriaWeightRequest) returns (SetCriteriaWeightResponse) {}
   rpc LoadTaskBlockingCriterias (LoadTaskBlockingCriteriasRequest) returns (LoadTaskBlockingCriteriasResponse) {}
   rpc LoadTaskMainCriterias (LoadTaskMainCriteriasRequest) returns (LoadTaskMainCriteriasResponse) {}
+  rpc CreateCriteriaGroup (CreateCriteriaGroupRequest) returns (CreateCriteriaGroupResponse) {}
+  rpc CreateCriterion (CreateCriterionRequest) returns (CreateCriterionResponse) {}
+  rpc UpdateCriterionWeight (UpdateCriterionWeightRequest) returns (UpdateCriterionWeightResponse) {}
+  rpc UpdateCriterionComment (UpdateCriterionCommentRequest) returns (UpdateCriterionCommentResponse) {}
+}
+
+message CreateCriteriaGroupRequest {
+  int32 task_id = 1;
+  string group_name = 2;
+}
+
+message CreateCriteriaGroupResponse {
+  int32 group_id = 1;
+  string error = 2;
+}
+
+message CreateCriterionRequest {
+  int32 group_id = 1;
+  string name = 2;
+}
+
+message CreateCriterionResponse {
+  int32 criterion_id = 1;
+  string error = 2;
+}
+
+message UpdateCriterionWeightRequest {
+  int32 criterion_id = 1;
+  int32 weight = 2;
+}
+
+message UpdateCriterionWeightResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message UpdateCriterionCommentRequest {
+  int32 criterion_id = 1;
+  string mark = 2; // "000", "025", "050", "075", "100"
+  string comment = 3;
+}
+
+message UpdateCriterionCommentResponse {
+  bool success = 1;
+  string error = 2;
 }
 
 message CreateNewBlockingCriteriaRequest {

@@ -21,6 +21,246 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type GetTaskDetailsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        int32                  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTaskDetailsRequest) Reset() {
+	*x = GetTaskDetailsRequest{}
+	mi := &file_proto_work_work_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTaskDetailsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTaskDetailsRequest) ProtoMessage() {}
+
+func (x *GetTaskDetailsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTaskDetailsRequest.ProtoReflect.Descriptor instead.
+func (*GetTaskDetailsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetTaskDetailsRequest) GetTaskId() int32 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+type GetTaskDetailsResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Title          string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description    string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Deadline       string                 `protobuf:"bytes,3,opt,name=deadline,proto3" json:"deadline,omitempty"`
+	GroupName      string                 `protobuf:"bytes,4,opt,name=group_name,json=groupName,proto3" json:"group_name,omitempty"`
+	DisciplineName string                 `protobuf:"bytes,5,opt,name=discipline_name,json=disciplineName,proto3" json:"discipline_name,omitempty"`
+	Error          string                 `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetTaskDetailsResponse) Reset() {
+	*x = GetTaskDetailsResponse{}
+	mi := &file_proto_work_work_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTaskDetailsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTaskDetailsResponse) ProtoMessage() {}
+
+func (x *GetTaskDetailsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTaskDetailsResponse.ProtoReflect.Descriptor instead.
+func (*GetTaskDetailsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetTaskDetailsResponse) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *GetTaskDetailsResponse) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *GetTaskDetailsResponse) GetDeadline() string {
+	if x != nil {
+		return x.Deadline
+	}
+	return ""
+}
+
+func (x *GetTaskDetailsResponse) GetGroupName() string {
+	if x != nil {
+		return x.GroupName
+	}
+	return ""
+}
+
+func (x *GetTaskDetailsResponse) GetDisciplineName() string {
+	if x != nil {
+		return x.DisciplineName
+	}
+	return ""
+}
+
+func (x *GetTaskDetailsResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type UpdateTaskGroupAndDisciplineRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        int32                  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	GroupId       int32                  `protobuf:"varint,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	DisciplineId  int32                  `protobuf:"varint,3,opt,name=discipline_id,json=disciplineId,proto3" json:"discipline_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTaskGroupAndDisciplineRequest) Reset() {
+	*x = UpdateTaskGroupAndDisciplineRequest{}
+	mi := &file_proto_work_work_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskGroupAndDisciplineRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskGroupAndDisciplineRequest) ProtoMessage() {}
+
+func (x *UpdateTaskGroupAndDisciplineRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskGroupAndDisciplineRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTaskGroupAndDisciplineRequest) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateTaskGroupAndDisciplineRequest) GetTaskId() int32 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+func (x *UpdateTaskGroupAndDisciplineRequest) GetGroupId() int32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+func (x *UpdateTaskGroupAndDisciplineRequest) GetDisciplineId() int32 {
+	if x != nil {
+		return x.DisciplineId
+	}
+	return 0
+}
+
+type UpdateTaskGroupAndDisciplineResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTaskGroupAndDisciplineResponse) Reset() {
+	*x = UpdateTaskGroupAndDisciplineResponse{}
+	mi := &file_proto_work_work_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskGroupAndDisciplineResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskGroupAndDisciplineResponse) ProtoMessage() {}
+
+func (x *UpdateTaskGroupAndDisciplineResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskGroupAndDisciplineResponse.ProtoReflect.Descriptor instead.
+func (*UpdateTaskGroupAndDisciplineResponse) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateTaskGroupAndDisciplineResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateTaskGroupAndDisciplineResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 type GetTasksForLectorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	LectorId      int32                  `protobuf:"varint,1,opt,name=lector_id,json=lectorId,proto3" json:"lector_id,omitempty"`
@@ -30,7 +270,7 @@ type GetTasksForLectorRequest struct {
 
 func (x *GetTasksForLectorRequest) Reset() {
 	*x = GetTasksForLectorRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[0]
+	mi := &file_proto_work_work_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +282,7 @@ func (x *GetTasksForLectorRequest) String() string {
 func (*GetTasksForLectorRequest) ProtoMessage() {}
 
 func (x *GetTasksForLectorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[0]
+	mi := &file_proto_work_work_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +295,7 @@ func (x *GetTasksForLectorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTasksForLectorRequest.ProtoReflect.Descriptor instead.
 func (*GetTasksForLectorRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{0}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetTasksForLectorRequest) GetLectorId() int32 {
@@ -76,7 +316,7 @@ type Task struct {
 
 func (x *Task) Reset() {
 	*x = Task{}
-	mi := &file_proto_work_work_proto_msgTypes[1]
+	mi := &file_proto_work_work_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -88,7 +328,7 @@ func (x *Task) String() string {
 func (*Task) ProtoMessage() {}
 
 func (x *Task) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[1]
+	mi := &file_proto_work_work_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -101,7 +341,7 @@ func (x *Task) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Task.ProtoReflect.Descriptor instead.
 func (*Task) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{1}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Task) GetId() int32 {
@@ -135,7 +375,7 @@ type GetTasksForLectorResponse struct {
 
 func (x *GetTasksForLectorResponse) Reset() {
 	*x = GetTasksForLectorResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[2]
+	mi := &file_proto_work_work_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +387,7 @@ func (x *GetTasksForLectorResponse) String() string {
 func (*GetTasksForLectorResponse) ProtoMessage() {}
 
 func (x *GetTasksForLectorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[2]
+	mi := &file_proto_work_work_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +400,7 @@ func (x *GetTasksForLectorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTasksForLectorResponse.ProtoReflect.Descriptor instead.
 func (*GetTasksForLectorResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{2}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetTasksForLectorResponse) GetTasks() []*Task {
@@ -186,7 +426,7 @@ type DeleteTaskRequest struct {
 
 func (x *DeleteTaskRequest) Reset() {
 	*x = DeleteTaskRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[3]
+	mi := &file_proto_work_work_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +438,7 @@ func (x *DeleteTaskRequest) String() string {
 func (*DeleteTaskRequest) ProtoMessage() {}
 
 func (x *DeleteTaskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[3]
+	mi := &file_proto_work_work_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +451,7 @@ func (x *DeleteTaskRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTaskRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTaskRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{3}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteTaskRequest) GetTaskId() int32 {
@@ -231,7 +471,7 @@ type DeleteTaskResponse struct {
 
 func (x *DeleteTaskResponse) Reset() {
 	*x = DeleteTaskResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[4]
+	mi := &file_proto_work_work_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -243,7 +483,7 @@ func (x *DeleteTaskResponse) String() string {
 func (*DeleteTaskResponse) ProtoMessage() {}
 
 func (x *DeleteTaskResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[4]
+	mi := &file_proto_work_work_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -256,7 +496,7 @@ func (x *DeleteTaskResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTaskResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTaskResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{4}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteTaskResponse) GetSuccess() bool {
@@ -283,7 +523,7 @@ type SetTaskTitleRequest struct {
 
 func (x *SetTaskTitleRequest) Reset() {
 	*x = SetTaskTitleRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[5]
+	mi := &file_proto_work_work_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -295,7 +535,7 @@ func (x *SetTaskTitleRequest) String() string {
 func (*SetTaskTitleRequest) ProtoMessage() {}
 
 func (x *SetTaskTitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[5]
+	mi := &file_proto_work_work_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -308,7 +548,7 @@ func (x *SetTaskTitleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTaskTitleRequest.ProtoReflect.Descriptor instead.
 func (*SetTaskTitleRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{5}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SetTaskTitleRequest) GetTaskId() int32 {
@@ -335,7 +575,7 @@ type SetTaskTitleResponse struct {
 
 func (x *SetTaskTitleResponse) Reset() {
 	*x = SetTaskTitleResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[6]
+	mi := &file_proto_work_work_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -347,7 +587,7 @@ func (x *SetTaskTitleResponse) String() string {
 func (*SetTaskTitleResponse) ProtoMessage() {}
 
 func (x *SetTaskTitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[6]
+	mi := &file_proto_work_work_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -360,7 +600,7 @@ func (x *SetTaskTitleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTaskTitleResponse.ProtoReflect.Descriptor instead.
 func (*SetTaskTitleResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{6}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SetTaskTitleResponse) GetSuccess() bool {
@@ -387,7 +627,7 @@ type SetTaskDescriptionRequest struct {
 
 func (x *SetTaskDescriptionRequest) Reset() {
 	*x = SetTaskDescriptionRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[7]
+	mi := &file_proto_work_work_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -399,7 +639,7 @@ func (x *SetTaskDescriptionRequest) String() string {
 func (*SetTaskDescriptionRequest) ProtoMessage() {}
 
 func (x *SetTaskDescriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[7]
+	mi := &file_proto_work_work_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -412,7 +652,7 @@ func (x *SetTaskDescriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTaskDescriptionRequest.ProtoReflect.Descriptor instead.
 func (*SetTaskDescriptionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{7}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SetTaskDescriptionRequest) GetTaskId() int32 {
@@ -439,7 +679,7 @@ type SetTaskDescriptionResponse struct {
 
 func (x *SetTaskDescriptionResponse) Reset() {
 	*x = SetTaskDescriptionResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[8]
+	mi := &file_proto_work_work_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +691,7 @@ func (x *SetTaskDescriptionResponse) String() string {
 func (*SetTaskDescriptionResponse) ProtoMessage() {}
 
 func (x *SetTaskDescriptionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[8]
+	mi := &file_proto_work_work_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +704,7 @@ func (x *SetTaskDescriptionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTaskDescriptionResponse.ProtoReflect.Descriptor instead.
 func (*SetTaskDescriptionResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{8}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SetTaskDescriptionResponse) GetSuccess() bool {
@@ -491,7 +731,7 @@ type SetTaskDeadlineRequest struct {
 
 func (x *SetTaskDeadlineRequest) Reset() {
 	*x = SetTaskDeadlineRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[9]
+	mi := &file_proto_work_work_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -503,7 +743,7 @@ func (x *SetTaskDeadlineRequest) String() string {
 func (*SetTaskDeadlineRequest) ProtoMessage() {}
 
 func (x *SetTaskDeadlineRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[9]
+	mi := &file_proto_work_work_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -516,7 +756,7 @@ func (x *SetTaskDeadlineRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTaskDeadlineRequest.ProtoReflect.Descriptor instead.
 func (*SetTaskDeadlineRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{9}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SetTaskDeadlineRequest) GetTaskId() int32 {
@@ -543,7 +783,7 @@ type SetTaskDeadlineResponse struct {
 
 func (x *SetTaskDeadlineResponse) Reset() {
 	*x = SetTaskDeadlineResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[10]
+	mi := &file_proto_work_work_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -555,7 +795,7 @@ func (x *SetTaskDeadlineResponse) String() string {
 func (*SetTaskDeadlineResponse) ProtoMessage() {}
 
 func (x *SetTaskDeadlineResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[10]
+	mi := &file_proto_work_work_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -568,7 +808,7 @@ func (x *SetTaskDeadlineResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTaskDeadlineResponse.ProtoReflect.Descriptor instead.
 func (*SetTaskDeadlineResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{10}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *SetTaskDeadlineResponse) GetSuccess() bool {
@@ -600,7 +840,7 @@ type CreateWorkRequest struct {
 
 func (x *CreateWorkRequest) Reset() {
 	*x = CreateWorkRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[11]
+	mi := &file_proto_work_work_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -612,7 +852,7 @@ func (x *CreateWorkRequest) String() string {
 func (*CreateWorkRequest) ProtoMessage() {}
 
 func (x *CreateWorkRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[11]
+	mi := &file_proto_work_work_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -625,7 +865,7 @@ func (x *CreateWorkRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWorkRequest.ProtoReflect.Descriptor instead.
 func (*CreateWorkRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{11}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CreateWorkRequest) GetLectorId() int32 {
@@ -687,7 +927,7 @@ type CreateWorkResponse struct {
 
 func (x *CreateWorkResponse) Reset() {
 	*x = CreateWorkResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[12]
+	mi := &file_proto_work_work_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -699,7 +939,7 @@ func (x *CreateWorkResponse) String() string {
 func (*CreateWorkResponse) ProtoMessage() {}
 
 func (x *CreateWorkResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[12]
+	mi := &file_proto_work_work_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -712,7 +952,7 @@ func (x *CreateWorkResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWorkResponse.ProtoReflect.Descriptor instead.
 func (*CreateWorkResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{12}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CreateWorkResponse) GetTaskId() int32 {
@@ -738,7 +978,7 @@ type LoadTaskNameRequest struct {
 
 func (x *LoadTaskNameRequest) Reset() {
 	*x = LoadTaskNameRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[13]
+	mi := &file_proto_work_work_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -750,7 +990,7 @@ func (x *LoadTaskNameRequest) String() string {
 func (*LoadTaskNameRequest) ProtoMessage() {}
 
 func (x *LoadTaskNameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[13]
+	mi := &file_proto_work_work_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -763,7 +1003,7 @@ func (x *LoadTaskNameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskNameRequest.ProtoReflect.Descriptor instead.
 func (*LoadTaskNameRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{13}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *LoadTaskNameRequest) GetTaskId() int32 {
@@ -783,7 +1023,7 @@ type LoadTaskNameResponse struct {
 
 func (x *LoadTaskNameResponse) Reset() {
 	*x = LoadTaskNameResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[14]
+	mi := &file_proto_work_work_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -795,7 +1035,7 @@ func (x *LoadTaskNameResponse) String() string {
 func (*LoadTaskNameResponse) ProtoMessage() {}
 
 func (x *LoadTaskNameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[14]
+	mi := &file_proto_work_work_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -808,7 +1048,7 @@ func (x *LoadTaskNameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskNameResponse.ProtoReflect.Descriptor instead.
 func (*LoadTaskNameResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{14}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *LoadTaskNameResponse) GetTitle() string {
@@ -834,7 +1074,7 @@ type LoadTaskDescriptionRequest struct {
 
 func (x *LoadTaskDescriptionRequest) Reset() {
 	*x = LoadTaskDescriptionRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[15]
+	mi := &file_proto_work_work_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -846,7 +1086,7 @@ func (x *LoadTaskDescriptionRequest) String() string {
 func (*LoadTaskDescriptionRequest) ProtoMessage() {}
 
 func (x *LoadTaskDescriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[15]
+	mi := &file_proto_work_work_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -859,7 +1099,7 @@ func (x *LoadTaskDescriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskDescriptionRequest.ProtoReflect.Descriptor instead.
 func (*LoadTaskDescriptionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{15}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *LoadTaskDescriptionRequest) GetTaskId() int32 {
@@ -879,7 +1119,7 @@ type LoadTaskDescriptionResponse struct {
 
 func (x *LoadTaskDescriptionResponse) Reset() {
 	*x = LoadTaskDescriptionResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[16]
+	mi := &file_proto_work_work_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -891,7 +1131,7 @@ func (x *LoadTaskDescriptionResponse) String() string {
 func (*LoadTaskDescriptionResponse) ProtoMessage() {}
 
 func (x *LoadTaskDescriptionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[16]
+	mi := &file_proto_work_work_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -904,7 +1144,7 @@ func (x *LoadTaskDescriptionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskDescriptionResponse.ProtoReflect.Descriptor instead.
 func (*LoadTaskDescriptionResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{16}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *LoadTaskDescriptionResponse) GetDescription() string {
@@ -930,7 +1170,7 @@ type LoadTaskDeadlineRequest struct {
 
 func (x *LoadTaskDeadlineRequest) Reset() {
 	*x = LoadTaskDeadlineRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[17]
+	mi := &file_proto_work_work_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -942,7 +1182,7 @@ func (x *LoadTaskDeadlineRequest) String() string {
 func (*LoadTaskDeadlineRequest) ProtoMessage() {}
 
 func (x *LoadTaskDeadlineRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[17]
+	mi := &file_proto_work_work_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -955,7 +1195,7 @@ func (x *LoadTaskDeadlineRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskDeadlineRequest.ProtoReflect.Descriptor instead.
 func (*LoadTaskDeadlineRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{17}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *LoadTaskDeadlineRequest) GetTaskId() int32 {
@@ -975,7 +1215,7 @@ type LoadTaskDeadlineResponse struct {
 
 func (x *LoadTaskDeadlineResponse) Reset() {
 	*x = LoadTaskDeadlineResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[18]
+	mi := &file_proto_work_work_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -987,7 +1227,7 @@ func (x *LoadTaskDeadlineResponse) String() string {
 func (*LoadTaskDeadlineResponse) ProtoMessage() {}
 
 func (x *LoadTaskDeadlineResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[18]
+	mi := &file_proto_work_work_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1000,7 +1240,7 @@ func (x *LoadTaskDeadlineResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskDeadlineResponse.ProtoReflect.Descriptor instead.
 func (*LoadTaskDeadlineResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{18}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *LoadTaskDeadlineResponse) GetDeadline() string {
@@ -1026,7 +1266,7 @@ type GetGroupsRequest struct {
 
 func (x *GetGroupsRequest) Reset() {
 	*x = GetGroupsRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[19]
+	mi := &file_proto_work_work_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1278,7 @@ func (x *GetGroupsRequest) String() string {
 func (*GetGroupsRequest) ProtoMessage() {}
 
 func (x *GetGroupsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[19]
+	mi := &file_proto_work_work_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,7 +1291,7 @@ func (x *GetGroupsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGroupsRequest.ProtoReflect.Descriptor instead.
 func (*GetGroupsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{19}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetGroupsRequest) GetLectorId() int32 {
@@ -1071,7 +1311,7 @@ type GetGroupsResponse struct {
 
 func (x *GetGroupsResponse) Reset() {
 	*x = GetGroupsResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[20]
+	mi := &file_proto_work_work_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1083,7 +1323,7 @@ func (x *GetGroupsResponse) String() string {
 func (*GetGroupsResponse) ProtoMessage() {}
 
 func (x *GetGroupsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[20]
+	mi := &file_proto_work_work_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1096,7 +1336,7 @@ func (x *GetGroupsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGroupsResponse.ProtoReflect.Descriptor instead.
 func (*GetGroupsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{20}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetGroupsResponse) GetGroups() []*GetGroupsResponse_Group {
@@ -1122,7 +1362,7 @@ type GetDisciplinesRequest struct {
 
 func (x *GetDisciplinesRequest) Reset() {
 	*x = GetDisciplinesRequest{}
-	mi := &file_proto_work_work_proto_msgTypes[21]
+	mi := &file_proto_work_work_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1134,7 +1374,7 @@ func (x *GetDisciplinesRequest) String() string {
 func (*GetDisciplinesRequest) ProtoMessage() {}
 
 func (x *GetDisciplinesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[21]
+	mi := &file_proto_work_work_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1147,7 +1387,7 @@ func (x *GetDisciplinesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDisciplinesRequest.ProtoReflect.Descriptor instead.
 func (*GetDisciplinesRequest) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{21}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetDisciplinesRequest) GetLectorId() int32 {
@@ -1167,7 +1407,7 @@ type GetDisciplinesResponse struct {
 
 func (x *GetDisciplinesResponse) Reset() {
 	*x = GetDisciplinesResponse{}
-	mi := &file_proto_work_work_proto_msgTypes[22]
+	mi := &file_proto_work_work_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1179,7 +1419,7 @@ func (x *GetDisciplinesResponse) String() string {
 func (*GetDisciplinesResponse) ProtoMessage() {}
 
 func (x *GetDisciplinesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[22]
+	mi := &file_proto_work_work_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1192,7 +1432,7 @@ func (x *GetDisciplinesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDisciplinesResponse.ProtoReflect.Descriptor instead.
 func (*GetDisciplinesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{22}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetDisciplinesResponse) GetDisciplines() []*GetDisciplinesResponse_Discipline {
@@ -1219,7 +1459,7 @@ type GetGroupsResponse_Group struct {
 
 func (x *GetGroupsResponse_Group) Reset() {
 	*x = GetGroupsResponse_Group{}
-	mi := &file_proto_work_work_proto_msgTypes[23]
+	mi := &file_proto_work_work_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1231,7 +1471,7 @@ func (x *GetGroupsResponse_Group) String() string {
 func (*GetGroupsResponse_Group) ProtoMessage() {}
 
 func (x *GetGroupsResponse_Group) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[23]
+	mi := &file_proto_work_work_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1244,7 +1484,7 @@ func (x *GetGroupsResponse_Group) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGroupsResponse_Group.ProtoReflect.Descriptor instead.
 func (*GetGroupsResponse_Group) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{20, 0}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{24, 0}
 }
 
 func (x *GetGroupsResponse_Group) GetId() int32 {
@@ -1271,7 +1511,7 @@ type GetDisciplinesResponse_Discipline struct {
 
 func (x *GetDisciplinesResponse_Discipline) Reset() {
 	*x = GetDisciplinesResponse_Discipline{}
-	mi := &file_proto_work_work_proto_msgTypes[24]
+	mi := &file_proto_work_work_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1283,7 +1523,7 @@ func (x *GetDisciplinesResponse_Discipline) String() string {
 func (*GetDisciplinesResponse_Discipline) ProtoMessage() {}
 
 func (x *GetDisciplinesResponse_Discipline) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[24]
+	mi := &file_proto_work_work_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1296,7 +1536,7 @@ func (x *GetDisciplinesResponse_Discipline) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetDisciplinesResponse_Discipline.ProtoReflect.Descriptor instead.
 func (*GetDisciplinesResponse_Discipline) Descriptor() ([]byte, []int) {
-	return file_proto_work_work_proto_rawDescGZIP(), []int{22, 0}
+	return file_proto_work_work_proto_rawDescGZIP(), []int{26, 0}
 }
 
 func (x *GetDisciplinesResponse_Discipline) GetId() int32 {
@@ -1317,7 +1557,24 @@ var File_proto_work_work_proto protoreflect.FileDescriptor
 
 const file_proto_work_work_proto_rawDesc = "" +
 	"\n" +
-	"\x15proto/work/work.proto\x12\x04work\"7\n" +
+	"\x15proto/work/work.proto\x12\x04work\"0\n" +
+	"\x15GetTaskDetailsRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\x05R\x06taskId\"\xca\x01\n" +
+	"\x16GetTaskDetailsResponse\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1a\n" +
+	"\bdeadline\x18\x03 \x01(\tR\bdeadline\x12\x1d\n" +
+	"\n" +
+	"group_name\x18\x04 \x01(\tR\tgroupName\x12'\n" +
+	"\x0fdiscipline_name\x18\x05 \x01(\tR\x0edisciplineName\x12\x14\n" +
+	"\x05error\x18\x06 \x01(\tR\x05error\"~\n" +
+	"#UpdateTaskGroupAndDisciplineRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\x05R\x06taskId\x12\x19\n" +
+	"\bgroup_id\x18\x02 \x01(\x05R\agroupId\x12#\n" +
+	"\rdiscipline_id\x18\x03 \x01(\x05R\fdisciplineId\"V\n" +
+	"$UpdateTaskGroupAndDisciplineResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"7\n" +
 	"\x18GetTasksForLectorRequest\x12\x1b\n" +
 	"\tlector_id\x18\x01 \x01(\x05R\blectorId\"H\n" +
 	"\x04Task\x12\x0e\n" +
@@ -1394,7 +1651,7 @@ const file_proto_work_work_proto_rawDesc = "" +
 	"\n" +
 	"Discipline\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name2\xe8\x06\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name2\xb0\b\n" +
 	"\vWorkService\x12V\n" +
 	"\x11GetTasksForLector\x12\x1e.work.GetTasksForLectorRequest\x1a\x1f.work.GetTasksForLectorResponse\"\x00\x12A\n" +
 	"\n" +
@@ -1408,7 +1665,9 @@ const file_proto_work_work_proto_rawDesc = "" +
 	"\x13LoadTaskDescription\x12 .work.LoadTaskDescriptionRequest\x1a!.work.LoadTaskDescriptionResponse\"\x00\x12S\n" +
 	"\x10LoadTaskDeadline\x12\x1d.work.LoadTaskDeadlineRequest\x1a\x1e.work.LoadTaskDeadlineResponse\"\x00\x12<\n" +
 	"\tGetGroups\x12\x16.work.GetGroupsRequest\x1a\x17.work.GetGroupsResponse\x12K\n" +
-	"\x0eGetDisciplines\x12\x1b.work.GetDisciplinesRequest\x1a\x1c.work.GetDisciplinesResponseB\x13Z\x11./proto/work;workb\x06proto3"
+	"\x0eGetDisciplines\x12\x1b.work.GetDisciplinesRequest\x1a\x1c.work.GetDisciplinesResponse\x12M\n" +
+	"\x0eGetTaskDetails\x12\x1b.work.GetTaskDetailsRequest\x1a\x1c.work.GetTaskDetailsResponse\"\x00\x12w\n" +
+	"\x1cUpdateTaskGroupAndDiscipline\x12).work.UpdateTaskGroupAndDisciplineRequest\x1a*.work.UpdateTaskGroupAndDisciplineResponse\"\x00B\x13Z\x11./proto/work;workb\x06proto3"
 
 var (
 	file_proto_work_work_proto_rawDescOnce sync.Once
@@ -1422,62 +1681,70 @@ func file_proto_work_work_proto_rawDescGZIP() []byte {
 	return file_proto_work_work_proto_rawDescData
 }
 
-var file_proto_work_work_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_proto_work_work_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_proto_work_work_proto_goTypes = []any{
-	(*GetTasksForLectorRequest)(nil),          // 0: work.GetTasksForLectorRequest
-	(*Task)(nil),                              // 1: work.Task
-	(*GetTasksForLectorResponse)(nil),         // 2: work.GetTasksForLectorResponse
-	(*DeleteTaskRequest)(nil),                 // 3: work.DeleteTaskRequest
-	(*DeleteTaskResponse)(nil),                // 4: work.DeleteTaskResponse
-	(*SetTaskTitleRequest)(nil),               // 5: work.SetTaskTitleRequest
-	(*SetTaskTitleResponse)(nil),              // 6: work.SetTaskTitleResponse
-	(*SetTaskDescriptionRequest)(nil),         // 7: work.SetTaskDescriptionRequest
-	(*SetTaskDescriptionResponse)(nil),        // 8: work.SetTaskDescriptionResponse
-	(*SetTaskDeadlineRequest)(nil),            // 9: work.SetTaskDeadlineRequest
-	(*SetTaskDeadlineResponse)(nil),           // 10: work.SetTaskDeadlineResponse
-	(*CreateWorkRequest)(nil),                 // 11: work.CreateWorkRequest
-	(*CreateWorkResponse)(nil),                // 12: work.CreateWorkResponse
-	(*LoadTaskNameRequest)(nil),               // 13: work.LoadTaskNameRequest
-	(*LoadTaskNameResponse)(nil),              // 14: work.LoadTaskNameResponse
-	(*LoadTaskDescriptionRequest)(nil),        // 15: work.LoadTaskDescriptionRequest
-	(*LoadTaskDescriptionResponse)(nil),       // 16: work.LoadTaskDescriptionResponse
-	(*LoadTaskDeadlineRequest)(nil),           // 17: work.LoadTaskDeadlineRequest
-	(*LoadTaskDeadlineResponse)(nil),          // 18: work.LoadTaskDeadlineResponse
-	(*GetGroupsRequest)(nil),                  // 19: work.GetGroupsRequest
-	(*GetGroupsResponse)(nil),                 // 20: work.GetGroupsResponse
-	(*GetDisciplinesRequest)(nil),             // 21: work.GetDisciplinesRequest
-	(*GetDisciplinesResponse)(nil),            // 22: work.GetDisciplinesResponse
-	(*GetGroupsResponse_Group)(nil),           // 23: work.GetGroupsResponse.Group
-	(*GetDisciplinesResponse_Discipline)(nil), // 24: work.GetDisciplinesResponse.Discipline
+	(*GetTaskDetailsRequest)(nil),                // 0: work.GetTaskDetailsRequest
+	(*GetTaskDetailsResponse)(nil),               // 1: work.GetTaskDetailsResponse
+	(*UpdateTaskGroupAndDisciplineRequest)(nil),  // 2: work.UpdateTaskGroupAndDisciplineRequest
+	(*UpdateTaskGroupAndDisciplineResponse)(nil), // 3: work.UpdateTaskGroupAndDisciplineResponse
+	(*GetTasksForLectorRequest)(nil),             // 4: work.GetTasksForLectorRequest
+	(*Task)(nil),                                 // 5: work.Task
+	(*GetTasksForLectorResponse)(nil),            // 6: work.GetTasksForLectorResponse
+	(*DeleteTaskRequest)(nil),                    // 7: work.DeleteTaskRequest
+	(*DeleteTaskResponse)(nil),                   // 8: work.DeleteTaskResponse
+	(*SetTaskTitleRequest)(nil),                  // 9: work.SetTaskTitleRequest
+	(*SetTaskTitleResponse)(nil),                 // 10: work.SetTaskTitleResponse
+	(*SetTaskDescriptionRequest)(nil),            // 11: work.SetTaskDescriptionRequest
+	(*SetTaskDescriptionResponse)(nil),           // 12: work.SetTaskDescriptionResponse
+	(*SetTaskDeadlineRequest)(nil),               // 13: work.SetTaskDeadlineRequest
+	(*SetTaskDeadlineResponse)(nil),              // 14: work.SetTaskDeadlineResponse
+	(*CreateWorkRequest)(nil),                    // 15: work.CreateWorkRequest
+	(*CreateWorkResponse)(nil),                   // 16: work.CreateWorkResponse
+	(*LoadTaskNameRequest)(nil),                  // 17: work.LoadTaskNameRequest
+	(*LoadTaskNameResponse)(nil),                 // 18: work.LoadTaskNameResponse
+	(*LoadTaskDescriptionRequest)(nil),           // 19: work.LoadTaskDescriptionRequest
+	(*LoadTaskDescriptionResponse)(nil),          // 20: work.LoadTaskDescriptionResponse
+	(*LoadTaskDeadlineRequest)(nil),              // 21: work.LoadTaskDeadlineRequest
+	(*LoadTaskDeadlineResponse)(nil),             // 22: work.LoadTaskDeadlineResponse
+	(*GetGroupsRequest)(nil),                     // 23: work.GetGroupsRequest
+	(*GetGroupsResponse)(nil),                    // 24: work.GetGroupsResponse
+	(*GetDisciplinesRequest)(nil),                // 25: work.GetDisciplinesRequest
+	(*GetDisciplinesResponse)(nil),               // 26: work.GetDisciplinesResponse
+	(*GetGroupsResponse_Group)(nil),              // 27: work.GetGroupsResponse.Group
+	(*GetDisciplinesResponse_Discipline)(nil),    // 28: work.GetDisciplinesResponse.Discipline
 }
 var file_proto_work_work_proto_depIdxs = []int32{
-	1,  // 0: work.GetTasksForLectorResponse.tasks:type_name -> work.Task
-	23, // 1: work.GetGroupsResponse.groups:type_name -> work.GetGroupsResponse.Group
-	24, // 2: work.GetDisciplinesResponse.disciplines:type_name -> work.GetDisciplinesResponse.Discipline
-	0,  // 3: work.WorkService.GetTasksForLector:input_type -> work.GetTasksForLectorRequest
-	3,  // 4: work.WorkService.DeleteTask:input_type -> work.DeleteTaskRequest
-	5,  // 5: work.WorkService.SetTaskTitle:input_type -> work.SetTaskTitleRequest
-	7,  // 6: work.WorkService.SetTaskDescription:input_type -> work.SetTaskDescriptionRequest
-	9,  // 7: work.WorkService.SetTaskDeadline:input_type -> work.SetTaskDeadlineRequest
-	11, // 8: work.WorkService.CreateWork:input_type -> work.CreateWorkRequest
-	13, // 9: work.WorkService.LoadTaskName:input_type -> work.LoadTaskNameRequest
-	15, // 10: work.WorkService.LoadTaskDescription:input_type -> work.LoadTaskDescriptionRequest
-	17, // 11: work.WorkService.LoadTaskDeadline:input_type -> work.LoadTaskDeadlineRequest
-	19, // 12: work.WorkService.GetGroups:input_type -> work.GetGroupsRequest
-	21, // 13: work.WorkService.GetDisciplines:input_type -> work.GetDisciplinesRequest
-	2,  // 14: work.WorkService.GetTasksForLector:output_type -> work.GetTasksForLectorResponse
-	4,  // 15: work.WorkService.DeleteTask:output_type -> work.DeleteTaskResponse
-	6,  // 16: work.WorkService.SetTaskTitle:output_type -> work.SetTaskTitleResponse
-	8,  // 17: work.WorkService.SetTaskDescription:output_type -> work.SetTaskDescriptionResponse
-	10, // 18: work.WorkService.SetTaskDeadline:output_type -> work.SetTaskDeadlineResponse
-	12, // 19: work.WorkService.CreateWork:output_type -> work.CreateWorkResponse
-	14, // 20: work.WorkService.LoadTaskName:output_type -> work.LoadTaskNameResponse
-	16, // 21: work.WorkService.LoadTaskDescription:output_type -> work.LoadTaskDescriptionResponse
-	18, // 22: work.WorkService.LoadTaskDeadline:output_type -> work.LoadTaskDeadlineResponse
-	20, // 23: work.WorkService.GetGroups:output_type -> work.GetGroupsResponse
-	22, // 24: work.WorkService.GetDisciplines:output_type -> work.GetDisciplinesResponse
-	14, // [14:25] is the sub-list for method output_type
-	3,  // [3:14] is the sub-list for method input_type
+	5,  // 0: work.GetTasksForLectorResponse.tasks:type_name -> work.Task
+	27, // 1: work.GetGroupsResponse.groups:type_name -> work.GetGroupsResponse.Group
+	28, // 2: work.GetDisciplinesResponse.disciplines:type_name -> work.GetDisciplinesResponse.Discipline
+	4,  // 3: work.WorkService.GetTasksForLector:input_type -> work.GetTasksForLectorRequest
+	7,  // 4: work.WorkService.DeleteTask:input_type -> work.DeleteTaskRequest
+	9,  // 5: work.WorkService.SetTaskTitle:input_type -> work.SetTaskTitleRequest
+	11, // 6: work.WorkService.SetTaskDescription:input_type -> work.SetTaskDescriptionRequest
+	13, // 7: work.WorkService.SetTaskDeadline:input_type -> work.SetTaskDeadlineRequest
+	15, // 8: work.WorkService.CreateWork:input_type -> work.CreateWorkRequest
+	17, // 9: work.WorkService.LoadTaskName:input_type -> work.LoadTaskNameRequest
+	19, // 10: work.WorkService.LoadTaskDescription:input_type -> work.LoadTaskDescriptionRequest
+	21, // 11: work.WorkService.LoadTaskDeadline:input_type -> work.LoadTaskDeadlineRequest
+	23, // 12: work.WorkService.GetGroups:input_type -> work.GetGroupsRequest
+	25, // 13: work.WorkService.GetDisciplines:input_type -> work.GetDisciplinesRequest
+	0,  // 14: work.WorkService.GetTaskDetails:input_type -> work.GetTaskDetailsRequest
+	2,  // 15: work.WorkService.UpdateTaskGroupAndDiscipline:input_type -> work.UpdateTaskGroupAndDisciplineRequest
+	6,  // 16: work.WorkService.GetTasksForLector:output_type -> work.GetTasksForLectorResponse
+	8,  // 17: work.WorkService.DeleteTask:output_type -> work.DeleteTaskResponse
+	10, // 18: work.WorkService.SetTaskTitle:output_type -> work.SetTaskTitleResponse
+	12, // 19: work.WorkService.SetTaskDescription:output_type -> work.SetTaskDescriptionResponse
+	14, // 20: work.WorkService.SetTaskDeadline:output_type -> work.SetTaskDeadlineResponse
+	16, // 21: work.WorkService.CreateWork:output_type -> work.CreateWorkResponse
+	18, // 22: work.WorkService.LoadTaskName:output_type -> work.LoadTaskNameResponse
+	20, // 23: work.WorkService.LoadTaskDescription:output_type -> work.LoadTaskDescriptionResponse
+	22, // 24: work.WorkService.LoadTaskDeadline:output_type -> work.LoadTaskDeadlineResponse
+	24, // 25: work.WorkService.GetGroups:output_type -> work.GetGroupsResponse
+	26, // 26: work.WorkService.GetDisciplines:output_type -> work.GetDisciplinesResponse
+	1,  // 27: work.WorkService.GetTaskDetails:output_type -> work.GetTaskDetailsResponse
+	3,  // 28: work.WorkService.UpdateTaskGroupAndDiscipline:output_type -> work.UpdateTaskGroupAndDisciplineResponse
+	16, // [16:29] is the sub-list for method output_type
+	3,  // [3:16] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1494,7 +1761,7 @@ func file_proto_work_work_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_work_work_proto_rawDesc), len(file_proto_work_work_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   25,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

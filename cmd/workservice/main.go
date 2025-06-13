@@ -169,6 +169,37 @@ func (s *server) GetDisciplines(ctx context.Context, req *pb.GetDisciplinesReque
 	return &pb.GetDisciplinesResponse{Disciplines: disciplines}, nil
 }
 
+func (s *server) GetTaskDetails(ctx context.Context, req *pb.GetTaskDetailsRequest) (*pb.GetTaskDetailsResponse, error) {
+	query := `
+        SELECT t.title, t.description, t.deadline, sg.name AS group_name, d.name AS discipline_name
+        FROM tasks t
+        JOIN student_groups sg ON t.group_id = sg.id
+        JOIN disciplines d ON t.discipline_id = d.id
+        WHERE t.id = $1
+    `
+	var title, description, deadline, groupName, disciplineName string
+	err := s.db.QueryRowContext(ctx, query, req.TaskId).Scan(&title, &description, &deadline, &groupName, &disciplineName)
+	if err != nil {
+		return &pb.GetTaskDetailsResponse{Error: err.Error()}, nil
+	}
+	return &pb.GetTaskDetailsResponse{
+		Title:          title,
+		Description:    description,
+		Deadline:       deadline,
+		GroupName:      groupName,
+		DisciplineName: disciplineName,
+	}, nil
+}
+
+func (s *server) UpdateTaskGroupAndDiscipline(ctx context.Context, req *pb.UpdateTaskGroupAndDisciplineRequest) (*pb.UpdateTaskGroupAndDisciplineResponse, error) {
+	query := `UPDATE tasks SET group_id = $1, discipline_id = $2 WHERE id = $3`
+	_, err := s.db.ExecContext(ctx, query, req.GroupId, req.DisciplineId, req.TaskId)
+	if err != nil {
+		return &pb.UpdateTaskGroupAndDisciplineResponse{Error: err.Error()}, nil
+	}
+	return &pb.UpdateTaskGroupAndDisciplineResponse{Success: true}, nil
+}
+
 func main() {
 
 	dbHost := os.Getenv("DB_HOST")
@@ -200,7 +231,7 @@ func main() {
 	s := grpc.NewServer()
 	pb.RegisterWorkServiceServer(s, &server{db: db})
 
-	log.Println("UserService starting on :50053")
+	log.Println("WorkService starting on :50053")
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
