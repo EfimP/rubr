@@ -27,7 +27,7 @@ type User struct {
 
 // Global data store - симулированная база данных всех пользователей.
 // Используется для поиска и добавления новых пользователей в список.
-var allUsers = []*User{
+var allUsers2 = []*User{
 	{ID: 1, FIO: "Иванов Иван", Email: "ivanov@mail.ru", Group: "Математики", Status: "студ"},
 	{ID: 2, FIO: "Петров Петр", Email: "petrov@mail.ru", Group: "Физики", Status: "лек"},
 	{ID: 3, FIO: "Сидорова Анна", Email: "sidorova@mail.ru", Group: "Математики", Status: "асс"},
@@ -166,10 +166,10 @@ func ShowUsersListPage() { // Изменено на ShowUsersListPage без gro
 		// Фильтруем пользователей
 		filteredUsers := []*User{}
 		if searchText == "" {
-			filteredUsers = allUsers // Если поиск пуст, показываем всех
+			filteredUsers = allUsers2 // Если поиск пуст, показываем всех
 		} else {
 			lowerSearchText := strings.ToLower(searchText)
-			for _, user := range allUsers {
+			for _, user := range allUsers2 {
 				if strings.Contains(strings.ToLower(user.FIO), lowerSearchText) ||
 					strings.Contains(strings.ToLower(user.Email), lowerSearchText) {
 					filteredUsers = append(filteredUsers, user)

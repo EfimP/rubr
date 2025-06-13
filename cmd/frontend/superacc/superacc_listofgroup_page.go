@@ -26,7 +26,7 @@ type CriterionEntry struct {
 // я переделал ShowBlockingCriteriaPage котрый отображает страницу для управления блокирующими критериями.
 // Создает окно с заголовком, списком критериев, кнопками "Добавить", "Удалить" и "Далее",
 // а также возможностью прокрутки списка критериев.
-func ShowBlockingCriteriaPage() {
+func GroupListPage() {
 	a := app.New()
 	w := a.NewWindow("Список групп")
 	w.Resize(fyne.NewSize(1280, 720))

@@ -22,7 +22,7 @@ type UserEntry struct {
 }
 
 // Simulated database of all users
-var allUsers = []UserEntry{
+var allUsers1 = []UserEntry{
 	{"Иванов И.И., ivanov@mail.ru", "студ"},
 	{"Петров П.П., petrov@mail.ru", "лек"},
 	{"Сидоров С.С., sidorov@mail.ru", "асс"},
@@ -31,7 +31,7 @@ var allUsers = []UserEntry{
 }
 
 // ShowUsersListPage displays the "Users List" page for the selected group.
-func ShowUsersListPage(groupName string) {
+func ShowGroupUsersPage(groupName string) {
 	a := app.New()
 	a.Settings().SetTheme(theme.LightTheme()) // Set constant light theme
 	logoText := canvas.NewText("ВШЭ", color.White)
@@ -193,7 +193,7 @@ func ShowUsersListPage(groupName string) {
 		updateFilteredUsers := func() {
 			query := strings.ToLower(searchEntry.Text)
 			filteredUsers = nil
-			for _, user := range allUsers {
+			for _, user := range allUsers1 {
 				if strings.Contains(strings.ToLower(user.FIOEmail), query) {
 					filteredUsers = append(filteredUsers, user)
 				}
