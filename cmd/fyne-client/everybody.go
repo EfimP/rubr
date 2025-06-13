@@ -54,7 +54,7 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 	enterButton := widget.NewButton("Войти в аккаунт", func() {
 		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to gRPC: %v", err)
+			log.Printf("Failed to connect to userservice: %v", err)
 			return
 		}
 		defer conn.Close()
@@ -75,7 +75,6 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 
 		state.userID = resp.UserId
 		state.role = resp.Role
-		// переход от авторизационного экрана к экранам по ролям
 		if state.role == "lecturer" {
 			state.currentPage = "lector_works"
 		} else if state.role == "superaccount" {
@@ -122,10 +121,9 @@ func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 	passwordEntry.SetPlaceHolder("Введите пароль")
 
 	enterButton := widget.NewButton("Зарегистрироваться", func() {
-		// Вызов регистрации через gRPC
 		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to gRPC: %v", err)
+			log.Printf("Failed to connect to userservice: %v", err)
 			return
 		}
 		defer conn.Close()
@@ -147,7 +145,6 @@ func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 			return
 		}
 		log.Printf("Registration successful, UserID: %s", resp.UserId)
-		// Здесь можно вернуться на GreetingPage или перейти на профиль
 		state.currentPage = "greeting"
 		state.window.SetContent(createContent(state))
 	})

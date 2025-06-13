@@ -7,21 +7,13 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"google.golang.org/grpc"
-	"log"
-	rubricpb "rubr/proto/rubric"
-	userpb "rubr/proto/user"
-	workpb "rubr/proto/work"
 )
 
 type AppState struct {
-	currentPage  string
-	userID       string
-	role         string
-	window       fyne.Window
-	userClient   userpb.UserServiceClient
-	workClient   workpb.WorkServiceClient
-	rubricClient rubricpb.RubricServiceClient
+	currentPage string
+	userID      string
+	role        string
+	window      fyne.Window
 }
 
 func main() {
@@ -29,38 +21,11 @@ func main() {
 	a.Settings().SetTheme(theme.LightTheme())
 	w := a.NewWindow("Rubric Grader")
 
-	// Подключение к userservice
-	userConn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Failed to connect to userservice: %v", err)
-	}
-	defer userConn.Close()
-	userClient := userpb.NewUserServiceClient(userConn)
-
-	// Подключение к workservice
-	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Failed to connect to workservice: %v", err)
-	}
-	defer workConn.Close()
-	workClient := workpb.NewWorkServiceClient(workConn)
-
-	// Подключение к rubricservice
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Failed to connect to rubricservice: %v", err)
-	}
-	defer rubricConn.Close()
-	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
-
 	state := &AppState{
-		currentPage:  "greeting",
-		userID:       "",
-		role:         "",
-		window:       w,
-		userClient:   userClient,
-		workClient:   workClient,
-		rubricClient: rubricClient,
+		currentPage: "greeting",
+		userID:      "",
+		role:        "",
+		window:      w,
 	}
 
 	w.SetContent(createContent(state))
@@ -68,7 +33,6 @@ func main() {
 	w.ShowAndRun()
 }
 
-// createContent создает содержимое окна в зависимости от текущей страницы
 func createContent(state *AppState) fyne.CanvasObject {
 	leftBackground := canvas.NewImageFromFile("bin/logo/hse_logo.svg")
 	leftBackground.FillMode = canvas.ImageFillStretch

@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"google.golang.org/grpc"
 	"image/color"
 	"log"
 	rubricpb "rubr/proto/rubric"
@@ -20,7 +21,7 @@ import (
 type MyListItem struct {
 	ID      int32
 	Name    string
-	DueDate string // дедлайн
+	DueDate string
 }
 
 func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
@@ -31,9 +32,17 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 	}
 	userID := int32(userIDint64)
 
+	conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to connect to workservice: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису работ"))
+	}
+	defer conn.Close()
+
+	workClient := workpb.NewWorkServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	resp, err := state.workClient.GetTasksForLector(ctx, &workpb.GetTasksForLectorRequest{LectorId: userID})
+	resp, err := workClient.GetTasksForLector(ctx, &workpb.GetTasksForLectorRequest{LectorId: userID})
 	if err != nil {
 		log.Printf("Failed to get tasks: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка загрузки работ"))
@@ -107,9 +116,17 @@ func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.C
 				fmt.Sprintf("Вы уверены, что хотите удалить работу '%s'?", data[currentID].Name),
 				func(confirmed bool) {
 					if confirmed {
+						conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+						if err != nil {
+							log.Printf("Failed to connect to workservice: %v", err)
+							return
+						}
+						defer conn.Close()
+
+						workClient := workpb.NewWorkServiceClient(conn)
 						ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 						defer cancel()
-						_, err := state.workClient.DeleteTask(ctx, &workpb.DeleteTaskRequest{TaskId: data[currentID].ID})
+						_, err = workClient.DeleteTask(ctx, &workpb.DeleteTaskRequest{TaskId: data[currentID].ID})
 						if err != nil {
 							log.Printf("Failed to delete task: %v", err)
 							return
@@ -167,7 +184,17 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 	}
 	userID := int32(userIDint64)
 
-	groupsResp, err := state.workClient.GetGroups(ctx, &workpb.GetGroupsRequest{LectorId: userID})
+	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to connect to workservice: %v", err)
+		dialog.ShowError(err, w)
+		return
+	}
+	defer workConn.Close()
+
+	workClient := workpb.NewWorkServiceClient(workConn)
+
+	groupsResp, err := workClient.GetGroups(ctx, &workpb.GetGroupsRequest{LectorId: userID})
 	if err != nil {
 		log.Printf("Failed to get groups: %v", err)
 		dialog.ShowError(err, w)
@@ -178,7 +205,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		return
 	}
 
-	disciplinesResp, err := state.workClient.GetDisciplines(ctx, &workpb.GetDisciplinesRequest{LectorId: userID})
+	disciplinesResp, err := workClient.GetDisciplines(ctx, &workpb.GetDisciplinesRequest{LectorId: userID})
 	if err != nil {
 		log.Printf("Failed to get disciplines: %v", err)
 		dialog.ShowError(err, w)
@@ -191,7 +218,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 
 	var existingTask *workpb.GetTaskDetailsResponse
 	if !isNewWork {
-		resp, err := state.workClient.GetTaskDetails(ctx, &workpb.GetTaskDetailsRequest{TaskId: *taskID})
+		resp, err := workClient.GetTaskDetails(ctx, &workpb.GetTaskDetailsRequest{TaskId: *taskID})
 		if err != nil {
 			log.Printf("Failed to get task details: %v", err)
 			dialog.ShowError(err, w)
@@ -324,10 +351,19 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		}
 		deadline := selectedDateTime.Format(time.RFC3339)
 
+		workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Failed to connect to workservice: %v", err)
+			dialog.ShowError(err, w)
+			return
+		}
+		defer workConn.Close()
+		workClient := workpb.NewWorkServiceClient(workConn)
+
 		if isNewWork {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			resp, err := state.workClient.CreateWork(ctx, &workpb.CreateWorkRequest{
+			resp, err := workClient.CreateWork(ctx, &workpb.CreateWorkRequest{
 				LectorId:     userID,
 				GroupId:      groupIDs[groupSelect.Selected],
 				Title:        titleEntry.Text,
@@ -351,7 +387,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
-			respTitle, err := state.workClient.SetTaskTitle(ctx, &workpb.SetTaskTitleRequest{
+			respTitle, err := workClient.SetTaskTitle(ctx, &workpb.SetTaskTitleRequest{
 				TaskId: *taskID,
 				Title:  titleEntry.Text,
 			})
@@ -365,7 +401,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 				return
 			}
 
-			respDesc, err := state.workClient.SetTaskDescription(ctx, &workpb.SetTaskDescriptionRequest{
+			respDesc, err := workClient.SetTaskDescription(ctx, &workpb.SetTaskDescriptionRequest{
 				TaskId:      *taskID,
 				Description: descriptionEntry.Text,
 			})
@@ -379,7 +415,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 				return
 			}
 
-			respDeadline, err := state.workClient.SetTaskDeadline(ctx, &workpb.SetTaskDeadlineRequest{
+			respDeadline, err := workClient.SetTaskDeadline(ctx, &workpb.SetTaskDeadlineRequest{
 				TaskId:   *taskID,
 				Deadline: deadline,
 			})
@@ -393,7 +429,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 				return
 			}
 
-			respGroupDisc, err := state.workClient.UpdateTaskGroupAndDiscipline(ctx, &workpb.UpdateTaskGroupAndDisciplineRequest{
+			respGroupDisc, err := workClient.UpdateTaskGroupAndDiscipline(ctx, &workpb.UpdateTaskGroupAndDisciplineRequest{
 				TaskId:       *taskID,
 				GroupId:      groupIDs[groupSelect.Selected],
 				DisciplineId: disciplineIDs[disciplineSelect.Selected],
@@ -518,8 +554,17 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Загрузка блокирующих критериев
-	resp, err := state.rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: taskID})
+	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to connect to rubricservice: %v", err)
+		dialog.ShowError(err, w)
+		return
+	}
+	defer rubricConn.Close()
+
+	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
+	resp, err := rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: taskID})
 	if err != nil {
 		log.Printf("Failed to load blocking criteria: %v", err)
 		dialog.ShowError(err, w)
@@ -530,7 +575,6 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 		return
 	}
 
-	// UI элементы
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
 	logoText.TextStyle.Bold = true
@@ -628,12 +672,9 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 		}
 	}
 
-	// Добавляем существующие критерии
 	for _, crit := range resp.Criteria {
 		addCriterionEntry(crit)
 	}
-
-	// Если критериев нет, добавляем одно пустое поле
 	if len(resp.Criteria) == 0 {
 		addCriterionEntry(nil)
 	}
@@ -645,6 +686,15 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 	addButton := widget.NewButton("Добавить", func() { addCriterionEntry(nil) })
 	deleteButton := widget.NewButton("Удалить", func() { deleteCriterionEntry() })
 	nextButton := widget.NewButton("Далее", func() {
+		rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Failed to connect to rubricservice: %v", err)
+			dialog.ShowError(err, w)
+			return
+		}
+		defer rubricConn.Close()
+		rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		for _, criterion := range activeCriteria {
@@ -653,7 +703,7 @@ func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
 				dialog.ShowInformation("Ошибка", "Оценка должна быть числом", w)
 				return
 			}
-			resp, err := state.rubricClient.CreateNewBlockingCriteria(ctx, &rubricpb.CreateNewBlockingCriteriaRequest{
+			resp, err := rubricClient.CreateNewBlockingCriteria(ctx, &rubricpb.CreateNewBlockingCriteriaRequest{
 				TaskId:      taskID,
 				Name:        criterion.NameEntry.Text,
 				Description: criterion.DescriptionEntry.Text,
@@ -711,8 +761,17 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Загрузка основных критериев
-	resp, err := state.rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: taskID})
+	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to connect to rubricservice: %v", err)
+		dialog.ShowError(err, w)
+		return
+	}
+	defer rubricConn.Close()
+
+	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
+	resp, err := rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: taskID})
 	if err != nil {
 		log.Printf("Failed to load main criteria: %v", err)
 		dialog.ShowError(err, w)
@@ -723,7 +782,6 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 		return
 	}
 
-	// Данные групп и критериев
 	type Group struct {
 		Name        string
 		GroupID     int32
@@ -746,7 +804,6 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 
 	selectedGroupIndex := -1
 
-	// UI элементы
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
 	logoText.TextStyle.Bold = true
@@ -791,9 +848,18 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 			{Text: "Название группы", Widget: entry},
 		}, func(b bool) {
 			if b && entry.Text != "" {
+				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Failed to connect to rubricservice: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				defer rubricConn.Close()
+				rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
-				resp, err := state.rubricClient.CreateCriteriaGroup(ctx, &rubricpb.CreateCriteriaGroupRequest{
+				resp, err := rubricClient.CreateCriteriaGroup(ctx, &rubricpb.CreateCriteriaGroupRequest{
 					TaskId:    taskID,
 					GroupName: entry.Text,
 				})
@@ -839,9 +905,18 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 			{Text: "Название критерия", Widget: entry},
 		}, func(b bool) {
 			if b && entry.Text != "" {
+				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Failed to connect to rubricservice: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				defer rubricConn.Close()
+				rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
-				resp, err := state.rubricClient.CreateCriterion(ctx, &rubricpb.CreateCriterionRequest{
+				resp, err := rubricClient.CreateCriterion(ctx, &rubricpb.CreateCriterionRequest{
 					GroupId: groups[selectedGroupIndex].GroupID,
 					Name:    entry.Text,
 				})
@@ -870,10 +945,8 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 
 	criteriaList.OnSelected = func(id widget.ListItemID) {
 		if selectedGroupIndex >= 0 && selectedGroupIndex < len(groups) && id >= 0 && id < len(groups[selectedGroupIndex].Criteria) {
-			// Получаем criterionId
 			criterionId := groups[selectedGroupIndex].CriteriaIDs[id]
 
-			// Ищем критерий в resp.Groups
 			var crit *rubricpb.MainCriteria
 			for _, group := range resp.Groups {
 				if group.Id == groups[selectedGroupIndex].GroupID {
@@ -887,104 +960,41 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 				}
 			}
 
-			// Если критерий не найден (новый), показываем пустую форму
-			if crit == nil {
-				weightEntry := widget.NewEntry()
-				weightEntry.SetPlaceHolder("Вес критерия")
-
-				entries := make(map[string]*widget.Entry)
-				scores := []string{"000", "025", "050", "075", "100"}
-				formItems := []*widget.FormItem{}
-				for _, score := range scores {
-					entry := widget.NewEntry()
-					entry.SetPlaceHolder(fmt.Sprintf("Комментарий для %s", score))
-					entries[score] = entry
-					formItems = append(formItems, &widget.FormItem{
-						Text:   fmt.Sprintf("Оценка %s", score),
-						Widget: entry,
-					})
-				}
-				formItems = append(formItems, &widget.FormItem{
-					Text:   "Вес",
-					Widget: weightEntry,
-				})
-
-				saveButton := widget.NewButton("Сохранить", func() {
-					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-					defer cancel()
-
-					if weightEntry.Text != "" {
-						weight, err := strconv.Atoi(weightEntry.Text)
-						if err != nil {
-							dialog.ShowInformation("Ошибка", "Вес должен быть числом", w)
-							return
-						}
-						respWeight, err := state.rubricClient.UpdateCriterionWeight(ctx, &rubricpb.UpdateCriterionWeightRequest{
-							CriterionId: criterionId,
-							Weight:      int32(weight),
-						})
-						if err != nil {
-							log.Printf("Failed to update criterion weight: %v", err)
-							dialog.ShowError(err, w)
-							return
-						}
-						if respWeight.Error != "" {
-							dialog.ShowInformation("Ошибка", respWeight.Error, w)
-							return
-						}
-					}
-
-					for score, entry := range entries {
-						if entry.Text != "" {
-							respComment, err := state.rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
-								CriterionId: criterionId,
-								Mark:        score,
-								Comment:     entry.Text,
-							})
-							if err != nil {
-								log.Printf("Failed to update criterion comment: %v", err)
-								dialog.ShowError(err, w)
-								return
-							}
-							if respComment.Error != "" {
-								dialog.ShowInformation("Ошибка", respComment.Error, w)
-								return
-							}
-						}
-					}
-					dialog.ShowInformation("Успех", "Данные сохранены", w)
-				})
-
-				content := container.NewVBox(
-					widget.NewForm(formItems...),
-					saveButton,
-				)
-
-				contentContainer.Objects = []fyne.CanvasObject{content}
-				contentContainer.Refresh()
+			rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+			if err != nil {
+				log.Printf("Failed to connect to rubricservice: %v", err)
+				dialog.ShowError(err, w)
 				return
 			}
-
-			// Если критерий существует, отображаем его данные
+			defer rubricConn.Close()
+	
 			weightEntry := widget.NewEntry()
-			weightEntry.SetText(strconv.FormatInt(crit.Weight, 10))
+			if crit != nil {
+				weightEntry.SetText(strconv.FormatInt(crit.Weight, 10))
+			} else {
+				weightEntry.SetPlaceHolder("Вес критерия")
+			}
 
 			entries := make(map[string]*widget.Entry)
 			scores := []string{"000", "025", "050", "075", "100"}
 			formItems := []*widget.FormItem{}
 			for _, score := range scores {
 				entry := widget.NewEntry()
-				switch score {
-				case "000":
-					entry.SetText(crit.Comment_000)
-				case "025":
-					entry.SetText(crit.Comment_025)
-				case "050":
-					entry.SetText(crit.Comment_050)
-				case "075":
-					entry.SetText(crit.Comment_075)
-				case "100":
-					entry.SetText(crit.Comment_100)
+				if crit != nil {
+					switch score {
+					case "000":
+						entry.SetText(crit.Comment_000)
+					case "025":
+						entry.SetText(crit.Comment_025)
+					case "050":
+						entry.SetText(crit.Comment_050)
+					case "075":
+						entry.SetText(crit.Comment_075)
+					case "100":
+						entry.SetText(crit.Comment_100)
+					}
+				} else {
+					entry.SetPlaceHolder(fmt.Sprintf("Комментарий для %s", score))
 				}
 				entries[score] = entry
 				formItems = append(formItems, &widget.FormItem{
@@ -998,6 +1008,15 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 			})
 
 			saveButton := widget.NewButton("Сохранить", func() {
+				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Failed to connect to rubricservice: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				defer rubricConn.Close()
+				rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
 
@@ -1007,7 +1026,7 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 						dialog.ShowInformation("Ошибка", "Вес должен быть числом", w)
 						return
 					}
-					respWeight, err := state.rubricClient.UpdateCriterionWeight(ctx, &rubricpb.UpdateCriterionWeightRequest{
+					respWeight, err := rubricClient.UpdateCriterionWeight(ctx, &rubricpb.UpdateCriterionWeightRequest{
 						CriterionId: criterionId,
 						Weight:      int32(weight),
 					})
@@ -1024,7 +1043,7 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 
 				for score, entry := range entries {
 					if entry.Text != "" {
-						respComment, err := state.rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
+						respComment, err := rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
 							CriterionId: criterionId,
 							Mark:        score,
 							Comment:     entry.Text,
