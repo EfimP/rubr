@@ -62,7 +62,7 @@ CREATE TABLE tasks (
     group_id BIGINT NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
-    deadline TIMESTAMP,
+    deadline TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     discipline_id BIGINT NOT NULL,
     content_url TEXT, -- Ссылка на S3 для материалов задачи
     FOREIGN KEY (lector_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -82,6 +82,8 @@ CREATE TABLE criteria_groups (
 -- 8) criteria
 CREATE TABLE criteria (
     id SERIAL PRIMARY KEY,
+	name TEXT, 
+	description TEXT,
     criteria_group_id BIGINT NOT NULL,
     weight BIGINT NOT NULL CHECK (weight >= 0),
     comment_000 TEXT,
