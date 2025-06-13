@@ -44,7 +44,7 @@ func (s *server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) 
 		return &pb.RegisterUserResponse{Error: err.Error()}, nil
 	}
 
-	return &pb.RegisterUserResponse{UserId: string(id)}, nil
+	return &pb.RegisterUserResponse{UserId: strconv.Itoa(id)}, nil
 }
 
 func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -79,7 +79,7 @@ func (s *server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 		return &pb.LoginResponse{Error: "Failed to generate token"}, nil
 	}
 
-	return &pb.LoginResponse{UserId: string(id), Token: tokenString}, nil
+	return &pb.LoginResponse{UserId: strconv.Itoa(id), Token: tokenString, Role: role}, nil
 }
 
 func main() {

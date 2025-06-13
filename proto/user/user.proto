@@ -1,11 +1,12 @@
 syntax = "proto3";
 package user;
 
-option  go_package = "./proto/user;user";
+option go_package = "./proto/user;user";
 
 service UserService {
   rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse) {}
   rpc Login (LoginRequest) returns (LoginResponse) {}
+  rpc GetUser (GetUserRequest) returns (GetUserResponse) {}
 }
 
 message RegisterUserRequest {
@@ -15,6 +16,7 @@ message RegisterUserRequest {
   string Email = 4;
   string Password = 5;
 }
+
 message RegisterUserResponse {
   string UserId = 1;
   string Error = 2;
@@ -24,9 +26,28 @@ message LoginRequest {
   string Email = 1;
   string Password = 2;
 }
+
 message LoginResponse {
   string UserId = 1;
   string Token = 2; // JWT токен
-  string Error = 3;
+  string Role = 3;
+  string Error = 4;
 }
 
+message user {
+  int32 id = 1;
+  string name = 2;
+  string surname = 3;
+  string patronymic = 4;
+  string email = 5;
+  string role = 6;
+}
+
+message GetUserRequest {
+  string userId = 1;
+}
+
+message GetUserResponse {
+  user User = 1;
+  string Error = 2;
+}
