@@ -84,6 +84,8 @@ CREATE TABLE criteria (
     id SERIAL PRIMARY KEY,
 	name TEXT, 
 	description TEXT,
+	comment_for_blocking_criteria TEXT,
+	final_mark_for_blocking_criteria BIGINT,
     criteria_group_id BIGINT NOT NULL,
     weight BIGINT NOT NULL CHECK (weight >= 0),
     comment_000 TEXT,
