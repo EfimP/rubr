@@ -78,7 +78,7 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 		if state.role == "lecturer" {
 			state.currentPage = "lector_works"
 		} else if state.role == "superaccount" {
-			state.currentPage = "superacc_usrs"
+			state.currentPage = "superacc-groups"
 		} else {
 			state.currentPage = "greeting"
 		}

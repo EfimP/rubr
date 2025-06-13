@@ -52,8 +52,8 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return СreateGroupUsersPage(state, leftBackground, GroupName)
 	case "superacc-all-users":
 		return СreateUsersListPage(state, leftBackground)
-  // lector
-  case "lector_works":
+		// lector
+	case "lector_works":
 		return CreateLectorWorksPage(state, leftBackground)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
