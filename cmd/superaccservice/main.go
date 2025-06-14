@@ -132,6 +132,40 @@ func (s *Service) RemoveUser(ctx context.Context, req *pb.RemoveUserRequest) (*p
 	return &pb.RemoveUserResponse{Message: "User removed successfully", Success: true}, nil
 }
 
+func (r *Repository) GetGroupStaff(ctx context.Context, groupID int32) (*pb.GetGroupStaffResponse, error) {
+	query := `
+        SELECT seminarist_id, assistant_id 
+        FROM groups_in_disciplines 
+        WHERE group_id = $1 LIMIT 1`
+	row := r.db.QueryRowContext(ctx, query, groupID)
+
+	var seminaristID, assistantID sql.NullInt32
+	err := row.Scan(&seminaristID, &assistantID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &pb.GetGroupStaffResponse{Success: true, SeminaristId: 0, AssistantId: 0}, nil
+		}
+		return nil, err
+	}
+
+	return &pb.GetGroupStaffResponse{
+		Success:      true,
+		SeminaristId: seminaristID.Int32,
+		AssistantId:  assistantID.Int32,
+	}, nil
+}
+
+func (s *Service) GetGroupStaff(ctx context.Context, req *pb.GetGroupStaffRequest) (*pb.GetGroupStaffResponse, error) {
+	if req.GroupId <= 0 {
+		return &pb.GetGroupStaffResponse{Message: "invalid group ID", Success: false}, nil
+	}
+	resp, err := s.repo.GetGroupStaff(ctx, req.GroupId)
+	if err != nil {
+		return &pb.GetGroupStaffResponse{Message: err.Error(), Success: false}, err
+	}
+	return resp, nil
+}
+
 func (r *Repository) UpdateUserRole(ctx context.Context, userID int, role string) error {
 	query := "UPDATE users SET role = $1 WHERE id = $2"
 	_, err := r.db.ExecContext(ctx, query, role, userID)
@@ -383,6 +417,23 @@ func (s *Service) ManageGroupEntity(ctx context.Context, req *pb.ManageGroupEnti
 	return &pb.ManageGroupEntityResponse{Message: "Group entity managed successfully", Success: true, GroupId: newGroupID}, nil
 }
 
+func (s *Service) ListDisciplines(ctx context.Context, req *pb.ListDisciplinesRequest) (*pb.ListDisciplinesResponse, error) {
+	disciplines, err := s.repo.ListDisciplines(ctx)
+	if err != nil {
+		return &pb.ListDisciplinesResponse{Message: err.Error(), Success: false}, err
+	}
+	return &pb.ListDisciplinesResponse{Success: true, Disciplines: disciplines}, nil
+}
+
+func (r *Repository) ManageDiscipline(ctx context.Context, disciplineID, groupID, seminaristID, assistantID int) error {
+	query := `
+		UPDATE groups_in_disciplines 
+		SET seminarist_id = $1, assistant_id = $2 
+		WHERE discipline_id = $3 AND group_id = $4`
+	_, err := r.db.ExecContext(ctx, query, seminaristID, assistantID, disciplineID, groupID)
+	return err
+}
+
 func (s *Service) ManageDiscipline(ctx context.Context, req *pb.ManageDisciplineRequest) (*pb.ManageDisciplineResponse, error) {
 	if req.DisciplineId <= 0 || req.GroupId <= 0 {
 		return &pb.ManageDisciplineResponse{Message: "invalid discipline or group ID", Success: false}, nil
@@ -394,39 +445,15 @@ func (s *Service) ManageDiscipline(ctx context.Context, req *pb.ManageDiscipline
 	return &pb.ManageDisciplineResponse{Message: "Discipline managed successfully", Success: true}, nil
 }
 
-func (s *Service) ListDisciplines(ctx context.Context, req *pb.ListDisciplinesRequest) (*pb.ListDisciplinesResponse, error) {
-	disciplines, err := s.repo.ListDisciplines(ctx)
-	if err != nil {
-		return &pb.ListDisciplinesResponse{Message: err.Error(), Success: false}, err
-	}
-	return &pb.ListDisciplinesResponse{Success: true, Disciplines: disciplines}, nil
-}
-
 func (r *Repository) ManageDisciplineEntity(ctx context.Context, action string, groupID int32, disciplineIDs []int32, name string, seminaristID, assistantID int32) error {
-	log.Printf("ManageDisciplineEntity called with action=%s, groupID=%d, name=%s, seminaristID=%d, assistantID=%d", action, groupID, name, seminaristID, assistantID)
+	log.Printf("ManageDisciplineEntity вызван с action=%s, groupID=%d, name=%s, seminaristID=%d, assistantID=%d", action, groupID, name, seminaristID, assistantID)
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	if action == "create" {
-		if name == "" {
-			return fmt.Errorf("name is required for creating a discipline")
-		}
-		query := "INSERT INTO disciplines (name) VALUES ($1) RETURNING id"
-		var newDisciplineID int32
-		err = tx.QueryRowContext(ctx, query, name).Scan(&newDisciplineID)
-		if err != nil {
-			return err
-		}
-		// Прикрепляем дисциплину к группе с указанием семинариста и ассистента
-		_, err = tx.ExecContext(ctx, "INSERT INTO groups_in_disciplines (group_id, discipline_id, seminarist_id, assistant_id) VALUES ($1, $2, $3, $4)",
-			groupID, newDisciplineID, seminaristID, assistantID)
-		if err != nil {
-			return err
-		}
-	} else if action == "attach" {
+	if action == "attach" {
 		for _, disciplineID := range disciplineIDs {
 			var exists bool
 			err = tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM groups_in_disciplines WHERE group_id = $1 AND discipline_id = $2)", groupID, disciplineID).Scan(&exists)
@@ -442,7 +469,7 @@ func (r *Repository) ManageDisciplineEntity(ctx context.Context, action string, 
 			}
 		}
 	} else {
-		return fmt.Errorf("invalid action, must be 'create' or 'attach'")
+		return fmt.Errorf("недопустимое действие, должно быть 'create' или 'attach'")
 	}
 
 	return tx.Commit()
@@ -456,13 +483,72 @@ func (s *Service) ManageDisciplineEntity(ctx context.Context, req *pb.ManageDisc
 	return &pb.ManageDisciplineEntityResponse{Message: "Discipline managed successfully", Success: true}, nil
 }
 
-func (r *Repository) ManageDiscipline(ctx context.Context, disciplineID, groupID, seminaristID, assistantID int) error {
-	query := `
-		UPDATE groups_in_disciplines 
-		SET seminarist_id = $1, assistant_id = $2 
-		WHERE discipline_id = $3 AND group_id = $4`
-	_, err := r.db.ExecContext(ctx, query, seminaristID, assistantID, disciplineID, groupID)
-	return err
+func (s *Service) CreateDiscipline(ctx context.Context, req *pb.ManageDisciplineEntityRequest) (*pb.ManageDisciplineEntityResponse, error) {
+	log.Printf("CreateDiscipline вызван с action=%s, name=%s, groupID=%d, seminaristID=%d, assistantID=%d", req.Action, req.Name, req.GroupId, req.SeminaristId, req.AssistantId)
+	tx, err := s.repo.db.BeginTx(ctx, nil)
+	if err != nil {
+		return &pb.ManageDisciplineEntityResponse{Message: "Ошибка начала транзакции", Success: false}, err
+	}
+	defer func() {
+		if err != nil {
+			log.Printf("Откат транзакции: %v", tx.Rollback())
+		}
+	}()
+
+	if req.Action != "create" {
+		return &pb.ManageDisciplineEntityResponse{Message: "Недопустимое действие, должно быть 'create'", Success: false}, nil
+	}
+
+	if req.Name == "" {
+		return &pb.ManageDisciplineEntityResponse{Message: "Для создания дисциплины требуется название", Success: false}, nil
+	}
+
+	query := "INSERT INTO disciplines (name) VALUES ($1) RETURNING id"
+	var newDisciplineID int32
+	err = tx.QueryRowContext(ctx, query, req.Name).Scan(&newDisciplineID)
+	if err != nil {
+		return &pb.ManageDisciplineEntityResponse{Message: "Ошибка вставки в disciplines", Success: false}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return &pb.ManageDisciplineEntityResponse{Message: "Ошибка коммита транзакции", Success: false}, err
+	}
+
+	log.Printf("Дисциплина успешно создана с ID: %d", newDisciplineID)
+	return &pb.ManageDisciplineEntityResponse{Message: "Дисциплина успешно создана", Success: true, DisciplineId: newDisciplineID}, nil
+}
+
+func (r *Repository) DeleteDiscipline(ctx context.Context, disciplineIDs []int32) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, id := range disciplineIDs {
+		query := "DELETE FROM disciplines WHERE id = $1"
+		result, err := tx.ExecContext(ctx, query, id)
+		if err != nil {
+			return err
+		}
+		if affected, _ := result.RowsAffected(); affected == 0 {
+			return fmt.Errorf("discipline with ID %d not found", id)
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (s *Service) DeleteDiscipline(ctx context.Context, req *pb.DeleteDisciplineRequest) (*pb.DeleteDisciplineResponse, error) {
+	if len(req.DisciplineIds) == 0 {
+		return &pb.DeleteDisciplineResponse{Message: "at least one discipline ID is required", Success: false}, nil
+	}
+	err := s.repo.DeleteDiscipline(ctx, req.DisciplineIds)
+	if err != nil {
+		return &pb.DeleteDisciplineResponse{Message: err.Error(), Success: false}, err
+	}
+	return &pb.DeleteDisciplineResponse{Message: "Disciplines deleted successfully", Success: true}, nil
 }
 
 func (r *Repository) ListDisciplines(ctx context.Context) ([]*pb.Discipline, error) {
@@ -482,6 +568,43 @@ func (r *Repository) ListDisciplines(ctx context.Context) ([]*pb.Discipline, err
 		disciplines = append(disciplines, &pb.Discipline{Id: id, Name: name})
 	}
 	return disciplines, nil
+}
+
+func (r *Repository) DetachDisciplinesFromGroup(ctx context.Context, groupID int32, disciplineIDs []int32) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, disciplineID := range disciplineIDs {
+		query := "DELETE FROM groups_in_disciplines WHERE group_id = $1 AND discipline_id = $2"
+		result, err := tx.ExecContext(ctx, query, groupID, disciplineID)
+		if err != nil {
+			return err
+		}
+		if affected, _ := result.RowsAffected(); affected == 0 {
+			log.Printf("No discipline with ID %d found for group %d", disciplineID, groupID)
+		}
+	}
+
+	return tx.Commit()
+}
+
+// В структуре Service
+func (s *Service) DetachDisciplinesFromGroup(ctx context.Context, req *pb.DetachDisciplinesFromGroupRequest) (*pb.DetachDisciplinesFromGroupResponse, error) {
+	if req.GroupId <= 0 {
+		return &pb.DetachDisciplinesFromGroupResponse{Message: "invalid group ID", Success: false}, nil
+	}
+	if len(req.DisciplineIds) == 0 {
+		return &pb.DetachDisciplinesFromGroupResponse{Message: "at least one discipline ID is required", Success: false}, nil
+	}
+
+	err := s.repo.DetachDisciplinesFromGroup(ctx, req.GroupId, req.DisciplineIds)
+	if err != nil {
+		return &pb.DetachDisciplinesFromGroupResponse{Message: err.Error(), Success: false}, err
+	}
+	return &pb.DetachDisciplinesFromGroupResponse{Message: "Disciplines detached successfully", Success: true}, nil
 }
 
 func main() {

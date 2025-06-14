@@ -1,3 +1,5 @@
+// В файле superacc.proto
+
 syntax = "proto3";
 package superacc;
 
@@ -15,6 +17,10 @@ service SuperAccService {
   rpc AddUser (AddUserRequest) returns (AddUserResponse) {}
   rpc ManageDisciplineEntity (ManageDisciplineEntityRequest) returns (ManageDisciplineEntityResponse) {}
   rpc ListDisciplines (ListDisciplinesRequest) returns (ListDisciplinesResponse) {}
+  rpc CreateDiscipline (ManageDisciplineEntityRequest) returns (ManageDisciplineEntityResponse) {}
+  rpc DeleteDiscipline (DeleteDisciplineRequest) returns (DeleteDisciplineResponse) {}
+  rpc GetGroupStaff (GetGroupStaffRequest) returns (GetGroupStaffResponse) {}
+  rpc DetachDisciplinesFromGroup (DetachDisciplinesFromGroupRequest) returns (DetachDisciplinesFromGroupResponse) {} // Новый метод
 }
 
 message UpdateRoleRequest {
@@ -55,7 +61,7 @@ message Group {
   int32 id = 1;
   string name = 2;
   string description = 3;
-  repeated string disciplines = 4; // Добавляем список дисциплин
+  repeated string disciplines = 4;
 }
 
 message ListGroupsRequest {}
@@ -67,16 +73,16 @@ message ListGroupsResponse {
 }
 
 message ManageGroupEntityRequest {
-  int32 group_id = 1; // ID группы (0 для создания новой)
-  string name = 2;    // Название группы (обязательно для создания)
-  string description = 3; // Описание группы (опционально для создания)
-  string action = 4;  // "create" или "delete"
+  int32 group_id = 1;
+  string name = 2;
+  string description = 3;
+  string action = 4;
 }
 
 message ManageGroupEntityResponse {
   string message = 1;
   bool success = 2;
-  int32 group_id = 3; // Возвращается ID созданной группы
+  int32 group_id = 3;
 }
 
 message ListAllUsersRequest {}
@@ -106,7 +112,7 @@ message ListUsersByGroupResponse {
 }
 
 message RemoveUserRequest {
-  string email = 1; // Уникальный идентификатор пользователя
+  string email = 1;
 }
 
 message RemoveUserResponse {
@@ -124,7 +130,7 @@ message AddUserRequest {
 message AddUserResponse {
   string message = 1;
   bool success = 2;
-  int32 user_id = 3; // ID созданного пользователя
+  int32 user_id = 3;
 }
 
 message Discipline {
@@ -141,28 +147,46 @@ message ListDisciplinesResponse {
 }
 
 message ManageDisciplineEntityRequest {
-  string action = 1;      // "create" или "attach"
-  int32 group_id = 2;     // ID группы
-  repeated int32 discipline_ids = 3; // IDs дисциплин для attach
-  string name = 4;        // Название дисциплины (для create)
-  int32 seminarist_id = 5; // ID семинариста (опционально)
-  int32 assistant_id = 6;  // ID ассистента (опционально)
+  string action = 1;
+  int32 group_id = 2;
+  repeated int32 discipline_ids = 3;
+  string name = 4;
+  int32 seminarist_id = 5;
+  int32 assistant_id = 6;
 }
 
 message ManageDisciplineEntityResponse {
   string message = 1;
   bool success = 2;
+  int32 discipline_id = 3;
 }
 
-//message ManageDisciplineEntityResponse {
-//  string message = 1;
-//  bool success = 2;
-//  int32 discipline_id = 3; // Возвращается ID созданной/прикреплённой дисциплины
-//}
+message DeleteDisciplineRequest {
+  repeated int32 discipline_ids = 1;
+}
 
-//message ManageDisciplineEntityRequest {
-//  int32 discipline_id = 1; // ID дисциплины (0 для создания новой)
-//  string name = 2;        // Название дисциплины (обязательно для создания)
-//  int32 group_id = 3;     // ID группы
-//  string action = 4;      // "create" или "attach"
-//}
+message DeleteDisciplineResponse {
+  string message = 1;
+  bool success = 2;
+}
+
+message GetGroupStaffRequest {
+  int32 group_id = 1;
+}
+
+message GetGroupStaffResponse {
+  bool success = 1;
+  string message = 2;
+  int32 seminarist_id = 3;
+  int32 assistant_id = 4;
+}
+
+message DetachDisciplinesFromGroupRequest {
+  int32 group_id = 1;
+  repeated int32 discipline_ids = 2;
+}
+
+message DetachDisciplinesFromGroupResponse {
+  string message = 1;
+  bool success = 2;
+}
