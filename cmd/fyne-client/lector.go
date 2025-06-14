@@ -24,6 +24,14 @@ type MyListItem struct {
 	DueDate string
 }
 
+type CriterionEntry struct {
+	NameEntry        *widget.Entry
+	DescriptionEntry *widget.Entry
+	CommentEntry     *widget.Entry
+	EvaluationEntry  *widget.Entry
+	Container        fyne.CanvasObject
+}
+
 func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
@@ -967,7 +975,7 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 				return
 			}
 			defer rubricConn.Close()
-	
+
 			weightEntry := widget.NewEntry()
 			if crit != nil {
 				weightEntry.SetText(strconv.FormatInt(crit.Weight, 10))
