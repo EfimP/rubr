@@ -29,7 +29,7 @@ type CriterionEntry struct {
 	DescriptionEntry *widget.Entry
 	CommentEntry     *widget.Entry
 	EvaluationEntry  *widget.Entry
-	Container        fyne.CanvasObject
+	Container        *fyne.Container
 }
 
 func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
