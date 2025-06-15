@@ -15,6 +15,7 @@ service RubricService {
   rpc CreateCriterion (CreateCriterionRequest) returns (CreateCriterionResponse) {}
   rpc UpdateCriterionWeight (UpdateCriterionWeightRequest) returns (UpdateCriterionWeightResponse) {}
   rpc UpdateCriterionComment (UpdateCriterionCommentRequest) returns (UpdateCriterionCommentResponse) {}
+  
 }
 
 message CreateCriteriaGroupRequest {
@@ -154,3 +155,7 @@ message LoadTaskMainCriteriasResponse {
   repeated CriteriaGroup groups = 1;
   string error = 2;
 }
+
+
+
+

@@ -390,7 +390,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 				return
 			}
 			taskID := resp.TaskId
-			ShowBlockingCriteriaPage(state, taskID)
+			CreateBlockingCriteriaPage(state, taskID)
 		} else {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
@@ -452,7 +452,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 				return
 			}
 
-			ShowBlockingCriteriaPage(state, *taskID)
+			CreateBlockingCriteriaPage(state, *taskID)
 		}
 	})
 	nextButtonContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), nextButton)
@@ -556,7 +556,7 @@ func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSel
 	d.Show()
 }
 
-func ShowBlockingCriteriaPage(state *AppState, taskID int32) {
+func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 	w := state.window
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

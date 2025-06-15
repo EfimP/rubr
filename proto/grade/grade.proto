@@ -1,0 +1,32 @@
+syntax = "proto3";
+package grade;
+
+option go_package = "./proto/grade;grade";
+
+service GradingService {
+  rpc SetBlockingCriteriaMark (SetBlockingCriteriaMarkRequest) returns (SetBlockingCriteriaMarkResponse) {}
+  rpc SetMainCriteriaMark (SetMainCriteriaMarkRequest) returns (SetMainCriteriaMarkResponse) {}
+}
+
+// Добавить в конец message определений
+message SetBlockingCriteriaMarkRequest {
+  int32 work_id = 1;
+  int32 criterion_id = 2;
+  float mark = 3; // 0.0 или 1.0
+  string comment = 4;
+}
+
+message SetBlockingCriteriaMarkResponse {
+  string error = 1;
+}
+
+message SetMainCriteriaMarkRequest {
+  int32 work_id = 1;
+  int32 criterion_id = 2;
+  float mark = 3; // 0.0, 0.25, 0.50, 0.75, 1.00
+  string comment = 4;
+}
+
+message SetMainCriteriaMarkResponse {
+  string error = 1;
+}
