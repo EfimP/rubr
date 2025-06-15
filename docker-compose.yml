@@ -95,6 +95,23 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
+
+  gradingservice:
+    build:
+      context: .
+      dockerfile: ./cmd/gradingservice/Dockerfile
+    ports:
+      - "50057:50057"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=rubrlocal
+
 networks:
   rubric-net:
     driver: bridge
