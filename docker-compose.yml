@@ -80,7 +80,21 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
-
+  workassignmentservice:
+    build:
+      context: .
+      dockerfile: ./cmd/workassignmentservice/Dockerfile
+    ports:
+      - "50054:50054"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=rubrlocal
 networks:
   rubric-net:
     driver: bridge

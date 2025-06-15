@@ -1,0 +1,44 @@
+syntax = "proto3";
+package workassignment;
+
+option go_package = "./proto/workassignment;workassignment";
+
+service WorkAssignmentService {
+  rpc GetWorksForAssistant (GetWorksForAssistantRequest) returns (GetWorksForAssistantResponse);
+  rpc GetWorkDetails (GetWorkDetailsRequest) returns (GetWorkDetailsResponse);
+}
+
+message GetWorksForAssistantRequest {
+  int32 assistant_id = 1;
+}
+
+message GetWorksForAssistantResponse {
+  repeated WorkAssignment works = 1;
+  string error = 2;
+}
+
+message GetWorkDetailsRequest {
+  int32 work_id = 1;
+}
+
+message GetWorkDetailsResponse {
+  int32 work_id = 1;
+  string task_title = 2;
+  string task_description = 3;
+  string task_deadline = 4;
+  string created_at = 5;
+  string status = 6;
+  string content_url = 7;
+  string error = 8;
+}
+
+message WorkAssignment {
+  int32 work_id = 1;
+  int32 task_id = 2;
+  string task_title = 3;
+  int32 student_id = 4;
+  string student_email = 5;
+  string student_name = 6;
+  string student_surname = 7;
+  string student_patronymic = 8;
+}
