@@ -1,4 +1,4 @@
-package super
+package student
 
 import (
 	"image/color"
