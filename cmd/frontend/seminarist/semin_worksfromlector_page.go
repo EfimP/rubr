@@ -1,4 +1,4 @@
-package lector
+package seminarist
 
 import (
 	"image/color"
@@ -14,16 +14,16 @@ import (
 )
 
 // Структура для хранения информации о работе
-type Work struct {
+type Worklec struct {
 	Date  time.Time
 	Title string
 }
 
 // Симуляция данных из базы данных (включая просроченные работы)
-var works = []Work{
+var workslec = []Worklec{
 	{Date: time.Date(2025, 6, 10, 0, 0, 0, 0, time.UTC), Title: "НАЗВАНИЕ"}}
 
-func AllWorksScreen() {
+func AllWorksScreenfromlector() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("семинарист: Список всех работ")
 	myWindow.Resize(fyne.NewSize(1920, 1080)) // Разрешение 16:9
@@ -58,12 +58,12 @@ func AllWorksScreen() {
 
 	// таблица работ с разделителями и кнопкой "Подробнее"
 	var tableContent []fyne.CanvasObject
-	for i, work := range works {
+	for i, work := range workslec {
 		// Создаем строку для каждой работы
 		titleLabel := widget.NewLabel(work.Title)
 		date := widget.NewLabel(work.Date.Format("02.01.2006"))
 
-		detailsButton := widget.NewButton("Перейти", func(w Work) func() {
+		detailsButton := widget.NewButton("Перейти", func(w Worklec) func() {
 			return func() {}
 		}(work)) // Копируем Work для замыкания
 
@@ -78,7 +78,7 @@ func AllWorksScreen() {
 		tableContent = append(tableContent, row)
 
 		//горизонтальный разделитель, если это не последняя строка
-		if i < len(works)-1 {
+		if i < len(workslec)-1 {
 			separator := canvas.NewLine(separatorColor)
 			separator.StrokeWidth = 2
 			separator.Position1 = fyne.NewPos(0, 0)
