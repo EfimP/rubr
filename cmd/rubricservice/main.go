@@ -18,6 +18,84 @@ type server struct {
 	db *sql.DB
 }
 
+func (s *server) DeleteCriteriaGroup(ctx context.Context, req *pb.DeleteCriteriaGroupRequest) (*pb.DeleteCriteriaGroupResponse, error) {
+	query := `DELETE FROM criteria_groups WHERE id = $1 AND block_flag = false`
+	result, err := s.db.ExecContext(ctx, query, req.GroupId)
+	if err != nil {
+		return &pb.DeleteCriteriaGroupResponse{Error: err.Error()}, nil
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return &pb.DeleteCriteriaGroupResponse{Error: err.Error()}, nil
+	}
+	if rowsAffected == 0 {
+		return &pb.DeleteCriteriaGroupResponse{Error: "Группа с указанным ID не найдена или является блокирующей"}, nil
+	}
+	return &pb.DeleteCriteriaGroupResponse{Success: true}, nil
+}
+
+func (s *server) DeleteCriterion(ctx context.Context, req *pb.DeleteCriterionRequest) (*pb.DeleteCriterionResponse, error) {
+	query := `DELETE FROM criteria WHERE id = $1`
+	result, err := s.db.ExecContext(ctx, query, req.CriterionId)
+	if err != nil {
+		return &pb.DeleteCriterionResponse{Error: err.Error()}, nil
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return &pb.DeleteCriterionResponse{Error: err.Error()}, nil
+	}
+	if rowsAffected == 0 {
+		return &pb.DeleteCriterionResponse{Error: "Критерий с указанным ID не найден"}, nil
+	}
+	return &pb.DeleteCriterionResponse{Success: true}, nil
+}
+
+func (s *server) DeleteBlockingCriteria(ctx context.Context, req *pb.DeleteBlockingCriteriaRequest) (*pb.DeleteBlockingCriteriaResponse, error) {
+	query := `DELETE FROM criteria WHERE id = $1`
+	result, err := s.db.ExecContext(ctx, query, req.CriteriaId)
+	if err != nil {
+		return &pb.DeleteBlockingCriteriaResponse{Error: err.Error()}, nil
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return &pb.DeleteBlockingCriteriaResponse{Error: err.Error()}, nil
+	}
+	if rowsAffected == 0 {
+		return &pb.DeleteBlockingCriteriaResponse{Error: "Критерий с указанным ID не найден"}, nil
+	}
+	return &pb.DeleteBlockingCriteriaResponse{Success: true}, nil
+}
+
+func (s *server) DeleteTaskBlockingCriterias(ctx context.Context, req *pb.DeleteTaskBlockingCriteriasRequest) (*pb.DeleteTaskBlockingCriteriasResponse, error) {
+	// Находим ID группы критериев с block_flag = true и group_name = 'blocking_criterias'
+	var groupID int32
+	queryGroup := `SELECT id FROM criteria_groups WHERE task_id = $1 AND group_name = 'blocking_criterias' AND block_flag = true`
+	err := s.db.QueryRowContext(ctx, queryGroup, req.TaskId).Scan(&groupID)
+	if err == sql.ErrNoRows {
+		// Если группы нет, это не ошибка, просто нет критериев для удаления
+		return &pb.DeleteTaskBlockingCriteriasResponse{Success: true}, nil
+	}
+	if err != nil {
+		return &pb.DeleteTaskBlockingCriteriasResponse{Error: err.Error()}, nil
+	}
+
+	// Удаляем все критерии, связанные с этой группой
+	queryCriteria := `DELETE FROM criteria WHERE criteria_group_id = $1`
+	_, err = s.db.ExecContext(ctx, queryCriteria, groupID)
+	if err != nil {
+		return &pb.DeleteTaskBlockingCriteriasResponse{Error: err.Error()}, nil
+	}
+
+	// Удаляем саму группу критериев
+	queryGroupDelete := `DELETE FROM criteria_groups WHERE id = $1`
+	_, err = s.db.ExecContext(ctx, queryGroupDelete, groupID)
+	if err != nil {
+		return &pb.DeleteTaskBlockingCriteriasResponse{Error: err.Error()}, nil
+	}
+
+	return &pb.DeleteTaskBlockingCriteriasResponse{Success: true}, nil
+}
+
 func (s *server) CreateNewBlockingCriteria(ctx context.Context, req *pb.CreateNewBlockingCriteriaRequest) (*pb.CreateNewBlockingCriteriaResponse, error) {
 	var groupID int32
 	query := `SELECT id FROM criteria_groups WHERE task_id = $1 AND group_name = 'blocking_criterias' AND block_flag = true`

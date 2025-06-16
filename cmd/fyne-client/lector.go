@@ -25,11 +25,95 @@ type MyListItem struct {
 }
 
 type CriterionEntry struct {
+	ID               int32
 	NameEntry        *widget.Entry
 	DescriptionEntry *widget.Entry
 	CommentEntry     *widget.Entry
 	EvaluationEntry  *widget.Entry
 	Container        *fyne.Container
+}
+
+func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSelected *bool, displayEntry *widget.Entry) {
+	var initialDate time.Time
+	var currentHour, currentMinute string
+	if *isSelected {
+		initialDate = *selectedTime
+	} else {
+		initialDate = time.Now()
+	}
+	currentHour = fmt.Sprintf("%02d", initialDate.Hour())
+	currentMinute = fmt.Sprintf("%02d", initialDate.Minute())
+
+	dateFromCalendar := initialDate
+	calendar := widget.NewCalendar(initialDate, func(t time.Time) {
+		dateFromCalendar = t
+	})
+
+	hours := make([]string, 24)
+	for i := 0; i < 24; i++ {
+		hours[i] = fmt.Sprintf("%02d", i)
+	}
+	minutes := make([]string, 60)
+	for i := 0; i < 60; i++ {
+		minutes[i] = fmt.Sprintf("%02d", i)
+	}
+
+	hourSelect := widget.NewSelect(hours, func(s string) { currentHour = s })
+	hourSelect.SetSelected(currentHour)
+	minuteSelect := widget.NewSelect(minutes, func(s string) { currentMinute = s })
+	minuteSelect.SetSelected(currentMinute)
+
+	nowButton := widget.NewButton("Now", func() {
+		currentTime := time.Now()
+		currentHour = fmt.Sprintf("%02d", currentTime.Hour())
+		currentMinute = fmt.Sprintf("%02d", currentTime.Minute())
+		hourSelect.SetSelected(currentHour)
+		minuteSelect.SetSelected(currentMinute)
+	})
+
+	timeLayout := container.New(layout.NewHBoxLayout(),
+		widget.NewLabel("Time"),
+		hourSelect,
+		widget.NewLabel(":"),
+		minuteSelect,
+		layout.NewSpacer(),
+		nowButton,
+	)
+	dialogContent := container.NewVBox(
+		widget.NewLabelWithStyle("Choose date and time", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		widget.NewSeparator(),
+		calendar,
+		widget.NewSeparator(),
+		timeLayout,
+	)
+
+	d := dialog.NewCustomConfirm(
+		"",
+		"Ok",
+		"Cancel",
+		dialogContent,
+		func(ok bool) {
+			if ok {
+				h, _ := strconv.Atoi(currentHour)
+				m, _ := strconv.Atoi(currentMinute)
+				finalTime := time.Date(
+					dateFromCalendar.Year(),
+					dateFromCalendar.Month(),
+					dateFromCalendar.Day(),
+					h,
+					m,
+					0, 0,
+					dateFromCalendar.Location(),
+				)
+				*selectedTime = finalTime
+				*isSelected = true
+				displayEntry.SetText(finalTime.Format("02.01.2006 15:04"))
+			}
+		},
+		parent,
+	)
+	d.Resize(fyne.NewSize(400, 500))
+	d.Show()
 }
 
 func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
@@ -274,6 +358,12 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		container.NewCenter(headerTitle),
 	)
 
+	// Add Back button
+	backButton := widget.NewButton("Назад", func() {
+		state.currentPage = "lector_works"
+		w.SetContent(CreateLectorWorksPage(state, nil))
+	})
+
 	titleEntry := widget.NewEntry()
 	if existingTask != nil {
 		titleEntry.SetText(existingTask.Title)
@@ -455,7 +545,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 			CreateBlockingCriteriaPage(state, *taskID)
 		}
 	})
-	nextButtonContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), nextButton)
+	buttonsContainer := container.New(layout.NewHBoxLayout(), backButton, layout.NewSpacer(), nextButton)
 
 	contentBackground := canvas.NewRectangle(color.White)
 	contentWithPadding := container.NewPadded(inputGrid)
@@ -465,95 +555,12 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}),
 		container.NewBorder(
 			headerContent,
-			nextButtonContainer,
+			buttonsContainer,
 			nil,
 			nil,
 			centralContent,
 		),
 	))
-}
-
-func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSelected *bool, displayEntry *widget.Entry) {
-	var initialDate time.Time
-	var currentHour, currentMinute string
-	if *isSelected {
-		initialDate = *selectedTime
-	} else {
-		initialDate = time.Now()
-	}
-	currentHour = fmt.Sprintf("%02d", initialDate.Hour())
-	currentMinute = fmt.Sprintf("%02d", initialDate.Minute())
-
-	dateFromCalendar := initialDate
-	calendar := widget.NewCalendar(initialDate, func(t time.Time) {
-		dateFromCalendar = t
-	})
-
-	hours := make([]string, 24)
-	for i := 0; i < 24; i++ {
-		hours[i] = fmt.Sprintf("%02d", i)
-	}
-	minutes := make([]string, 60)
-	for i := 0; i < 60; i++ {
-		minutes[i] = fmt.Sprintf("%02d", i)
-	}
-
-	hourSelect := widget.NewSelect(hours, func(s string) { currentHour = s })
-	hourSelect.SetSelected(currentHour)
-	minuteSelect := widget.NewSelect(minutes, func(s string) { currentMinute = s })
-	minuteSelect.SetSelected(currentMinute)
-
-	nowButton := widget.NewButton("Now", func() {
-		currentTime := time.Now()
-		currentHour = fmt.Sprintf("%02d", currentTime.Hour())
-		currentMinute = fmt.Sprintf("%02d", currentTime.Minute())
-		hourSelect.SetSelected(currentHour)
-		minuteSelect.SetSelected(currentMinute)
-	})
-
-	timeLayout := container.New(layout.NewHBoxLayout(),
-		widget.NewLabel("Time"),
-		hourSelect,
-		widget.NewLabel(":"),
-		minuteSelect,
-		layout.NewSpacer(),
-		nowButton,
-	)
-	dialogContent := container.NewVBox(
-		widget.NewLabelWithStyle("Choose date and time", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		widget.NewSeparator(),
-		calendar,
-		widget.NewSeparator(),
-		timeLayout,
-	)
-
-	d := dialog.NewCustomConfirm(
-		"",
-		"Ok",
-		"Cancel",
-		dialogContent,
-		func(ok bool) {
-			if ok {
-				h, _ := strconv.Atoi(currentHour)
-				m, _ := strconv.Atoi(currentMinute)
-				finalTime := time.Date(
-					dateFromCalendar.Year(),
-					dateFromCalendar.Month(),
-					dateFromCalendar.Day(),
-					h,
-					m,
-					0, 0,
-					dateFromCalendar.Location(),
-				)
-				*selectedTime = finalTime
-				*isSelected = true
-				displayEntry.SetText(finalTime.Format("02.01.2006 15:04"))
-			}
-		},
-		parent,
-	)
-	d.Resize(fyne.NewSize(400, 500))
-	d.Show()
 }
 
 func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
@@ -616,10 +623,13 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 	var activeCriteria []*CriterionEntry
 	addCriterionEntry := func(crit *rubricpb.BlockingCriteria) {
 		nameEntry := widget.NewEntry()
+		var id int32
 		if crit != nil {
 			nameEntry.SetText(crit.Name)
+			id = crit.Id
 		} else {
 			nameEntry.SetPlaceHolder("Название")
+			id = 0
 		}
 		nameEntryContainer := container.NewMax(nameEntry)
 		nameEntryContainer.Resize(fyne.NewSize(250, 60))
@@ -662,6 +672,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 		criteriaListContainer.Refresh()
 
 		activeCriteria = append(activeCriteria, &CriterionEntry{
+			ID:               id,
 			NameEntry:        nameEntry,
 			DescriptionEntry: descriptionEntry,
 			CommentEntry:     commentEntry,
@@ -671,13 +682,85 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 	}
 
 	deleteCriterionEntry := func() {
-		if len(activeCriteria) > 0 {
-			lastIndex := len(activeCriteria) - 1
-			lastCriterion := activeCriteria[lastIndex]
-			criteriaListContainer.Remove(lastCriterion.Container)
-			activeCriteria = activeCriteria[:lastIndex]
-			criteriaListContainer.Refresh()
+		if len(activeCriteria) == 0 {
+			dialog.ShowInformation("Ошибка", "Нет критериев для удаления", w)
+			return
 		}
+
+		// Создаем список названий критериев
+		criteriaNames := make([]string, len(activeCriteria))
+		nameToIndex := make(map[string]int)
+		for i, crit := range activeCriteria {
+			name := crit.NameEntry.Text
+			if name == "" {
+				name = "Критерий без названия"
+			}
+			criteriaNames[i] = name
+			nameToIndex[name] = i
+		}
+
+		// Создаем выпадающий список для выбора критерия
+		selectEntry := widget.NewSelect(criteriaNames, func(selected string) {})
+		selectEntry.PlaceHolder = "Выберите критерий для удаления"
+		selectEntryContainer := container.NewVBox(
+			widget.NewLabel("Выберите критерий:"),
+			selectEntry,
+		)
+
+		// Диалоговое окно для выбора критерия
+		deleteDialog := dialog.NewCustomConfirm(
+			"Удаление критерия",
+			"Удалить",
+			"Отмена",
+			selectEntryContainer,
+			func(confirmed bool) {
+				if !confirmed || selectEntry.Selected == "" {
+					return
+				}
+
+				// Находим выбранный критерий
+				index, ok := nameToIndex[selectEntry.Selected]
+				if !ok {
+					dialog.ShowInformation("Ошибка", "Выбранный критерий не найден", w)
+					return
+				}
+				selectedCriterion := activeCriteria[index]
+
+				// Если критерий существует в базе (ID != 0), удаляем его
+				if selectedCriterion.ID != 0 {
+					rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+					if err != nil {
+						log.Printf("Failed to connect to rubricservice: %v", err)
+						dialog.ShowError(err, w)
+						return
+					}
+					defer rubricConn.Close()
+					rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+
+					resp, err := rubricClient.DeleteBlockingCriteria(ctx, &rubricpb.DeleteBlockingCriteriaRequest{CriteriaId: selectedCriterion.ID})
+					if err != nil {
+						log.Printf("Failed to delete blocking criteria: %v", err)
+						dialog.ShowError(err, w)
+						return
+					}
+					if resp.Error != "" {
+						log.Println("DeleteBlockingCriteria error:", resp.Error)
+						dialog.ShowInformation("Ошибка", resp.Error, w)
+						return
+					}
+				}
+
+				// Удаляем критерий из интерфейса
+				criteriaListContainer.Remove(selectedCriterion.Container)
+				activeCriteria = append(activeCriteria[:index], activeCriteria[index+1:]...)
+				criteriaListContainer.Refresh()
+			},
+			w,
+		)
+		deleteDialog.Show()
 	}
 
 	for _, crit := range resp.Criteria {
@@ -705,7 +788,26 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
+
+		// Удаляем все существующие блокирующие критерии для task_id
+		respDelete, err := rubricClient.DeleteTaskBlockingCriterias(ctx, &rubricpb.DeleteTaskBlockingCriteriasRequest{TaskId: taskID})
+		if err != nil {
+			log.Printf("Failed to delete existing blocking criteria: %v", err)
+			dialog.ShowError(err, w)
+			return
+		}
+		if respDelete.Error != "" {
+			log.Println("DeleteTaskBlockingCriterias error:", respDelete.Error)
+			dialog.ShowInformation("Ошибка", respDelete.Error, w)
+			return
+		}
+
+		// Создаем новые критерии
 		for _, criterion := range activeCriteria {
+			if criterion.NameEntry.Text == "" || criterion.EvaluationEntry.Text == "" {
+				dialog.ShowInformation("Ошибка", "Название и оценка обязательны для всех критериев", w)
+				return
+			}
 			finalMark, err := strconv.ParseInt(criterion.EvaluationEntry.Text, 10, 64)
 			if err != nil {
 				dialog.ShowInformation("Ошибка", "Оценка должна быть числом", w)
@@ -762,7 +864,6 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 		),
 	))
 }
-
 func CreateMainCriteriaPage(state *AppState, taskID int32) {
 	w := state.window
 
@@ -830,6 +931,12 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 	)
 	headerContent = container.NewStack(canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}), headerContent)
 
+	backButton := widget.NewButton("Назад", func() {
+		state.currentPage = "lector_blocking"
+		CreateBlockingCriteriaPage(state, taskID)
+	})
+	backButtonContainer := container.NewHBox(layout.NewSpacer(), backButton)
+
 	contentContainer := container.New(layout.NewMaxLayout(), widget.NewLabel("Выберите группу и критерий"))
 
 	createButton := widget.NewButton("Создать", func() {
@@ -888,6 +995,81 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 		}, w)
 	})
 
+	deleteGroupButton := widget.NewButton("Удалить группу", func() {
+		if len(groups) == 0 {
+			dialog.ShowInformation("Ошибка", "Нет групп для удаления", w)
+			return
+		}
+
+		groupNames := make([]string, len(groups))
+		nameToIndex := make(map[string]int)
+		for i, group := range groups {
+			groupNames[i] = group.Name
+			nameToIndex[group.Name] = i
+		}
+
+		selectEntry := widget.NewSelect(groupNames, func(selected string) {})
+		selectEntry.PlaceHolder = "Выберите группу для удаления"
+		selectEntryContainer := container.NewVBox(
+			widget.NewLabel("Выберите группу:"),
+			selectEntry,
+		)
+
+		deleteDialog := dialog.NewCustomConfirm(
+			"Удаление группы",
+			"Удалить",
+			"Отмена",
+			selectEntryContainer,
+			func(confirmed bool) {
+				if !confirmed || selectEntry.Selected == "" {
+					return
+				}
+
+				index, ok := nameToIndex[selectEntry.Selected]
+				if !ok {
+					dialog.ShowInformation("Ошибка", "Выбранная группа не найдена", w)
+					return
+				}
+
+				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Failed to connect to rubricservice: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				defer rubricConn.Close()
+				rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+
+				resp, err := rubricClient.DeleteCriteriaGroup(ctx, &rubricpb.DeleteCriteriaGroupRequest{GroupId: groups[index].GroupID})
+				if err != nil {
+					log.Printf("Failed to delete criteria group: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				if resp.Error != "" {
+					log.Println("DeleteCriteriaGroup error:", resp.Error)
+					dialog.ShowInformation("Ошибка", resp.Error, w)
+					return
+				}
+
+				groups = append(groups[:index], groups[index+1:]...)
+				if selectedGroupIndex == index {
+					selectedGroupIndex = -1
+					contentContainer.Objects = []fyne.CanvasObject{widget.NewLabel("Выберите группу и критерий")}
+					contentContainer.Refresh()
+				} else if selectedGroupIndex > index {
+					selectedGroupIndex--
+				}
+				groupList.Refresh()
+			},
+			w,
+		)
+		deleteDialog.Show()
+	})
+
 	criteriaList := widget.NewList(
 		func() int {
 			if selectedGroupIndex >= 0 && selectedGroupIndex < len(groups) {
@@ -944,6 +1126,79 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 				criteriaList.Refresh()
 			}
 		}, w)
+	})
+
+	deleteCriterionButton := widget.NewButton("Удалить критерий", func() {
+		if selectedGroupIndex < 0 {
+			dialog.ShowInformation("Ошибка", "Сначала выберите группу", w)
+			return
+		}
+		if len(groups[selectedGroupIndex].Criteria) == 0 {
+			dialog.ShowInformation("Ошибка", "Нет критериев для удаления", w)
+			return
+		}
+
+		criteriaNames := make([]string, len(groups[selectedGroupIndex].Criteria))
+		nameToIndex := make(map[string]int)
+		for i, name := range groups[selectedGroupIndex].Criteria {
+			criteriaNames[i] = name
+			nameToIndex[name] = i
+		}
+
+		selectEntry := widget.NewSelect(criteriaNames, func(selected string) {})
+		selectEntry.PlaceHolder = "Выберите критерий для удаления"
+		selectEntryContainer := container.NewVBox(
+			widget.NewLabel("Выберите критерий:"),
+			selectEntry,
+		)
+
+		deleteDialog := dialog.NewCustomConfirm(
+			"Удаление критерия",
+			"Удалить",
+			"Отмена",
+			selectEntryContainer,
+			func(confirmed bool) {
+				if !confirmed || selectEntry.Selected == "" {
+					return
+				}
+
+				nameIndex, ok := nameToIndex[selectEntry.Selected]
+				if !ok {
+					dialog.ShowInformation("Ошибка", "Выбранный критерий не найден", w)
+					return
+				}
+
+				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Failed to connect to rubricservice: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				defer rubricConn.Close()
+				rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+
+				resp, err := rubricClient.DeleteCriterion(ctx, &rubricpb.DeleteCriterionRequest{CriterionId: groups[selectedGroupIndex].CriteriaIDs[nameIndex]})
+				if err != nil {
+					log.Printf("Failed to delete criterion: %v", err)
+					dialog.ShowError(err, w)
+					return
+				}
+				if resp.Error != "" {
+					log.Println("DeleteCriterion error:", resp.Error)
+					dialog.ShowInformation("Ошибка", resp.Error, w)
+					return
+				}
+
+				groups[selectedGroupIndex].Criteria = append(groups[selectedGroupIndex].Criteria[:nameIndex], groups[selectedGroupIndex].Criteria[nameIndex+1:]...)
+				groups[selectedGroupIndex].CriteriaIDs = append(groups[selectedGroupIndex].CriteriaIDs[:nameIndex], groups[selectedGroupIndex].CriteriaIDs[nameIndex+1:]...)
+				criteriaList.Refresh()
+			},
+			w,
+		)
+		deleteDialog.Show()
 	})
 
 	groupList.OnSelected = func(id widget.ListItemID) {
@@ -1082,17 +1337,16 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 		}
 	}
 
-	groupContainer := container.NewVBox(groupList, addGroupButton)
-	criteriaContainer := container.NewVBox(criteriaList, addCriterionButton)
+	groupContainer := container.NewVBox(groupList, addGroupButton, deleteGroupButton)
+	criteriaContainer := container.NewVBox(criteriaList, addCriterionButton, deleteCriterionButton)
 	leftPanel := container.NewHSplit(groupContainer, criteriaContainer)
 	leftPanel.SetOffset(0.5)
 	split := container.NewHSplit(leftPanel, mainContent)
-	split.SetOffset(0.3)
 
 	w.SetContent(container.NewStack(
 		canvas.NewRectangle(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
 		container.NewBorder(
-			headerContent,
+			container.NewVBox(headerContent, backButtonContainer),
 			nil,
 			nil,
 			nil,
