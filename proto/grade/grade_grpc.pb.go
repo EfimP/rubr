@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	GradingService_SetBlockingCriteriaMark_FullMethodName = "/grade.GradingService/SetBlockingCriteriaMark"
 	GradingService_SetMainCriteriaMark_FullMethodName     = "/grade.GradingService/SetMainCriteriaMark"
+	GradingService_GetCriteriaMarks_FullMethodName        = "/grade.GradingService/GetCriteriaMarks"
+	GradingService_UpdateWorkStatus_FullMethodName        = "/grade.GradingService/UpdateWorkStatus"
 )
 
 // GradingServiceClient is the client API for GradingService service.
@@ -29,6 +31,8 @@ const (
 type GradingServiceClient interface {
 	SetBlockingCriteriaMark(ctx context.Context, in *SetBlockingCriteriaMarkRequest, opts ...grpc.CallOption) (*SetBlockingCriteriaMarkResponse, error)
 	SetMainCriteriaMark(ctx context.Context, in *SetMainCriteriaMarkRequest, opts ...grpc.CallOption) (*SetMainCriteriaMarkResponse, error)
+	GetCriteriaMarks(ctx context.Context, in *GetCriteriaMarksRequest, opts ...grpc.CallOption) (*GetCriteriaMarksResponse, error)
+	UpdateWorkStatus(ctx context.Context, in *UpdateWorkStatusRequest, opts ...grpc.CallOption) (*UpdateWorkStatusResponse, error)
 }
 
 type gradingServiceClient struct {
@@ -59,12 +63,34 @@ func (c *gradingServiceClient) SetMainCriteriaMark(ctx context.Context, in *SetM
 	return out, nil
 }
 
+func (c *gradingServiceClient) GetCriteriaMarks(ctx context.Context, in *GetCriteriaMarksRequest, opts ...grpc.CallOption) (*GetCriteriaMarksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCriteriaMarksResponse)
+	err := c.cc.Invoke(ctx, GradingService_GetCriteriaMarks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gradingServiceClient) UpdateWorkStatus(ctx context.Context, in *UpdateWorkStatusRequest, opts ...grpc.CallOption) (*UpdateWorkStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateWorkStatusResponse)
+	err := c.cc.Invoke(ctx, GradingService_UpdateWorkStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GradingServiceServer is the server API for GradingService service.
 // All implementations must embed UnimplementedGradingServiceServer
 // for forward compatibility.
 type GradingServiceServer interface {
 	SetBlockingCriteriaMark(context.Context, *SetBlockingCriteriaMarkRequest) (*SetBlockingCriteriaMarkResponse, error)
 	SetMainCriteriaMark(context.Context, *SetMainCriteriaMarkRequest) (*SetMainCriteriaMarkResponse, error)
+	GetCriteriaMarks(context.Context, *GetCriteriaMarksRequest) (*GetCriteriaMarksResponse, error)
+	UpdateWorkStatus(context.Context, *UpdateWorkStatusRequest) (*UpdateWorkStatusResponse, error)
 	mustEmbedUnimplementedGradingServiceServer()
 }
 
@@ -80,6 +106,12 @@ func (UnimplementedGradingServiceServer) SetBlockingCriteriaMark(context.Context
 }
 func (UnimplementedGradingServiceServer) SetMainCriteriaMark(context.Context, *SetMainCriteriaMarkRequest) (*SetMainCriteriaMarkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetMainCriteriaMark not implemented")
+}
+func (UnimplementedGradingServiceServer) GetCriteriaMarks(context.Context, *GetCriteriaMarksRequest) (*GetCriteriaMarksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCriteriaMarks not implemented")
+}
+func (UnimplementedGradingServiceServer) UpdateWorkStatus(context.Context, *UpdateWorkStatusRequest) (*UpdateWorkStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkStatus not implemented")
 }
 func (UnimplementedGradingServiceServer) mustEmbedUnimplementedGradingServiceServer() {}
 func (UnimplementedGradingServiceServer) testEmbeddedByValue()                        {}
@@ -138,6 +170,42 @@ func _GradingService_SetMainCriteriaMark_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GradingService_GetCriteriaMarks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCriteriaMarksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GradingServiceServer).GetCriteriaMarks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GradingService_GetCriteriaMarks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GradingServiceServer).GetCriteriaMarks(ctx, req.(*GetCriteriaMarksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GradingService_UpdateWorkStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorkStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GradingServiceServer).UpdateWorkStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GradingService_UpdateWorkStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GradingServiceServer).UpdateWorkStatus(ctx, req.(*UpdateWorkStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GradingService_ServiceDesc is the grpc.ServiceDesc for GradingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +220,14 @@ var GradingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetMainCriteriaMark",
 			Handler:    _GradingService_SetMainCriteriaMark_Handler,
+		},
+		{
+			MethodName: "GetCriteriaMarks",
+			Handler:    _GradingService_GetCriteriaMarks_Handler,
+		},
+		{
+			MethodName: "UpdateWorkStatus",
+			Handler:    _GradingService_UpdateWorkStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

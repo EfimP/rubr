@@ -21,6 +21,390 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type DeleteCriteriaGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       int32                  `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCriteriaGroupRequest) Reset() {
+	*x = DeleteCriteriaGroupRequest{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCriteriaGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCriteriaGroupRequest) ProtoMessage() {}
+
+func (x *DeleteCriteriaGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCriteriaGroupRequest.ProtoReflect.Descriptor instead.
+func (*DeleteCriteriaGroupRequest) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *DeleteCriteriaGroupRequest) GetGroupId() int32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+type DeleteCriteriaGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCriteriaGroupResponse) Reset() {
+	*x = DeleteCriteriaGroupResponse{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCriteriaGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCriteriaGroupResponse) ProtoMessage() {}
+
+func (x *DeleteCriteriaGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCriteriaGroupResponse.ProtoReflect.Descriptor instead.
+func (*DeleteCriteriaGroupResponse) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *DeleteCriteriaGroupResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteCriteriaGroupResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type DeleteCriterionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CriterionId   int32                  `protobuf:"varint,1,opt,name=criterion_id,json=criterionId,proto3" json:"criterion_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCriterionRequest) Reset() {
+	*x = DeleteCriterionRequest{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCriterionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCriterionRequest) ProtoMessage() {}
+
+func (x *DeleteCriterionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCriterionRequest.ProtoReflect.Descriptor instead.
+func (*DeleteCriterionRequest) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DeleteCriterionRequest) GetCriterionId() int32 {
+	if x != nil {
+		return x.CriterionId
+	}
+	return 0
+}
+
+type DeleteCriterionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCriterionResponse) Reset() {
+	*x = DeleteCriterionResponse{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCriterionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCriterionResponse) ProtoMessage() {}
+
+func (x *DeleteCriterionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCriterionResponse.ProtoReflect.Descriptor instead.
+func (*DeleteCriterionResponse) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *DeleteCriterionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteCriterionResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type DeleteBlockingCriteriaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CriteriaId    int32                  `protobuf:"varint,1,opt,name=criteria_id,json=criteriaId,proto3" json:"criteria_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBlockingCriteriaRequest) Reset() {
+	*x = DeleteBlockingCriteriaRequest{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBlockingCriteriaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBlockingCriteriaRequest) ProtoMessage() {}
+
+func (x *DeleteBlockingCriteriaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBlockingCriteriaRequest.ProtoReflect.Descriptor instead.
+func (*DeleteBlockingCriteriaRequest) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *DeleteBlockingCriteriaRequest) GetCriteriaId() int32 {
+	if x != nil {
+		return x.CriteriaId
+	}
+	return 0
+}
+
+type DeleteBlockingCriteriaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBlockingCriteriaResponse) Reset() {
+	*x = DeleteBlockingCriteriaResponse{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBlockingCriteriaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBlockingCriteriaResponse) ProtoMessage() {}
+
+func (x *DeleteBlockingCriteriaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBlockingCriteriaResponse.ProtoReflect.Descriptor instead.
+func (*DeleteBlockingCriteriaResponse) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeleteBlockingCriteriaResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteBlockingCriteriaResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type DeleteTaskBlockingCriteriasRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        int32                  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTaskBlockingCriteriasRequest) Reset() {
+	*x = DeleteTaskBlockingCriteriasRequest{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTaskBlockingCriteriasRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTaskBlockingCriteriasRequest) ProtoMessage() {}
+
+func (x *DeleteTaskBlockingCriteriasRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTaskBlockingCriteriasRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTaskBlockingCriteriasRequest) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DeleteTaskBlockingCriteriasRequest) GetTaskId() int32 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+type DeleteTaskBlockingCriteriasResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTaskBlockingCriteriasResponse) Reset() {
+	*x = DeleteTaskBlockingCriteriasResponse{}
+	mi := &file_proto_rubric_rubric_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTaskBlockingCriteriasResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTaskBlockingCriteriasResponse) ProtoMessage() {}
+
+func (x *DeleteTaskBlockingCriteriasResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_rubric_rubric_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTaskBlockingCriteriasResponse.ProtoReflect.Descriptor instead.
+func (*DeleteTaskBlockingCriteriasResponse) Descriptor() ([]byte, []int) {
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteTaskBlockingCriteriasResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteTaskBlockingCriteriasResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 type CreateCriteriaGroupRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TaskId        int32                  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
@@ -31,7 +415,7 @@ type CreateCriteriaGroupRequest struct {
 
 func (x *CreateCriteriaGroupRequest) Reset() {
 	*x = CreateCriteriaGroupRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[0]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +427,7 @@ func (x *CreateCriteriaGroupRequest) String() string {
 func (*CreateCriteriaGroupRequest) ProtoMessage() {}
 
 func (x *CreateCriteriaGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[0]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +440,7 @@ func (x *CreateCriteriaGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCriteriaGroupRequest.ProtoReflect.Descriptor instead.
 func (*CreateCriteriaGroupRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{0}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CreateCriteriaGroupRequest) GetTaskId() int32 {
@@ -83,7 +467,7 @@ type CreateCriteriaGroupResponse struct {
 
 func (x *CreateCriteriaGroupResponse) Reset() {
 	*x = CreateCriteriaGroupResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[1]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -95,7 +479,7 @@ func (x *CreateCriteriaGroupResponse) String() string {
 func (*CreateCriteriaGroupResponse) ProtoMessage() {}
 
 func (x *CreateCriteriaGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[1]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,7 +492,7 @@ func (x *CreateCriteriaGroupResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCriteriaGroupResponse.ProtoReflect.Descriptor instead.
 func (*CreateCriteriaGroupResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{1}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CreateCriteriaGroupResponse) GetGroupId() int32 {
@@ -135,7 +519,7 @@ type CreateCriterionRequest struct {
 
 func (x *CreateCriterionRequest) Reset() {
 	*x = CreateCriterionRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[2]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +531,7 @@ func (x *CreateCriterionRequest) String() string {
 func (*CreateCriterionRequest) ProtoMessage() {}
 
 func (x *CreateCriterionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[2]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +544,7 @@ func (x *CreateCriterionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCriterionRequest.ProtoReflect.Descriptor instead.
 func (*CreateCriterionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{2}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CreateCriterionRequest) GetGroupId() int32 {
@@ -187,7 +571,7 @@ type CreateCriterionResponse struct {
 
 func (x *CreateCriterionResponse) Reset() {
 	*x = CreateCriterionResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[3]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -199,7 +583,7 @@ func (x *CreateCriterionResponse) String() string {
 func (*CreateCriterionResponse) ProtoMessage() {}
 
 func (x *CreateCriterionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[3]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -212,7 +596,7 @@ func (x *CreateCriterionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCriterionResponse.ProtoReflect.Descriptor instead.
 func (*CreateCriterionResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{3}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *CreateCriterionResponse) GetCriterionId() int32 {
@@ -239,7 +623,7 @@ type UpdateCriterionWeightRequest struct {
 
 func (x *UpdateCriterionWeightRequest) Reset() {
 	*x = UpdateCriterionWeightRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[4]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -251,7 +635,7 @@ func (x *UpdateCriterionWeightRequest) String() string {
 func (*UpdateCriterionWeightRequest) ProtoMessage() {}
 
 func (x *UpdateCriterionWeightRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[4]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -264,7 +648,7 @@ func (x *UpdateCriterionWeightRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCriterionWeightRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCriterionWeightRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{4}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateCriterionWeightRequest) GetCriterionId() int32 {
@@ -291,7 +675,7 @@ type UpdateCriterionWeightResponse struct {
 
 func (x *UpdateCriterionWeightResponse) Reset() {
 	*x = UpdateCriterionWeightResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[5]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -303,7 +687,7 @@ func (x *UpdateCriterionWeightResponse) String() string {
 func (*UpdateCriterionWeightResponse) ProtoMessage() {}
 
 func (x *UpdateCriterionWeightResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[5]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -316,7 +700,7 @@ func (x *UpdateCriterionWeightResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCriterionWeightResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCriterionWeightResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{5}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UpdateCriterionWeightResponse) GetSuccess() bool {
@@ -344,7 +728,7 @@ type UpdateCriterionCommentRequest struct {
 
 func (x *UpdateCriterionCommentRequest) Reset() {
 	*x = UpdateCriterionCommentRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[6]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -356,7 +740,7 @@ func (x *UpdateCriterionCommentRequest) String() string {
 func (*UpdateCriterionCommentRequest) ProtoMessage() {}
 
 func (x *UpdateCriterionCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[6]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -369,7 +753,7 @@ func (x *UpdateCriterionCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCriterionCommentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCriterionCommentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{6}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateCriterionCommentRequest) GetCriterionId() int32 {
@@ -403,7 +787,7 @@ type UpdateCriterionCommentResponse struct {
 
 func (x *UpdateCriterionCommentResponse) Reset() {
 	*x = UpdateCriterionCommentResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[7]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +799,7 @@ func (x *UpdateCriterionCommentResponse) String() string {
 func (*UpdateCriterionCommentResponse) ProtoMessage() {}
 
 func (x *UpdateCriterionCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[7]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -428,7 +812,7 @@ func (x *UpdateCriterionCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCriterionCommentResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCriterionCommentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{7}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateCriterionCommentResponse) GetSuccess() bool {
@@ -458,7 +842,7 @@ type CreateNewBlockingCriteriaRequest struct {
 
 func (x *CreateNewBlockingCriteriaRequest) Reset() {
 	*x = CreateNewBlockingCriteriaRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[8]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -470,7 +854,7 @@ func (x *CreateNewBlockingCriteriaRequest) String() string {
 func (*CreateNewBlockingCriteriaRequest) ProtoMessage() {}
 
 func (x *CreateNewBlockingCriteriaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[8]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -483,7 +867,7 @@ func (x *CreateNewBlockingCriteriaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateNewBlockingCriteriaRequest.ProtoReflect.Descriptor instead.
 func (*CreateNewBlockingCriteriaRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{8}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CreateNewBlockingCriteriaRequest) GetTaskId() int32 {
@@ -531,7 +915,7 @@ type CreateNewBlockingCriteriaResponse struct {
 
 func (x *CreateNewBlockingCriteriaResponse) Reset() {
 	*x = CreateNewBlockingCriteriaResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[9]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -543,7 +927,7 @@ func (x *CreateNewBlockingCriteriaResponse) String() string {
 func (*CreateNewBlockingCriteriaResponse) ProtoMessage() {}
 
 func (x *CreateNewBlockingCriteriaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[9]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -556,7 +940,7 @@ func (x *CreateNewBlockingCriteriaResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use CreateNewBlockingCriteriaResponse.ProtoReflect.Descriptor instead.
 func (*CreateNewBlockingCriteriaResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{9}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *CreateNewBlockingCriteriaResponse) GetCriteriaGroupId() int32 {
@@ -583,7 +967,7 @@ type CreateNewCriteriaGroupRequest struct {
 
 func (x *CreateNewCriteriaGroupRequest) Reset() {
 	*x = CreateNewCriteriaGroupRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[10]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +979,7 @@ func (x *CreateNewCriteriaGroupRequest) String() string {
 func (*CreateNewCriteriaGroupRequest) ProtoMessage() {}
 
 func (x *CreateNewCriteriaGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[10]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +992,7 @@ func (x *CreateNewCriteriaGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateNewCriteriaGroupRequest.ProtoReflect.Descriptor instead.
 func (*CreateNewCriteriaGroupRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{10}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CreateNewCriteriaGroupRequest) GetTaskId() int32 {
@@ -635,7 +1019,7 @@ type CreateNewCriteriaGroupResponse struct {
 
 func (x *CreateNewCriteriaGroupResponse) Reset() {
 	*x = CreateNewCriteriaGroupResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[11]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -647,7 +1031,7 @@ func (x *CreateNewCriteriaGroupResponse) String() string {
 func (*CreateNewCriteriaGroupResponse) ProtoMessage() {}
 
 func (x *CreateNewCriteriaGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[11]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -660,7 +1044,7 @@ func (x *CreateNewCriteriaGroupResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateNewCriteriaGroupResponse.ProtoReflect.Descriptor instead.
 func (*CreateNewCriteriaGroupResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{11}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CreateNewCriteriaGroupResponse) GetCriteriaGroupId() int32 {
@@ -687,7 +1071,7 @@ type CreateNewMainCriteriaRequest struct {
 
 func (x *CreateNewMainCriteriaRequest) Reset() {
 	*x = CreateNewMainCriteriaRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[12]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -699,7 +1083,7 @@ func (x *CreateNewMainCriteriaRequest) String() string {
 func (*CreateNewMainCriteriaRequest) ProtoMessage() {}
 
 func (x *CreateNewMainCriteriaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[12]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -712,7 +1096,7 @@ func (x *CreateNewMainCriteriaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateNewMainCriteriaRequest.ProtoReflect.Descriptor instead.
 func (*CreateNewMainCriteriaRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{12}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CreateNewMainCriteriaRequest) GetCriteriaGroupId() int32 {
@@ -739,7 +1123,7 @@ type CreateNewMainCriteriaResponse struct {
 
 func (x *CreateNewMainCriteriaResponse) Reset() {
 	*x = CreateNewMainCriteriaResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[13]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -751,7 +1135,7 @@ func (x *CreateNewMainCriteriaResponse) String() string {
 func (*CreateNewMainCriteriaResponse) ProtoMessage() {}
 
 func (x *CreateNewMainCriteriaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[13]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -764,7 +1148,7 @@ func (x *CreateNewMainCriteriaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateNewMainCriteriaResponse.ProtoReflect.Descriptor instead.
 func (*CreateNewMainCriteriaResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{13}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CreateNewMainCriteriaResponse) GetCriteriaId() int32 {
@@ -792,7 +1176,7 @@ type CreateCriteriaDescriptionRequest struct {
 
 func (x *CreateCriteriaDescriptionRequest) Reset() {
 	*x = CreateCriteriaDescriptionRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[14]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -804,7 +1188,7 @@ func (x *CreateCriteriaDescriptionRequest) String() string {
 func (*CreateCriteriaDescriptionRequest) ProtoMessage() {}
 
 func (x *CreateCriteriaDescriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[14]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -817,7 +1201,7 @@ func (x *CreateCriteriaDescriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCriteriaDescriptionRequest.ProtoReflect.Descriptor instead.
 func (*CreateCriteriaDescriptionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{14}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CreateCriteriaDescriptionRequest) GetCriteriaId() int32 {
@@ -851,7 +1235,7 @@ type CreateCriteriaDescriptionResponse struct {
 
 func (x *CreateCriteriaDescriptionResponse) Reset() {
 	*x = CreateCriteriaDescriptionResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[15]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -863,7 +1247,7 @@ func (x *CreateCriteriaDescriptionResponse) String() string {
 func (*CreateCriteriaDescriptionResponse) ProtoMessage() {}
 
 func (x *CreateCriteriaDescriptionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[15]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -876,7 +1260,7 @@ func (x *CreateCriteriaDescriptionResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use CreateCriteriaDescriptionResponse.ProtoReflect.Descriptor instead.
 func (*CreateCriteriaDescriptionResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{15}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CreateCriteriaDescriptionResponse) GetSuccess() bool {
@@ -903,7 +1287,7 @@ type SetCriteriaWeightRequest struct {
 
 func (x *SetCriteriaWeightRequest) Reset() {
 	*x = SetCriteriaWeightRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[16]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -915,7 +1299,7 @@ func (x *SetCriteriaWeightRequest) String() string {
 func (*SetCriteriaWeightRequest) ProtoMessage() {}
 
 func (x *SetCriteriaWeightRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[16]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -928,7 +1312,7 @@ func (x *SetCriteriaWeightRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetCriteriaWeightRequest.ProtoReflect.Descriptor instead.
 func (*SetCriteriaWeightRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{16}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *SetCriteriaWeightRequest) GetCriteriaId() int32 {
@@ -955,7 +1339,7 @@ type SetCriteriaWeightResponse struct {
 
 func (x *SetCriteriaWeightResponse) Reset() {
 	*x = SetCriteriaWeightResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[17]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -967,7 +1351,7 @@ func (x *SetCriteriaWeightResponse) String() string {
 func (*SetCriteriaWeightResponse) ProtoMessage() {}
 
 func (x *SetCriteriaWeightResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[17]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -980,7 +1364,7 @@ func (x *SetCriteriaWeightResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetCriteriaWeightResponse.ProtoReflect.Descriptor instead.
 func (*SetCriteriaWeightResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{17}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *SetCriteriaWeightResponse) GetSuccess() bool {
@@ -1006,7 +1390,7 @@ type LoadTaskBlockingCriteriasRequest struct {
 
 func (x *LoadTaskBlockingCriteriasRequest) Reset() {
 	*x = LoadTaskBlockingCriteriasRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[18]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1018,7 +1402,7 @@ func (x *LoadTaskBlockingCriteriasRequest) String() string {
 func (*LoadTaskBlockingCriteriasRequest) ProtoMessage() {}
 
 func (x *LoadTaskBlockingCriteriasRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[18]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1031,7 +1415,7 @@ func (x *LoadTaskBlockingCriteriasRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskBlockingCriteriasRequest.ProtoReflect.Descriptor instead.
 func (*LoadTaskBlockingCriteriasRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{18}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *LoadTaskBlockingCriteriasRequest) GetTaskId() int32 {
@@ -1054,7 +1438,7 @@ type BlockingCriteria struct {
 
 func (x *BlockingCriteria) Reset() {
 	*x = BlockingCriteria{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[19]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1066,7 +1450,7 @@ func (x *BlockingCriteria) String() string {
 func (*BlockingCriteria) ProtoMessage() {}
 
 func (x *BlockingCriteria) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[19]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1079,7 +1463,7 @@ func (x *BlockingCriteria) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlockingCriteria.ProtoReflect.Descriptor instead.
 func (*BlockingCriteria) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{19}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *BlockingCriteria) GetId() int32 {
@@ -1127,7 +1511,7 @@ type LoadTaskBlockingCriteriasResponse struct {
 
 func (x *LoadTaskBlockingCriteriasResponse) Reset() {
 	*x = LoadTaskBlockingCriteriasResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[20]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1139,7 +1523,7 @@ func (x *LoadTaskBlockingCriteriasResponse) String() string {
 func (*LoadTaskBlockingCriteriasResponse) ProtoMessage() {}
 
 func (x *LoadTaskBlockingCriteriasResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[20]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1152,7 +1536,7 @@ func (x *LoadTaskBlockingCriteriasResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use LoadTaskBlockingCriteriasResponse.ProtoReflect.Descriptor instead.
 func (*LoadTaskBlockingCriteriasResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{20}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *LoadTaskBlockingCriteriasResponse) GetCriteria() []*BlockingCriteria {
@@ -1178,7 +1562,7 @@ type LoadTaskMainCriteriasRequest struct {
 
 func (x *LoadTaskMainCriteriasRequest) Reset() {
 	*x = LoadTaskMainCriteriasRequest{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[21]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1190,7 +1574,7 @@ func (x *LoadTaskMainCriteriasRequest) String() string {
 func (*LoadTaskMainCriteriasRequest) ProtoMessage() {}
 
 func (x *LoadTaskMainCriteriasRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[21]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1203,7 +1587,7 @@ func (x *LoadTaskMainCriteriasRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskMainCriteriasRequest.ProtoReflect.Descriptor instead.
 func (*LoadTaskMainCriteriasRequest) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{21}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *LoadTaskMainCriteriasRequest) GetTaskId() int32 {
@@ -1224,7 +1608,7 @@ type CriteriaGroup struct {
 
 func (x *CriteriaGroup) Reset() {
 	*x = CriteriaGroup{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[22]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1236,7 +1620,7 @@ func (x *CriteriaGroup) String() string {
 func (*CriteriaGroup) ProtoMessage() {}
 
 func (x *CriteriaGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[22]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1249,7 +1633,7 @@ func (x *CriteriaGroup) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CriteriaGroup.ProtoReflect.Descriptor instead.
 func (*CriteriaGroup) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{22}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *CriteriaGroup) GetId() int32 {
@@ -1289,7 +1673,7 @@ type MainCriteria struct {
 
 func (x *MainCriteria) Reset() {
 	*x = MainCriteria{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[23]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1301,7 +1685,7 @@ func (x *MainCriteria) String() string {
 func (*MainCriteria) ProtoMessage() {}
 
 func (x *MainCriteria) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[23]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1314,7 +1698,7 @@ func (x *MainCriteria) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MainCriteria.ProtoReflect.Descriptor instead.
 func (*MainCriteria) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{23}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *MainCriteria) GetId() int32 {
@@ -1383,7 +1767,7 @@ type LoadTaskMainCriteriasResponse struct {
 
 func (x *LoadTaskMainCriteriasResponse) Reset() {
 	*x = LoadTaskMainCriteriasResponse{}
-	mi := &file_proto_rubric_rubric_proto_msgTypes[24]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1395,7 +1779,7 @@ func (x *LoadTaskMainCriteriasResponse) String() string {
 func (*LoadTaskMainCriteriasResponse) ProtoMessage() {}
 
 func (x *LoadTaskMainCriteriasResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_rubric_rubric_proto_msgTypes[24]
+	mi := &file_proto_rubric_rubric_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1408,7 +1792,7 @@ func (x *LoadTaskMainCriteriasResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoadTaskMainCriteriasResponse.ProtoReflect.Descriptor instead.
 func (*LoadTaskMainCriteriasResponse) Descriptor() ([]byte, []int) {
-	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{24}
+	return file_proto_rubric_rubric_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *LoadTaskMainCriteriasResponse) GetGroups() []*CriteriaGroup {
@@ -1429,7 +1813,28 @@ var File_proto_rubric_rubric_proto protoreflect.FileDescriptor
 
 const file_proto_rubric_rubric_proto_rawDesc = "" +
 	"\n" +
-	"\x19proto/rubric/rubric.proto\x12\x06rubric\"T\n" +
+	"\x19proto/rubric/rubric.proto\x12\x06rubric\"7\n" +
+	"\x1aDeleteCriteriaGroupRequest\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\x05R\agroupId\"M\n" +
+	"\x1bDeleteCriteriaGroupResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\";\n" +
+	"\x16DeleteCriterionRequest\x12!\n" +
+	"\fcriterion_id\x18\x01 \x01(\x05R\vcriterionId\"I\n" +
+	"\x17DeleteCriterionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"@\n" +
+	"\x1dDeleteBlockingCriteriaRequest\x12\x1f\n" +
+	"\vcriteria_id\x18\x01 \x01(\x05R\n" +
+	"criteriaId\"P\n" +
+	"\x1eDeleteBlockingCriteriaResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"=\n" +
+	"\"DeleteTaskBlockingCriteriasRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\x05R\x06taskId\"U\n" +
+	"#DeleteTaskBlockingCriteriasResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"T\n" +
 	"\x1aCreateCriteriaGroupRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\x05R\x06taskId\x12\x1d\n" +
 	"\n" +
@@ -1530,7 +1935,7 @@ const file_proto_rubric_rubric_proto_rawDesc = "" +
 	"comment100\"d\n" +
 	"\x1dLoadTaskMainCriteriasResponse\x12-\n" +
 	"\x06groups\x18\x01 \x03(\v2\x15.rubric.CriteriaGroupR\x06groups\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error2\x8d\t\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error2\xaa\f\n" +
 	"\rRubricService\x12r\n" +
 	"\x19CreateNewBlockingCriteria\x12(.rubric.CreateNewBlockingCriteriaRequest\x1a).rubric.CreateNewBlockingCriteriaResponse\"\x00\x12i\n" +
 	"\x16CreateNewCriteriaGroup\x12%.rubric.CreateNewCriteriaGroupRequest\x1a&.rubric.CreateNewCriteriaGroupResponse\"\x00\x12f\n" +
@@ -1542,7 +1947,11 @@ const file_proto_rubric_rubric_proto_rawDesc = "" +
 	"\x13CreateCriteriaGroup\x12\".rubric.CreateCriteriaGroupRequest\x1a#.rubric.CreateCriteriaGroupResponse\"\x00\x12T\n" +
 	"\x0fCreateCriterion\x12\x1e.rubric.CreateCriterionRequest\x1a\x1f.rubric.CreateCriterionResponse\"\x00\x12f\n" +
 	"\x15UpdateCriterionWeight\x12$.rubric.UpdateCriterionWeightRequest\x1a%.rubric.UpdateCriterionWeightResponse\"\x00\x12i\n" +
-	"\x16UpdateCriterionComment\x12%.rubric.UpdateCriterionCommentRequest\x1a&.rubric.UpdateCriterionCommentResponse\"\x00B\x17Z\x15./proto/rubric;rubricb\x06proto3"
+	"\x16UpdateCriterionComment\x12%.rubric.UpdateCriterionCommentRequest\x1a&.rubric.UpdateCriterionCommentResponse\"\x00\x12x\n" +
+	"\x1bDeleteTaskBlockingCriterias\x12*.rubric.DeleteTaskBlockingCriteriasRequest\x1a+.rubric.DeleteTaskBlockingCriteriasResponse\"\x00\x12i\n" +
+	"\x16DeleteBlockingCriteria\x12%.rubric.DeleteBlockingCriteriaRequest\x1a&.rubric.DeleteBlockingCriteriaResponse\"\x00\x12`\n" +
+	"\x13DeleteCriteriaGroup\x12\".rubric.DeleteCriteriaGroupRequest\x1a#.rubric.DeleteCriteriaGroupResponse\"\x00\x12T\n" +
+	"\x0fDeleteCriterion\x12\x1e.rubric.DeleteCriterionRequest\x1a\x1f.rubric.DeleteCriterionResponse\"\x00B\x17Z\x15./proto/rubric;rubricb\x06proto3"
 
 var (
 	file_proto_rubric_rubric_proto_rawDescOnce sync.Once
@@ -1556,62 +1965,78 @@ func file_proto_rubric_rubric_proto_rawDescGZIP() []byte {
 	return file_proto_rubric_rubric_proto_rawDescData
 }
 
-var file_proto_rubric_rubric_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_proto_rubric_rubric_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_proto_rubric_rubric_proto_goTypes = []any{
-	(*CreateCriteriaGroupRequest)(nil),        // 0: rubric.CreateCriteriaGroupRequest
-	(*CreateCriteriaGroupResponse)(nil),       // 1: rubric.CreateCriteriaGroupResponse
-	(*CreateCriterionRequest)(nil),            // 2: rubric.CreateCriterionRequest
-	(*CreateCriterionResponse)(nil),           // 3: rubric.CreateCriterionResponse
-	(*UpdateCriterionWeightRequest)(nil),      // 4: rubric.UpdateCriterionWeightRequest
-	(*UpdateCriterionWeightResponse)(nil),     // 5: rubric.UpdateCriterionWeightResponse
-	(*UpdateCriterionCommentRequest)(nil),     // 6: rubric.UpdateCriterionCommentRequest
-	(*UpdateCriterionCommentResponse)(nil),    // 7: rubric.UpdateCriterionCommentResponse
-	(*CreateNewBlockingCriteriaRequest)(nil),  // 8: rubric.CreateNewBlockingCriteriaRequest
-	(*CreateNewBlockingCriteriaResponse)(nil), // 9: rubric.CreateNewBlockingCriteriaResponse
-	(*CreateNewCriteriaGroupRequest)(nil),     // 10: rubric.CreateNewCriteriaGroupRequest
-	(*CreateNewCriteriaGroupResponse)(nil),    // 11: rubric.CreateNewCriteriaGroupResponse
-	(*CreateNewMainCriteriaRequest)(nil),      // 12: rubric.CreateNewMainCriteriaRequest
-	(*CreateNewMainCriteriaResponse)(nil),     // 13: rubric.CreateNewMainCriteriaResponse
-	(*CreateCriteriaDescriptionRequest)(nil),  // 14: rubric.CreateCriteriaDescriptionRequest
-	(*CreateCriteriaDescriptionResponse)(nil), // 15: rubric.CreateCriteriaDescriptionResponse
-	(*SetCriteriaWeightRequest)(nil),          // 16: rubric.SetCriteriaWeightRequest
-	(*SetCriteriaWeightResponse)(nil),         // 17: rubric.SetCriteriaWeightResponse
-	(*LoadTaskBlockingCriteriasRequest)(nil),  // 18: rubric.LoadTaskBlockingCriteriasRequest
-	(*BlockingCriteria)(nil),                  // 19: rubric.BlockingCriteria
-	(*LoadTaskBlockingCriteriasResponse)(nil), // 20: rubric.LoadTaskBlockingCriteriasResponse
-	(*LoadTaskMainCriteriasRequest)(nil),      // 21: rubric.LoadTaskMainCriteriasRequest
-	(*CriteriaGroup)(nil),                     // 22: rubric.CriteriaGroup
-	(*MainCriteria)(nil),                      // 23: rubric.MainCriteria
-	(*LoadTaskMainCriteriasResponse)(nil),     // 24: rubric.LoadTaskMainCriteriasResponse
+	(*DeleteCriteriaGroupRequest)(nil),          // 0: rubric.DeleteCriteriaGroupRequest
+	(*DeleteCriteriaGroupResponse)(nil),         // 1: rubric.DeleteCriteriaGroupResponse
+	(*DeleteCriterionRequest)(nil),              // 2: rubric.DeleteCriterionRequest
+	(*DeleteCriterionResponse)(nil),             // 3: rubric.DeleteCriterionResponse
+	(*DeleteBlockingCriteriaRequest)(nil),       // 4: rubric.DeleteBlockingCriteriaRequest
+	(*DeleteBlockingCriteriaResponse)(nil),      // 5: rubric.DeleteBlockingCriteriaResponse
+	(*DeleteTaskBlockingCriteriasRequest)(nil),  // 6: rubric.DeleteTaskBlockingCriteriasRequest
+	(*DeleteTaskBlockingCriteriasResponse)(nil), // 7: rubric.DeleteTaskBlockingCriteriasResponse
+	(*CreateCriteriaGroupRequest)(nil),          // 8: rubric.CreateCriteriaGroupRequest
+	(*CreateCriteriaGroupResponse)(nil),         // 9: rubric.CreateCriteriaGroupResponse
+	(*CreateCriterionRequest)(nil),              // 10: rubric.CreateCriterionRequest
+	(*CreateCriterionResponse)(nil),             // 11: rubric.CreateCriterionResponse
+	(*UpdateCriterionWeightRequest)(nil),        // 12: rubric.UpdateCriterionWeightRequest
+	(*UpdateCriterionWeightResponse)(nil),       // 13: rubric.UpdateCriterionWeightResponse
+	(*UpdateCriterionCommentRequest)(nil),       // 14: rubric.UpdateCriterionCommentRequest
+	(*UpdateCriterionCommentResponse)(nil),      // 15: rubric.UpdateCriterionCommentResponse
+	(*CreateNewBlockingCriteriaRequest)(nil),    // 16: rubric.CreateNewBlockingCriteriaRequest
+	(*CreateNewBlockingCriteriaResponse)(nil),   // 17: rubric.CreateNewBlockingCriteriaResponse
+	(*CreateNewCriteriaGroupRequest)(nil),       // 18: rubric.CreateNewCriteriaGroupRequest
+	(*CreateNewCriteriaGroupResponse)(nil),      // 19: rubric.CreateNewCriteriaGroupResponse
+	(*CreateNewMainCriteriaRequest)(nil),        // 20: rubric.CreateNewMainCriteriaRequest
+	(*CreateNewMainCriteriaResponse)(nil),       // 21: rubric.CreateNewMainCriteriaResponse
+	(*CreateCriteriaDescriptionRequest)(nil),    // 22: rubric.CreateCriteriaDescriptionRequest
+	(*CreateCriteriaDescriptionResponse)(nil),   // 23: rubric.CreateCriteriaDescriptionResponse
+	(*SetCriteriaWeightRequest)(nil),            // 24: rubric.SetCriteriaWeightRequest
+	(*SetCriteriaWeightResponse)(nil),           // 25: rubric.SetCriteriaWeightResponse
+	(*LoadTaskBlockingCriteriasRequest)(nil),    // 26: rubric.LoadTaskBlockingCriteriasRequest
+	(*BlockingCriteria)(nil),                    // 27: rubric.BlockingCriteria
+	(*LoadTaskBlockingCriteriasResponse)(nil),   // 28: rubric.LoadTaskBlockingCriteriasResponse
+	(*LoadTaskMainCriteriasRequest)(nil),        // 29: rubric.LoadTaskMainCriteriasRequest
+	(*CriteriaGroup)(nil),                       // 30: rubric.CriteriaGroup
+	(*MainCriteria)(nil),                        // 31: rubric.MainCriteria
+	(*LoadTaskMainCriteriasResponse)(nil),       // 32: rubric.LoadTaskMainCriteriasResponse
 }
 var file_proto_rubric_rubric_proto_depIdxs = []int32{
-	19, // 0: rubric.LoadTaskBlockingCriteriasResponse.criteria:type_name -> rubric.BlockingCriteria
-	23, // 1: rubric.CriteriaGroup.criteria:type_name -> rubric.MainCriteria
-	22, // 2: rubric.LoadTaskMainCriteriasResponse.groups:type_name -> rubric.CriteriaGroup
-	8,  // 3: rubric.RubricService.CreateNewBlockingCriteria:input_type -> rubric.CreateNewBlockingCriteriaRequest
-	10, // 4: rubric.RubricService.CreateNewCriteriaGroup:input_type -> rubric.CreateNewCriteriaGroupRequest
-	12, // 5: rubric.RubricService.CreateNewMainCriteria:input_type -> rubric.CreateNewMainCriteriaRequest
-	14, // 6: rubric.RubricService.CreateCriteriaDescription:input_type -> rubric.CreateCriteriaDescriptionRequest
-	16, // 7: rubric.RubricService.SetCriteriaWeight:input_type -> rubric.SetCriteriaWeightRequest
-	18, // 8: rubric.RubricService.LoadTaskBlockingCriterias:input_type -> rubric.LoadTaskBlockingCriteriasRequest
-	21, // 9: rubric.RubricService.LoadTaskMainCriterias:input_type -> rubric.LoadTaskMainCriteriasRequest
-	0,  // 10: rubric.RubricService.CreateCriteriaGroup:input_type -> rubric.CreateCriteriaGroupRequest
-	2,  // 11: rubric.RubricService.CreateCriterion:input_type -> rubric.CreateCriterionRequest
-	4,  // 12: rubric.RubricService.UpdateCriterionWeight:input_type -> rubric.UpdateCriterionWeightRequest
-	6,  // 13: rubric.RubricService.UpdateCriterionComment:input_type -> rubric.UpdateCriterionCommentRequest
-	9,  // 14: rubric.RubricService.CreateNewBlockingCriteria:output_type -> rubric.CreateNewBlockingCriteriaResponse
-	11, // 15: rubric.RubricService.CreateNewCriteriaGroup:output_type -> rubric.CreateNewCriteriaGroupResponse
-	13, // 16: rubric.RubricService.CreateNewMainCriteria:output_type -> rubric.CreateNewMainCriteriaResponse
-	15, // 17: rubric.RubricService.CreateCriteriaDescription:output_type -> rubric.CreateCriteriaDescriptionResponse
-	17, // 18: rubric.RubricService.SetCriteriaWeight:output_type -> rubric.SetCriteriaWeightResponse
-	20, // 19: rubric.RubricService.LoadTaskBlockingCriterias:output_type -> rubric.LoadTaskBlockingCriteriasResponse
-	24, // 20: rubric.RubricService.LoadTaskMainCriterias:output_type -> rubric.LoadTaskMainCriteriasResponse
-	1,  // 21: rubric.RubricService.CreateCriteriaGroup:output_type -> rubric.CreateCriteriaGroupResponse
-	3,  // 22: rubric.RubricService.CreateCriterion:output_type -> rubric.CreateCriterionResponse
-	5,  // 23: rubric.RubricService.UpdateCriterionWeight:output_type -> rubric.UpdateCriterionWeightResponse
-	7,  // 24: rubric.RubricService.UpdateCriterionComment:output_type -> rubric.UpdateCriterionCommentResponse
-	14, // [14:25] is the sub-list for method output_type
-	3,  // [3:14] is the sub-list for method input_type
+	27, // 0: rubric.LoadTaskBlockingCriteriasResponse.criteria:type_name -> rubric.BlockingCriteria
+	31, // 1: rubric.CriteriaGroup.criteria:type_name -> rubric.MainCriteria
+	30, // 2: rubric.LoadTaskMainCriteriasResponse.groups:type_name -> rubric.CriteriaGroup
+	16, // 3: rubric.RubricService.CreateNewBlockingCriteria:input_type -> rubric.CreateNewBlockingCriteriaRequest
+	18, // 4: rubric.RubricService.CreateNewCriteriaGroup:input_type -> rubric.CreateNewCriteriaGroupRequest
+	20, // 5: rubric.RubricService.CreateNewMainCriteria:input_type -> rubric.CreateNewMainCriteriaRequest
+	22, // 6: rubric.RubricService.CreateCriteriaDescription:input_type -> rubric.CreateCriteriaDescriptionRequest
+	24, // 7: rubric.RubricService.SetCriteriaWeight:input_type -> rubric.SetCriteriaWeightRequest
+	26, // 8: rubric.RubricService.LoadTaskBlockingCriterias:input_type -> rubric.LoadTaskBlockingCriteriasRequest
+	29, // 9: rubric.RubricService.LoadTaskMainCriterias:input_type -> rubric.LoadTaskMainCriteriasRequest
+	8,  // 10: rubric.RubricService.CreateCriteriaGroup:input_type -> rubric.CreateCriteriaGroupRequest
+	10, // 11: rubric.RubricService.CreateCriterion:input_type -> rubric.CreateCriterionRequest
+	12, // 12: rubric.RubricService.UpdateCriterionWeight:input_type -> rubric.UpdateCriterionWeightRequest
+	14, // 13: rubric.RubricService.UpdateCriterionComment:input_type -> rubric.UpdateCriterionCommentRequest
+	6,  // 14: rubric.RubricService.DeleteTaskBlockingCriterias:input_type -> rubric.DeleteTaskBlockingCriteriasRequest
+	4,  // 15: rubric.RubricService.DeleteBlockingCriteria:input_type -> rubric.DeleteBlockingCriteriaRequest
+	0,  // 16: rubric.RubricService.DeleteCriteriaGroup:input_type -> rubric.DeleteCriteriaGroupRequest
+	2,  // 17: rubric.RubricService.DeleteCriterion:input_type -> rubric.DeleteCriterionRequest
+	17, // 18: rubric.RubricService.CreateNewBlockingCriteria:output_type -> rubric.CreateNewBlockingCriteriaResponse
+	19, // 19: rubric.RubricService.CreateNewCriteriaGroup:output_type -> rubric.CreateNewCriteriaGroupResponse
+	21, // 20: rubric.RubricService.CreateNewMainCriteria:output_type -> rubric.CreateNewMainCriteriaResponse
+	23, // 21: rubric.RubricService.CreateCriteriaDescription:output_type -> rubric.CreateCriteriaDescriptionResponse
+	25, // 22: rubric.RubricService.SetCriteriaWeight:output_type -> rubric.SetCriteriaWeightResponse
+	28, // 23: rubric.RubricService.LoadTaskBlockingCriterias:output_type -> rubric.LoadTaskBlockingCriteriasResponse
+	32, // 24: rubric.RubricService.LoadTaskMainCriterias:output_type -> rubric.LoadTaskMainCriteriasResponse
+	9,  // 25: rubric.RubricService.CreateCriteriaGroup:output_type -> rubric.CreateCriteriaGroupResponse
+	11, // 26: rubric.RubricService.CreateCriterion:output_type -> rubric.CreateCriterionResponse
+	13, // 27: rubric.RubricService.UpdateCriterionWeight:output_type -> rubric.UpdateCriterionWeightResponse
+	15, // 28: rubric.RubricService.UpdateCriterionComment:output_type -> rubric.UpdateCriterionCommentResponse
+	7,  // 29: rubric.RubricService.DeleteTaskBlockingCriterias:output_type -> rubric.DeleteTaskBlockingCriteriasResponse
+	5,  // 30: rubric.RubricService.DeleteBlockingCriteria:output_type -> rubric.DeleteBlockingCriteriaResponse
+	1,  // 31: rubric.RubricService.DeleteCriteriaGroup:output_type -> rubric.DeleteCriteriaGroupResponse
+	3,  // 32: rubric.RubricService.DeleteCriterion:output_type -> rubric.DeleteCriterionResponse
+	18, // [18:33] is the sub-list for method output_type
+	3,  // [3:18] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1628,7 +2053,7 @@ func file_proto_rubric_rubric_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_rubric_rubric_proto_rawDesc), len(file_proto_rubric_rubric_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   25,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

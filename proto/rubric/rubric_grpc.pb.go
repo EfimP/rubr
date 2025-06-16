@@ -19,17 +19,21 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RubricService_CreateNewBlockingCriteria_FullMethodName = "/rubric.RubricService/CreateNewBlockingCriteria"
-	RubricService_CreateNewCriteriaGroup_FullMethodName    = "/rubric.RubricService/CreateNewCriteriaGroup"
-	RubricService_CreateNewMainCriteria_FullMethodName     = "/rubric.RubricService/CreateNewMainCriteria"
-	RubricService_CreateCriteriaDescription_FullMethodName = "/rubric.RubricService/CreateCriteriaDescription"
-	RubricService_SetCriteriaWeight_FullMethodName         = "/rubric.RubricService/SetCriteriaWeight"
-	RubricService_LoadTaskBlockingCriterias_FullMethodName = "/rubric.RubricService/LoadTaskBlockingCriterias"
-	RubricService_LoadTaskMainCriterias_FullMethodName     = "/rubric.RubricService/LoadTaskMainCriterias"
-	RubricService_CreateCriteriaGroup_FullMethodName       = "/rubric.RubricService/CreateCriteriaGroup"
-	RubricService_CreateCriterion_FullMethodName           = "/rubric.RubricService/CreateCriterion"
-	RubricService_UpdateCriterionWeight_FullMethodName     = "/rubric.RubricService/UpdateCriterionWeight"
-	RubricService_UpdateCriterionComment_FullMethodName    = "/rubric.RubricService/UpdateCriterionComment"
+	RubricService_CreateNewBlockingCriteria_FullMethodName   = "/rubric.RubricService/CreateNewBlockingCriteria"
+	RubricService_CreateNewCriteriaGroup_FullMethodName      = "/rubric.RubricService/CreateNewCriteriaGroup"
+	RubricService_CreateNewMainCriteria_FullMethodName       = "/rubric.RubricService/CreateNewMainCriteria"
+	RubricService_CreateCriteriaDescription_FullMethodName   = "/rubric.RubricService/CreateCriteriaDescription"
+	RubricService_SetCriteriaWeight_FullMethodName           = "/rubric.RubricService/SetCriteriaWeight"
+	RubricService_LoadTaskBlockingCriterias_FullMethodName   = "/rubric.RubricService/LoadTaskBlockingCriterias"
+	RubricService_LoadTaskMainCriterias_FullMethodName       = "/rubric.RubricService/LoadTaskMainCriterias"
+	RubricService_CreateCriteriaGroup_FullMethodName         = "/rubric.RubricService/CreateCriteriaGroup"
+	RubricService_CreateCriterion_FullMethodName             = "/rubric.RubricService/CreateCriterion"
+	RubricService_UpdateCriterionWeight_FullMethodName       = "/rubric.RubricService/UpdateCriterionWeight"
+	RubricService_UpdateCriterionComment_FullMethodName      = "/rubric.RubricService/UpdateCriterionComment"
+	RubricService_DeleteTaskBlockingCriterias_FullMethodName = "/rubric.RubricService/DeleteTaskBlockingCriterias"
+	RubricService_DeleteBlockingCriteria_FullMethodName      = "/rubric.RubricService/DeleteBlockingCriteria"
+	RubricService_DeleteCriteriaGroup_FullMethodName         = "/rubric.RubricService/DeleteCriteriaGroup"
+	RubricService_DeleteCriterion_FullMethodName             = "/rubric.RubricService/DeleteCriterion"
 )
 
 // RubricServiceClient is the client API for RubricService service.
@@ -47,6 +51,10 @@ type RubricServiceClient interface {
 	CreateCriterion(ctx context.Context, in *CreateCriterionRequest, opts ...grpc.CallOption) (*CreateCriterionResponse, error)
 	UpdateCriterionWeight(ctx context.Context, in *UpdateCriterionWeightRequest, opts ...grpc.CallOption) (*UpdateCriterionWeightResponse, error)
 	UpdateCriterionComment(ctx context.Context, in *UpdateCriterionCommentRequest, opts ...grpc.CallOption) (*UpdateCriterionCommentResponse, error)
+	DeleteTaskBlockingCriterias(ctx context.Context, in *DeleteTaskBlockingCriteriasRequest, opts ...grpc.CallOption) (*DeleteTaskBlockingCriteriasResponse, error)
+	DeleteBlockingCriteria(ctx context.Context, in *DeleteBlockingCriteriaRequest, opts ...grpc.CallOption) (*DeleteBlockingCriteriaResponse, error)
+	DeleteCriteriaGroup(ctx context.Context, in *DeleteCriteriaGroupRequest, opts ...grpc.CallOption) (*DeleteCriteriaGroupResponse, error)
+	DeleteCriterion(ctx context.Context, in *DeleteCriterionRequest, opts ...grpc.CallOption) (*DeleteCriterionResponse, error)
 }
 
 type rubricServiceClient struct {
@@ -167,6 +175,46 @@ func (c *rubricServiceClient) UpdateCriterionComment(ctx context.Context, in *Up
 	return out, nil
 }
 
+func (c *rubricServiceClient) DeleteTaskBlockingCriterias(ctx context.Context, in *DeleteTaskBlockingCriteriasRequest, opts ...grpc.CallOption) (*DeleteTaskBlockingCriteriasResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTaskBlockingCriteriasResponse)
+	err := c.cc.Invoke(ctx, RubricService_DeleteTaskBlockingCriterias_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rubricServiceClient) DeleteBlockingCriteria(ctx context.Context, in *DeleteBlockingCriteriaRequest, opts ...grpc.CallOption) (*DeleteBlockingCriteriaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBlockingCriteriaResponse)
+	err := c.cc.Invoke(ctx, RubricService_DeleteBlockingCriteria_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rubricServiceClient) DeleteCriteriaGroup(ctx context.Context, in *DeleteCriteriaGroupRequest, opts ...grpc.CallOption) (*DeleteCriteriaGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCriteriaGroupResponse)
+	err := c.cc.Invoke(ctx, RubricService_DeleteCriteriaGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rubricServiceClient) DeleteCriterion(ctx context.Context, in *DeleteCriterionRequest, opts ...grpc.CallOption) (*DeleteCriterionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCriterionResponse)
+	err := c.cc.Invoke(ctx, RubricService_DeleteCriterion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RubricServiceServer is the server API for RubricService service.
 // All implementations must embed UnimplementedRubricServiceServer
 // for forward compatibility.
@@ -182,6 +230,10 @@ type RubricServiceServer interface {
 	CreateCriterion(context.Context, *CreateCriterionRequest) (*CreateCriterionResponse, error)
 	UpdateCriterionWeight(context.Context, *UpdateCriterionWeightRequest) (*UpdateCriterionWeightResponse, error)
 	UpdateCriterionComment(context.Context, *UpdateCriterionCommentRequest) (*UpdateCriterionCommentResponse, error)
+	DeleteTaskBlockingCriterias(context.Context, *DeleteTaskBlockingCriteriasRequest) (*DeleteTaskBlockingCriteriasResponse, error)
+	DeleteBlockingCriteria(context.Context, *DeleteBlockingCriteriaRequest) (*DeleteBlockingCriteriaResponse, error)
+	DeleteCriteriaGroup(context.Context, *DeleteCriteriaGroupRequest) (*DeleteCriteriaGroupResponse, error)
+	DeleteCriterion(context.Context, *DeleteCriterionRequest) (*DeleteCriterionResponse, error)
 	mustEmbedUnimplementedRubricServiceServer()
 }
 
@@ -224,6 +276,18 @@ func (UnimplementedRubricServiceServer) UpdateCriterionWeight(context.Context, *
 }
 func (UnimplementedRubricServiceServer) UpdateCriterionComment(context.Context, *UpdateCriterionCommentRequest) (*UpdateCriterionCommentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCriterionComment not implemented")
+}
+func (UnimplementedRubricServiceServer) DeleteTaskBlockingCriterias(context.Context, *DeleteTaskBlockingCriteriasRequest) (*DeleteTaskBlockingCriteriasResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTaskBlockingCriterias not implemented")
+}
+func (UnimplementedRubricServiceServer) DeleteBlockingCriteria(context.Context, *DeleteBlockingCriteriaRequest) (*DeleteBlockingCriteriaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBlockingCriteria not implemented")
+}
+func (UnimplementedRubricServiceServer) DeleteCriteriaGroup(context.Context, *DeleteCriteriaGroupRequest) (*DeleteCriteriaGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCriteriaGroup not implemented")
+}
+func (UnimplementedRubricServiceServer) DeleteCriterion(context.Context, *DeleteCriterionRequest) (*DeleteCriterionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCriterion not implemented")
 }
 func (UnimplementedRubricServiceServer) mustEmbedUnimplementedRubricServiceServer() {}
 func (UnimplementedRubricServiceServer) testEmbeddedByValue()                       {}
@@ -444,6 +508,78 @@ func _RubricService_UpdateCriterionComment_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RubricService_DeleteTaskBlockingCriterias_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTaskBlockingCriteriasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).DeleteTaskBlockingCriterias(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_DeleteTaskBlockingCriterias_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).DeleteTaskBlockingCriterias(ctx, req.(*DeleteTaskBlockingCriteriasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RubricService_DeleteBlockingCriteria_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBlockingCriteriaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).DeleteBlockingCriteria(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_DeleteBlockingCriteria_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).DeleteBlockingCriteria(ctx, req.(*DeleteBlockingCriteriaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RubricService_DeleteCriteriaGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCriteriaGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).DeleteCriteriaGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_DeleteCriteriaGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).DeleteCriteriaGroup(ctx, req.(*DeleteCriteriaGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RubricService_DeleteCriterion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCriterionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RubricServiceServer).DeleteCriterion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RubricService_DeleteCriterion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RubricServiceServer).DeleteCriterion(ctx, req.(*DeleteCriterionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RubricService_ServiceDesc is the grpc.ServiceDesc for RubricService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -494,6 +630,22 @@ var RubricService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCriterionComment",
 			Handler:    _RubricService_UpdateCriterionComment_Handler,
+		},
+		{
+			MethodName: "DeleteTaskBlockingCriterias",
+			Handler:    _RubricService_DeleteTaskBlockingCriterias_Handler,
+		},
+		{
+			MethodName: "DeleteBlockingCriteria",
+			Handler:    _RubricService_DeleteBlockingCriteria_Handler,
+		},
+		{
+			MethodName: "DeleteCriteriaGroup",
+			Handler:    _RubricService_DeleteCriteriaGroup_Handler,
+		},
+		{
+			MethodName: "DeleteCriterion",
+			Handler:    _RubricService_DeleteCriterion_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

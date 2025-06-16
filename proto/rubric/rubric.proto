@@ -15,8 +15,47 @@ service RubricService {
   rpc CreateCriterion (CreateCriterionRequest) returns (CreateCriterionResponse) {}
   rpc UpdateCriterionWeight (UpdateCriterionWeightRequest) returns (UpdateCriterionWeightResponse) {}
   rpc UpdateCriterionComment (UpdateCriterionCommentRequest) returns (UpdateCriterionCommentResponse) {}
-  
+  rpc DeleteTaskBlockingCriterias (DeleteTaskBlockingCriteriasRequest) returns (DeleteTaskBlockingCriteriasResponse) {}
+  rpc DeleteBlockingCriteria (DeleteBlockingCriteriaRequest) returns (DeleteBlockingCriteriaResponse) {}
+  rpc DeleteCriteriaGroup (DeleteCriteriaGroupRequest) returns (DeleteCriteriaGroupResponse) {}
+  rpc DeleteCriterion (DeleteCriterionRequest) returns (DeleteCriterionResponse) {}
 }
+
+message DeleteCriteriaGroupRequest {
+  int32 group_id = 1;
+}
+
+message DeleteCriteriaGroupResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message DeleteCriterionRequest {
+  int32 criterion_id = 1;
+}
+
+message DeleteCriterionResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message DeleteBlockingCriteriaRequest {
+  int32 criteria_id = 1;
+}
+
+message DeleteBlockingCriteriaResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message DeleteTaskBlockingCriteriasRequest {
+  int32 task_id = 1;
+}
+
+message DeleteTaskBlockingCriteriasResponse {
+  bool success = 1;
+  string error = 2;
+} 
 
 message CreateCriteriaGroupRequest {
   int32 task_id = 1;
