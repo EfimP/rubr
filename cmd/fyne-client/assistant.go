@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -34,6 +36,7 @@ type BlockingCriterionEntry struct {
 	EvaluationEntry *widget.Entry
 	Container       *fyne.Container
 }
+
 type MainCriterionEntry struct {
 	CriterionID  int32
 	Select       *widget.Select
@@ -475,7 +478,7 @@ func CreateBlockingCriteriaGradingPage(state *AppState, workID int32, taskID int
 func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32, leftBackground *canvas.Image) fyne.CanvasObject {
 	w := state.window
 
-	// Подключение к gRPC сервису для загрузки данных
+	// Подключение к gRPC сервису
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -505,97 +508,205 @@ func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32, 
 	logoText.TextStyle.Bold = true
 	logoText.TextSize = 24
 	logoText.Alignment = fyne.TextAlignCenter
-	leftHeader := container.NewStack(logoText)
+	leftHeaderObject := container.NewStack(logoText)
 
-	headerTitle := canvas.NewText("Оценка основных критериев", headerTextColor)
+	headerTitle := canvas.NewText("Основные критерии", headerTextColor)
 	headerTitle.TextStyle.Bold = true
 	headerTitle.TextSize = 20
 	headerTitle.Alignment = fyne.TextAlignCenter
 
-	headerContent := container.New(layout.NewBorderLayout(nil, nil, leftHeader, nil),
-		leftHeader,
+	headerContent := container.New(layout.NewBorderLayout(nil, nil, leftHeaderObject, nil),
+		leftHeaderObject,
 		container.NewCenter(headerTitle),
 	)
+	headerContent = container.NewStack(canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}), headerContent)
 
-	// Список критериев
+	// Список групп и критериев
+	selectedGroupIndex := -1
 	var entries []MainCriterionEntry
-	criteriaListContainer := container.NewVBox()
+	// Карта для отслеживания всех критериев с их группами и именами
+	type criterionInfo struct {
+		groupName string
+		critName  string
+	}
+	criteriaInfo := make(map[int32]criterionInfo)
+	totalCriteriaCount := 0
+
+	// Инициализация entries для всех критериев
 	for _, group := range resp.Groups {
-		groupLabel := widget.NewLabelWithStyle(group.GroupName, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		criteriaListContainer.Add(groupLabel)
 		for _, crit := range group.Criteria {
+			commentEntry := widget.NewEntry()
 			selectOptions := []string{"0.0", "0.25", "0.50", "0.75", "1.00"}
 			selectWidget := widget.NewSelect(selectOptions, func(s string) {
-				for _, entry := range entries {
-					if entry.CriterionID == crit.Id {
-						switch s {
-						case "0.0":
-							entry.CommentEntry.SetText(crit.Comment_000)
-						case "0.25":
-							entry.CommentEntry.SetText(crit.Comment_025)
-						case "0.50":
-							entry.CommentEntry.SetText(crit.Comment_050)
-						case "0.75":
-							entry.CommentEntry.SetText(crit.Comment_075)
-						case "1.00":
-							entry.CommentEntry.SetText(crit.Comment_100)
-						}
-						break
-					}
+				switch s {
+				case "0.0":
+					commentEntry.SetText(crit.Comment_000)
+				case "0.25":
+					commentEntry.SetText(crit.Comment_025)
+				case "0.50":
+					commentEntry.SetText(crit.Comment_050)
+				case "0.75":
+					commentEntry.SetText(crit.Comment_075)
+				case "1.00":
+					commentEntry.SetText(crit.Comment_100)
 				}
 			})
-			commentEntry := widget.NewEntry()
+
 			entries = append(entries, MainCriterionEntry{
 				CriterionID:  crit.Id,
 				Select:       selectWidget,
 				CommentEntry: commentEntry,
 			})
-			criterionRow := container.NewGridWithColumns(2,
-				widget.NewLabel(crit.Name),
-				container.NewVBox(
-					container.NewHBox(widget.NewLabel("Оценка:"), selectWidget),
-					container.NewHBox(widget.NewLabel("Комментарий:"), commentEntry),
-				),
-			)
-			criteriaListContainer.Add(criterionRow)
+			criteriaInfo[crit.Id] = criterionInfo{
+				groupName: group.GroupName,
+				critName:  crit.Name,
+			}
+			totalCriteriaCount++
 		}
 	}
-	scrollableCriteria := container.NewVScroll(criteriaListContainer)
-	scrollableCriteria.SetMinSize(fyne.NewSize(0, 400))
+
+	log.Printf("Initialized %d criteria entries", len(entries))
+
+	contentContainer := container.New(layout.NewMaxLayout(), widget.NewLabel("Выберите группу и критерий"))
+
+	groupList := widget.NewList(
+		func() int {
+			return len(resp.Groups)
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Template")
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			item.(*widget.Label).SetText(resp.Groups[id].GroupName)
+		},
+	)
+
+	criteriaList := widget.NewList(
+		func() int {
+			if selectedGroupIndex >= 0 && selectedGroupIndex < len(resp.Groups) {
+				return len(resp.Groups[selectedGroupIndex].Criteria)
+			}
+			return 0
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Template")
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			if selectedGroupIndex >= 0 && selectedGroupIndex < len(resp.Groups) {
+				item.(*widget.Label).SetText(resp.Groups[selectedGroupIndex].Criteria[id].Name)
+			}
+		},
+	)
+
+	groupList.OnSelected = func(id widget.ListItemID) {
+		selectedGroupIndex = id
+		criteriaList.Refresh()
+		contentContainer.Objects = []fyne.CanvasObject{widget.NewLabel("Выберите критерий")}
+		contentContainer.Refresh()
+	}
+
+	criteriaList.OnSelected = func(id widget.ListItemID) {
+		if selectedGroupIndex >= 0 && selectedGroupIndex < len(resp.Groups) && id >= 0 && id < len(resp.Groups[selectedGroupIndex].Criteria) {
+			crit := resp.Groups[selectedGroupIndex].Criteria[id]
+
+			// Находим соответствующий entry для критерия
+			var selectedEntry *MainCriterionEntry
+			for i := range entries {
+				if entries[i].CriterionID == crit.Id {
+					selectedEntry = &entries[i]
+					break
+				}
+			}
+
+			if selectedEntry == nil {
+				log.Printf("No entry found for criterion ID %d", crit.Id)
+				return
+			}
+
+			// Создаем контейнер для отображения комментариев
+			commentsContainer := container.NewVBox(
+				widget.NewLabelWithStyle("Комментарии лектора:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(fmt.Sprintf("Для 0.0: %s", crit.Comment_000)),
+				widget.NewLabel(fmt.Sprintf("Для 0.25: %s", crit.Comment_025)),
+				widget.NewLabel(fmt.Sprintf("Для 0.75: %s", crit.Comment_075)),
+				widget.NewLabel(fmt.Sprintf("Для 1.00: %s", crit.Comment_100)),
+			)
+
+			content := container.NewVBox(
+				widget.NewLabel("Критерий: "+crit.Name),
+				container.NewHBox(widget.NewLabel("Оценка:"), selectedEntry.Select),
+				container.NewHBox(widget.NewLabel("Комментарий:"), selectedEntry.CommentEntry),
+				commentsContainer,
+			)
+
+			contentContainer.Objects = []fyne.CanvasObject{content}
+			contentContainer.Refresh()
+		}
+	}
+
+	groupContainer := container.NewVBox(groupList)
+	criteriaContainer := container.NewVBox(criteriaList)
+	leftPanel := container.NewHSplit(groupContainer, criteriaContainer)
+	leftPanel.SetOffset(0.5)
+
+	mainContent := container.NewBorder(nil, nil, nil, nil, contentContainer)
+	split := container.NewHSplit(leftPanel, mainContent)
+	split.SetOffset(0.3)
 
 	// Кнопки
 	backButton := widget.NewButton("Назад", func() {
 		state.currentPage = "grading_blocking"
 		w.SetContent(CreateBlockingCriteriaGradingPage(state, workID, taskID, leftBackground))
 	})
+
 	finalizeButton := widget.NewButton("Завершить оценку", func() {
+		// Проверка, что все критерии оценены
+		evaluatedCriteria := make(map[int32]struct{})
+		var missingCriteria []string
+		for _, entry := range entries {
+			if entry.Select.Selected == "" {
+				info, exists := criteriaInfo[entry.CriterionID]
+				if exists {
+					missingCriteria = append(missingCriteria, fmt.Sprintf("- Группа: %s, Критерий: %s", info.groupName, info.critName))
+					log.Printf("Criterion ID %d (Group: %s, Name: %s) has no mark selected", entry.CriterionID, info.groupName, info.critName)
+				} else {
+					log.Printf("Criterion ID %d has no mark selected (no group info)", entry.CriterionID)
+				}
+				continue
+			}
+			evaluatedCriteria[entry.CriterionID] = struct{}{}
+		}
+
+		if len(missingCriteria) > 0 {
+			errorMsg := "Необходимо оценить все критерии. Пропущены следующие критерии:\n" + strings.Join(missingCriteria, "\n")
+			dialog.ShowInformation("Ошибка", errorMsg, w)
+			return
+		}
+
 		// Создаем новый контекст и соединение для сохранения данных
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		conn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to rubricservice: %v", err)
+			log.Printf("Failed to connect to gradingservice: %v", err)
 			dialog.ShowError(err, w)
 			return
 		}
 		defer conn.Close()
 
-		gradingClient := gradingpb.NewGradingServiceClient(conn)
+		client := gradingpb.NewGradingServiceClient(conn)
 
+		// Сохранение оценок
 		for _, entry := range entries {
-			if entry.Select.Selected == "" {
-				dialog.ShowInformation("Ошибка", "Оцените все основные критерии", w)
-				return
-			}
 			mark, err := strconv.ParseFloat(entry.Select.Selected, 32)
 			if err != nil {
-				log.Printf("Failed to parse mark: %v", err)
+				log.Printf("Failed to parse mark for criterion ID %d: %v", entry.CriterionID, err)
 				dialog.ShowInformation("Ошибка", "Некорректное значение оценки", w)
 				return
 			}
 			log.Printf("Saving mark for criterion ID %d: mark=%f, comment=%s", entry.CriterionID, mark, entry.CommentEntry.Text)
-			resp, err := gradingClient.SetMainCriteriaMark(ctx, &gradingpb.SetMainCriteriaMarkRequest{
+			resp, err := client.SetMainCriteriaMark(ctx, &gradingpb.SetMainCriteriaMarkRequest{
 				WorkId:      workID,
 				CriterionId: entry.CriterionID,
 				Mark:        float32(mark),
@@ -618,12 +729,18 @@ func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32, 
 		w.SetContent(CreateAssistantWorksPage(state, leftBackground))
 	})
 
-	buttonsContainer := container.NewHBox(backButton, layout.NewSpacer(), finalizeButton)
-	contentBackground := canvas.NewRectangle(color.White)
-	centralContent := container.NewStack(contentBackground, container.NewPadded(scrollableCriteria))
-
+	// Нижняя панель с кнопками
+	bottomButtons := container.NewHBox(backButton, layout.NewSpacer(), finalizeButton)
+	bottomButtons = container.NewStack(canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}), bottomButtons)
+	// Сборка интерфейса
 	return container.NewStack(
-		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}),
-		container.NewBorder(headerContent, buttonsContainer, nil, nil, centralContent),
+		canvas.NewRectangle(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
+		container.NewBorder(
+			headerContent,
+			bottomButtons,
+			nil,
+			nil,
+			split,
+		),
 	)
 }

@@ -729,7 +729,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 				return
 			}
 		}
-		ShowMainCriteriaPage(state, taskID)
+		CreateMainCriteriaPage(state, taskID)
 	})
 
 	bottomButtons := container.New(layout.NewHBoxLayout(),
@@ -763,7 +763,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 	))
 }
 
-func ShowMainCriteriaPage(state *AppState, taskID int32) {
+func CreateMainCriteriaPage(state *AppState, taskID int32) {
 	w := state.window
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -828,6 +828,7 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 		leftHeaderObject,
 		container.NewCenter(headerTitle),
 	)
+	headerContent = container.NewStack(canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}), headerContent)
 
 	contentContainer := container.New(layout.NewMaxLayout(), widget.NewLabel("Выберите группу и критерий"))
 
@@ -835,8 +836,9 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 		state.currentPage = "lector_works"
 		w.SetContent(createContent(state))
 	})
+	createButtonColored := container.NewStack(createButton, canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 192}))
 
-	mainContent := container.NewBorder(nil, createButton, nil, nil, contentContainer)
+	mainContent := container.NewBorder(nil, createButtonColored, nil, nil, contentContainer)
 
 	groupList := widget.NewList(
 		func() int {
@@ -1088,7 +1090,7 @@ func ShowMainCriteriaPage(state *AppState, taskID int32) {
 	split.SetOffset(0.3)
 
 	w.SetContent(container.NewStack(
-		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}),
+		canvas.NewRectangle(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
 		container.NewBorder(
 			headerContent,
 			nil,
