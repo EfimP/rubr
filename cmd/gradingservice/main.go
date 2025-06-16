@@ -6,6 +6,8 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"os"
@@ -16,6 +18,90 @@ import (
 type server struct {
 	pb.UnimplementedGradingServiceServer
 	db *sql.DB
+}
+
+func (s *server) UpdateWorkStatus(ctx context.Context, req *pb.UpdateWorkStatusRequest) (*pb.UpdateWorkStatusResponse, error) {
+	log.Printf("Получен запрос UpdateWorkStatus для work_id: %d, status: %s", req.WorkId, req.Status)
+
+	// Валидация входных данных
+	if req.WorkId <= 0 {
+		log.Printf("Неверный work_id: %d", req.WorkId)
+		return nil, status.Errorf(codes.InvalidArgument, "work_id должен быть положительным")
+	}
+	if req.Status == "" {
+		log.Printf("Пустой статус для work_id: %d", req.WorkId)
+		return nil, status.Errorf(codes.InvalidArgument, "status не должен быть пустым")
+	}
+
+	// SQL-запрос для обновления статуса
+	query := `
+        UPDATE student_works
+        SET status = $1
+        WHERE id = $2
+        RETURNING id`
+	var updatedID int64
+	err := s.db.QueryRowContext(ctx, query, req.Status, req.WorkId).Scan(&updatedID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("Работа с id %d не найдена", req.WorkId)
+			return &pb.UpdateWorkStatusResponse{Error: fmt.Sprintf("работа с id %d не найдена", req.WorkId)}, nil
+		}
+		log.Printf("Ошибка обновления статуса для work_id %d: %v", req.WorkId, err)
+		return nil, status.Errorf(codes.Internal, "ошибка базы данных: %v", err)
+	}
+
+	log.Printf("Статус работы %d успешно обновлен на %s", req.WorkId, req.Status)
+	return &pb.UpdateWorkStatusResponse{}, nil
+}
+
+func (s *server) GetCriteriaMarks(ctx context.Context, req *pb.GetCriteriaMarksRequest) (*pb.GetCriteriaMarksResponse, error) {
+	log.Printf("Получен запрос GetCriteriaMarks для work_id: %d", req.WorkId)
+
+	// Проверка входных данных
+	if req.WorkId <= 0 {
+		log.Printf("Неверный work_id: %d", req.WorkId)
+		return &pb.GetCriteriaMarksResponse{Error: "work_id должен быть положительным"}, nil
+	}
+
+	// SQL-запрос для получения оценок
+	query := `
+        SELECT criteria_id, mark, COALESCE(comment, '')
+        FROM student_criteria_marks
+        WHERE student_work_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, req.WorkId)
+	if err != nil {
+		log.Printf("Ошибка выполнения запроса для work_id %d: %v", req.WorkId, err)
+		return &pb.GetCriteriaMarksResponse{Error: fmt.Sprintf("ошибка базы данных: %v", err)}, nil
+	}
+	defer rows.Close()
+
+	// Сбор результатов
+	var marks []*pb.CriterionMark
+	for rows.Next() {
+		var criterionID int64
+		var mark float32
+		var comment string
+		if err := rows.Scan(&criterionID, &mark, &comment); err != nil {
+			log.Printf("Ошибка сканирования строки для work_id %d: %v", req.WorkId, err)
+			return &pb.GetCriteriaMarksResponse{Error: fmt.Sprintf("ошибка обработки данных: %v", err)}, nil
+		}
+		marks = append(marks, &pb.CriterionMark{
+			CriterionId: int32(criterionID),
+			Mark:        mark,
+			Comment:     comment,
+		})
+	}
+
+	// Проверка ошибок после итерации
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации строк для work_id %d: %v", req.WorkId, err)
+		return &pb.GetCriteriaMarksResponse{Error: fmt.Sprintf("ошибка обработки данных: %v", err)}, nil
+	}
+
+	log.Printf("Найдено %d оценок для work_id %d", len(marks), req.WorkId)
+	return &pb.GetCriteriaMarksResponse{
+		Marks: marks,
+	}, nil
 }
 
 func (s *server) SetBlockingCriteriaMark(ctx context.Context, req *pb.SetBlockingCriteriaMarkRequest) (*pb.SetBlockingCriteriaMarkResponse, error) {

@@ -21,6 +21,258 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateWorkStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkId        int32                  `protobuf:"varint,1,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWorkStatusRequest) Reset() {
+	*x = UpdateWorkStatusRequest{}
+	mi := &file_proto_grade_grade_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkStatusRequest) ProtoMessage() {}
+
+func (x *UpdateWorkStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateWorkStatusRequest) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateWorkStatusRequest) GetWorkId() int32 {
+	if x != nil {
+		return x.WorkId
+	}
+	return 0
+}
+
+func (x *UpdateWorkStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateWorkStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Error         string                 `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWorkStatusResponse) Reset() {
+	*x = UpdateWorkStatusResponse{}
+	mi := &file_proto_grade_grade_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkStatusResponse) ProtoMessage() {}
+
+func (x *UpdateWorkStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkStatusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateWorkStatusResponse) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *UpdateWorkStatusResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type GetCriteriaMarksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkId        int32                  `protobuf:"varint,1,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCriteriaMarksRequest) Reset() {
+	*x = GetCriteriaMarksRequest{}
+	mi := &file_proto_grade_grade_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCriteriaMarksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCriteriaMarksRequest) ProtoMessage() {}
+
+func (x *GetCriteriaMarksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCriteriaMarksRequest.ProtoReflect.Descriptor instead.
+func (*GetCriteriaMarksRequest) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetCriteriaMarksRequest) GetWorkId() int32 {
+	if x != nil {
+		return x.WorkId
+	}
+	return 0
+}
+
+type GetCriteriaMarksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Error         string                 `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	Marks         []*CriterionMark       `protobuf:"bytes,2,rep,name=marks,proto3" json:"marks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCriteriaMarksResponse) Reset() {
+	*x = GetCriteriaMarksResponse{}
+	mi := &file_proto_grade_grade_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCriteriaMarksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCriteriaMarksResponse) ProtoMessage() {}
+
+func (x *GetCriteriaMarksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCriteriaMarksResponse.ProtoReflect.Descriptor instead.
+func (*GetCriteriaMarksResponse) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetCriteriaMarksResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+func (x *GetCriteriaMarksResponse) GetMarks() []*CriterionMark {
+	if x != nil {
+		return x.Marks
+	}
+	return nil
+}
+
+type CriterionMark struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CriterionId   int32                  `protobuf:"varint,1,opt,name=criterion_id,json=criterionId,proto3" json:"criterion_id,omitempty"`
+	Mark          float32                `protobuf:"fixed32,2,opt,name=mark,proto3" json:"mark,omitempty"`
+	Comment       string                 `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CriterionMark) Reset() {
+	*x = CriterionMark{}
+	mi := &file_proto_grade_grade_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CriterionMark) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CriterionMark) ProtoMessage() {}
+
+func (x *CriterionMark) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CriterionMark.ProtoReflect.Descriptor instead.
+func (*CriterionMark) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CriterionMark) GetCriterionId() int32 {
+	if x != nil {
+		return x.CriterionId
+	}
+	return 0
+}
+
+func (x *CriterionMark) GetMark() float32 {
+	if x != nil {
+		return x.Mark
+	}
+	return 0
+}
+
+func (x *CriterionMark) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
 // Добавить в конец message определений
 type SetBlockingCriteriaMarkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -34,7 +286,7 @@ type SetBlockingCriteriaMarkRequest struct {
 
 func (x *SetBlockingCriteriaMarkRequest) Reset() {
 	*x = SetBlockingCriteriaMarkRequest{}
-	mi := &file_proto_grade_grade_proto_msgTypes[0]
+	mi := &file_proto_grade_grade_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -46,7 +298,7 @@ func (x *SetBlockingCriteriaMarkRequest) String() string {
 func (*SetBlockingCriteriaMarkRequest) ProtoMessage() {}
 
 func (x *SetBlockingCriteriaMarkRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grade_grade_proto_msgTypes[0]
+	mi := &file_proto_grade_grade_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +311,7 @@ func (x *SetBlockingCriteriaMarkRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetBlockingCriteriaMarkRequest.ProtoReflect.Descriptor instead.
 func (*SetBlockingCriteriaMarkRequest) Descriptor() ([]byte, []int) {
-	return file_proto_grade_grade_proto_rawDescGZIP(), []int{0}
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *SetBlockingCriteriaMarkRequest) GetWorkId() int32 {
@@ -99,7 +351,7 @@ type SetBlockingCriteriaMarkResponse struct {
 
 func (x *SetBlockingCriteriaMarkResponse) Reset() {
 	*x = SetBlockingCriteriaMarkResponse{}
-	mi := &file_proto_grade_grade_proto_msgTypes[1]
+	mi := &file_proto_grade_grade_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -111,7 +363,7 @@ func (x *SetBlockingCriteriaMarkResponse) String() string {
 func (*SetBlockingCriteriaMarkResponse) ProtoMessage() {}
 
 func (x *SetBlockingCriteriaMarkResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grade_grade_proto_msgTypes[1]
+	mi := &file_proto_grade_grade_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -124,7 +376,7 @@ func (x *SetBlockingCriteriaMarkResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetBlockingCriteriaMarkResponse.ProtoReflect.Descriptor instead.
 func (*SetBlockingCriteriaMarkResponse) Descriptor() ([]byte, []int) {
-	return file_proto_grade_grade_proto_rawDescGZIP(), []int{1}
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SetBlockingCriteriaMarkResponse) GetError() string {
@@ -146,7 +398,7 @@ type SetMainCriteriaMarkRequest struct {
 
 func (x *SetMainCriteriaMarkRequest) Reset() {
 	*x = SetMainCriteriaMarkRequest{}
-	mi := &file_proto_grade_grade_proto_msgTypes[2]
+	mi := &file_proto_grade_grade_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -158,7 +410,7 @@ func (x *SetMainCriteriaMarkRequest) String() string {
 func (*SetMainCriteriaMarkRequest) ProtoMessage() {}
 
 func (x *SetMainCriteriaMarkRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grade_grade_proto_msgTypes[2]
+	mi := &file_proto_grade_grade_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -171,7 +423,7 @@ func (x *SetMainCriteriaMarkRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetMainCriteriaMarkRequest.ProtoReflect.Descriptor instead.
 func (*SetMainCriteriaMarkRequest) Descriptor() ([]byte, []int) {
-	return file_proto_grade_grade_proto_rawDescGZIP(), []int{2}
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SetMainCriteriaMarkRequest) GetWorkId() int32 {
@@ -211,7 +463,7 @@ type SetMainCriteriaMarkResponse struct {
 
 func (x *SetMainCriteriaMarkResponse) Reset() {
 	*x = SetMainCriteriaMarkResponse{}
-	mi := &file_proto_grade_grade_proto_msgTypes[3]
+	mi := &file_proto_grade_grade_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +475,7 @@ func (x *SetMainCriteriaMarkResponse) String() string {
 func (*SetMainCriteriaMarkResponse) ProtoMessage() {}
 
 func (x *SetMainCriteriaMarkResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grade_grade_proto_msgTypes[3]
+	mi := &file_proto_grade_grade_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +488,7 @@ func (x *SetMainCriteriaMarkResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetMainCriteriaMarkResponse.ProtoReflect.Descriptor instead.
 func (*SetMainCriteriaMarkResponse) Descriptor() ([]byte, []int) {
-	return file_proto_grade_grade_proto_rawDescGZIP(), []int{3}
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SetMainCriteriaMarkResponse) GetError() string {
@@ -250,7 +502,21 @@ var File_proto_grade_grade_proto protoreflect.FileDescriptor
 
 const file_proto_grade_grade_proto_rawDesc = "" +
 	"\n" +
-	"\x17proto/grade/grade.proto\x12\x05grade\"\x8a\x01\n" +
+	"\x17proto/grade/grade.proto\x12\x05grade\"J\n" +
+	"\x17UpdateWorkStatusRequest\x12\x17\n" +
+	"\awork_id\x18\x01 \x01(\x05R\x06workId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"0\n" +
+	"\x18UpdateWorkStatusResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\tR\x05error\"2\n" +
+	"\x17GetCriteriaMarksRequest\x12\x17\n" +
+	"\awork_id\x18\x01 \x01(\x05R\x06workId\"\\\n" +
+	"\x18GetCriteriaMarksResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\tR\x05error\x12*\n" +
+	"\x05marks\x18\x02 \x03(\v2\x14.grade.CriterionMarkR\x05marks\"`\n" +
+	"\rCriterionMark\x12!\n" +
+	"\fcriterion_id\x18\x01 \x01(\x05R\vcriterionId\x12\x12\n" +
+	"\x04mark\x18\x02 \x01(\x02R\x04mark\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\"\x8a\x01\n" +
 	"\x1eSetBlockingCriteriaMarkRequest\x12\x17\n" +
 	"\awork_id\x18\x01 \x01(\x05R\x06workId\x12!\n" +
 	"\fcriterion_id\x18\x02 \x01(\x05R\vcriterionId\x12\x12\n" +
@@ -264,10 +530,12 @@ const file_proto_grade_grade_proto_rawDesc = "" +
 	"\x04mark\x18\x03 \x01(\x02R\x04mark\x12\x18\n" +
 	"\acomment\x18\x04 \x01(\tR\acomment\"3\n" +
 	"\x1bSetMainCriteriaMarkResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\tR\x05error2\xdc\x01\n" +
+	"\x05error\x18\x01 \x01(\tR\x05error2\x86\x03\n" +
 	"\x0eGradingService\x12j\n" +
 	"\x17SetBlockingCriteriaMark\x12%.grade.SetBlockingCriteriaMarkRequest\x1a&.grade.SetBlockingCriteriaMarkResponse\"\x00\x12^\n" +
-	"\x13SetMainCriteriaMark\x12!.grade.SetMainCriteriaMarkRequest\x1a\".grade.SetMainCriteriaMarkResponse\"\x00B\x15Z\x13./proto/grade;gradeb\x06proto3"
+	"\x13SetMainCriteriaMark\x12!.grade.SetMainCriteriaMarkRequest\x1a\".grade.SetMainCriteriaMarkResponse\"\x00\x12S\n" +
+	"\x10GetCriteriaMarks\x12\x1e.grade.GetCriteriaMarksRequest\x1a\x1f.grade.GetCriteriaMarksResponse\x12S\n" +
+	"\x10UpdateWorkStatus\x12\x1e.grade.UpdateWorkStatusRequest\x1a\x1f.grade.UpdateWorkStatusResponseB\x15Z\x13./proto/grade;gradeb\x06proto3"
 
 var (
 	file_proto_grade_grade_proto_rawDescOnce sync.Once
@@ -281,23 +549,33 @@ func file_proto_grade_grade_proto_rawDescGZIP() []byte {
 	return file_proto_grade_grade_proto_rawDescData
 }
 
-var file_proto_grade_grade_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_grade_grade_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_proto_grade_grade_proto_goTypes = []any{
-	(*SetBlockingCriteriaMarkRequest)(nil),  // 0: grade.SetBlockingCriteriaMarkRequest
-	(*SetBlockingCriteriaMarkResponse)(nil), // 1: grade.SetBlockingCriteriaMarkResponse
-	(*SetMainCriteriaMarkRequest)(nil),      // 2: grade.SetMainCriteriaMarkRequest
-	(*SetMainCriteriaMarkResponse)(nil),     // 3: grade.SetMainCriteriaMarkResponse
+	(*UpdateWorkStatusRequest)(nil),         // 0: grade.UpdateWorkStatusRequest
+	(*UpdateWorkStatusResponse)(nil),        // 1: grade.UpdateWorkStatusResponse
+	(*GetCriteriaMarksRequest)(nil),         // 2: grade.GetCriteriaMarksRequest
+	(*GetCriteriaMarksResponse)(nil),        // 3: grade.GetCriteriaMarksResponse
+	(*CriterionMark)(nil),                   // 4: grade.CriterionMark
+	(*SetBlockingCriteriaMarkRequest)(nil),  // 5: grade.SetBlockingCriteriaMarkRequest
+	(*SetBlockingCriteriaMarkResponse)(nil), // 6: grade.SetBlockingCriteriaMarkResponse
+	(*SetMainCriteriaMarkRequest)(nil),      // 7: grade.SetMainCriteriaMarkRequest
+	(*SetMainCriteriaMarkResponse)(nil),     // 8: grade.SetMainCriteriaMarkResponse
 }
 var file_proto_grade_grade_proto_depIdxs = []int32{
-	0, // 0: grade.GradingService.SetBlockingCriteriaMark:input_type -> grade.SetBlockingCriteriaMarkRequest
-	2, // 1: grade.GradingService.SetMainCriteriaMark:input_type -> grade.SetMainCriteriaMarkRequest
-	1, // 2: grade.GradingService.SetBlockingCriteriaMark:output_type -> grade.SetBlockingCriteriaMarkResponse
-	3, // 3: grade.GradingService.SetMainCriteriaMark:output_type -> grade.SetMainCriteriaMarkResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: grade.GetCriteriaMarksResponse.marks:type_name -> grade.CriterionMark
+	5, // 1: grade.GradingService.SetBlockingCriteriaMark:input_type -> grade.SetBlockingCriteriaMarkRequest
+	7, // 2: grade.GradingService.SetMainCriteriaMark:input_type -> grade.SetMainCriteriaMarkRequest
+	2, // 3: grade.GradingService.GetCriteriaMarks:input_type -> grade.GetCriteriaMarksRequest
+	0, // 4: grade.GradingService.UpdateWorkStatus:input_type -> grade.UpdateWorkStatusRequest
+	6, // 5: grade.GradingService.SetBlockingCriteriaMark:output_type -> grade.SetBlockingCriteriaMarkResponse
+	8, // 6: grade.GradingService.SetMainCriteriaMark:output_type -> grade.SetMainCriteriaMarkResponse
+	3, // 7: grade.GradingService.GetCriteriaMarks:output_type -> grade.GetCriteriaMarksResponse
+	1, // 8: grade.GradingService.UpdateWorkStatus:output_type -> grade.UpdateWorkStatusResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_proto_grade_grade_proto_init() }
@@ -311,7 +589,7 @@ func file_proto_grade_grade_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_grade_grade_proto_rawDesc), len(file_proto_grade_grade_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

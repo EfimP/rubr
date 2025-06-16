@@ -864,6 +864,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 		),
 	))
 }
+
 func CreateMainCriteriaPage(state *AppState, taskID int32) {
 	w := state.window
 
