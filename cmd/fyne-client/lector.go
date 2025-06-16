@@ -687,7 +687,6 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 			return
 		}
 
-		// Создаем список названий критериев
 		criteriaNames := make([]string, len(activeCriteria))
 		nameToIndex := make(map[string]int)
 		for i, crit := range activeCriteria {
@@ -707,7 +706,6 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 			selectEntry,
 		)
 
-		// Диалоговое окно для выбора критерия
 		deleteDialog := dialog.NewCustomConfirm(
 			"Удаление критерия",
 			"Удалить",

@@ -8,7 +8,6 @@ service GradingService {
   rpc SetMainCriteriaMark (SetMainCriteriaMarkRequest) returns (SetMainCriteriaMarkResponse) {}
   rpc GetCriteriaMarks(GetCriteriaMarksRequest) returns (GetCriteriaMarksResponse);
   rpc UpdateWorkStatus(UpdateWorkStatusRequest) returns (UpdateWorkStatusResponse);
-
 }
 
 message UpdateWorkStatusRequest {
@@ -33,7 +32,6 @@ message CriterionMark {
   string comment = 3;
 }
 
-// Добавить в конец message определений
 message SetBlockingCriteriaMarkRequest {
   int32 work_id = 1;
   int32 criterion_id = 2;

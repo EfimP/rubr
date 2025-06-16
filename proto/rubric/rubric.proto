@@ -19,8 +19,6 @@ service RubricService {
   rpc DeleteBlockingCriteria (DeleteBlockingCriteriaRequest) returns (DeleteBlockingCriteriaResponse) {}
   rpc DeleteCriteriaGroup (DeleteCriteriaGroupRequest) returns (DeleteCriteriaGroupResponse) {}
   rpc DeleteCriterion (DeleteCriterionRequest) returns (DeleteCriterionResponse) {}
-
-
 }
 
 message DeleteCriteriaGroupRequest {

@@ -72,7 +72,6 @@ func (s *server) DeleteTaskBlockingCriterias(ctx context.Context, req *pb.Delete
 	queryGroup := `SELECT id FROM criteria_groups WHERE task_id = $1 AND group_name = 'blocking_criterias' AND block_flag = true`
 	err := s.db.QueryRowContext(ctx, queryGroup, req.TaskId).Scan(&groupID)
 	if err == sql.ErrNoRows {
-		// Если группы нет, это не ошибка, просто нет критериев для удаления
 		return &pb.DeleteTaskBlockingCriteriasResponse{Success: true}, nil
 	}
 	if err != nil {
