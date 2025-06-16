@@ -44,7 +44,7 @@ var works = []Work{
 
 func AllWorksScreen() {
 	myApp := app.New()
-	myWindow := myApp.NewWindow("ассистент: Список всех работ")
+	myWindow := myApp.NewWindow("семинарист: Список всех работ")
 	myWindow.Resize(fyne.NewSize(1920, 1080)) // Разрешение 16:9
 
 	// Цвета
