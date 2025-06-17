@@ -14,24 +14,24 @@ import (
 )
 
 // Структура для хранения информации о работе
-type Work struct {
+type Work2 struct {
 	Date        time.Time
 	Title       string
 	Studentname string
 }
 
 // Структура для хранения информации об ассистентах
-type Assistant struct {
+type Assistant2 struct {
 	ID   int
 	Name string
 }
 
 // Симуляция данных из базы данных
-var works = []Work{
+var works2 = []Work{
 	{Date: time.Date(2025, 6, 10, 0, 0, 0, 0, time.UTC), Title: "НАЗВАНЕ", Studentname: "ФАМИЛИЯ ИМЯ ОТЧЕСТВО"},
 }
 
-var assistants = []Assistant{
+var assistants2 = []Assistant2{
 	{ID: 1, Name: "Ассистент 1"},
 	{ID: 2, Name: "Ассистент 2"},
 	{ID: 3, Name: "Ассистент 3"},

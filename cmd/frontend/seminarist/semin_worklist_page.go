@@ -14,14 +14,14 @@ import (
 )
 
 // Структура для хранения информации о работе
-type Work struct {
+type Work3 struct {
 	Date        time.Time
 	Title       string
 	Studentname string
 }
 
 // Симуляция данных из базы данных (включая просроченные работы)
-var works = []Work{
+var works = []Work3{
 	{Date: time.Date(2025, 6, 10, 0, 0, 0, 0, time.UTC), Title: "НАЗВАНИЕ", Studentname: "ФИО"},
 	{Date: time.Date(2025, 6, 10, 0, 0, 0, 0, time.UTC), Title: "НАЗВАНИЕ", Studentname: "ФИО"},
 	{Date: time.Date(2025, 6, 10, 0, 0, 0, 0, time.UTC), Title: "НАЗВАНИЕ", Studentname: "ФИО"},
@@ -83,7 +83,7 @@ func AllWorksScreen() {
 		studentname := widget.NewLabel(work.Studentname)
 		date := widget.NewLabel(work.Date.Format("02.01.2006"))
 
-		detailsButton := widget.NewButton("Перейти", func(w Work) func() {
+		detailsButton := widget.NewButton("Перейти", func(Work3) func() {
 			return func() {}
 		}(work)) // Копируем Work для замыкания
 
