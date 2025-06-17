@@ -95,7 +95,7 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 		// Получаем прикреплённые дисциплины через gRPC
 		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to superaccservice: %v", err)
+			log.Printf("Не удалось подключиться к superaccservice: %v", err)
 			return
 		}
 		defer conn.Close()
@@ -117,31 +117,47 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 		commentEntryContainer := container.NewMax(commentEntry)
 		commentEntryContainer.Resize(fyne.NewSize(250, 60))
 
-		// Кнопка для добавления дисциплины
-		manageDisciplinesButton := widget.NewButton("Добавить дисциплину", func() {
+		contains := func(s []string, e string) bool {
+			for _, a := range s {
+				if a == e {
+					return true
+				}
+			}
+			return false
+		}
+
+		deleteDisciplineButton := widget.NewButton("Удалить дисциплину", func() {
 			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
 			if err != nil {
-				log.Printf("Failed to connect to superaccservice: %v", err)
+				log.Printf("Не удалось подключиться к superaccservice: %v", err)
 				return
 			}
 			defer conn.Close()
 			client := superaccpb.NewSuperAccServiceClient(conn)
 
-			// Получаем список дисциплин
+			// Получаем список прикреплённых дисциплин
 			respDisciplines, err := client.ListDisciplines(context.Background(), &superaccpb.ListDisciplinesRequest{})
 			if err != nil {
-				log.Printf("Failed to list disciplines: %v", err)
+				log.Printf("Не удалось получить список дисциплин: %v", err)
+				dialog.ShowInformation("Ошибка", "Не удалось загрузить список дисциплин", w)
 				return
 			}
 
 			var disciplineOptions []string
 			var disciplineIDs []int32
 			for _, d := range respDisciplines.Disciplines {
-				disciplineOptions = append(disciplineOptions, d.Name)
-				disciplineIDs = append(disciplineIDs, d.Id)
+				if contains(attachedDisciplines, d.Name) { // Только прикреплённые дисциплины
+					disciplineOptions = append(disciplineOptions, d.Name)
+					disciplineIDs = append(disciplineIDs, d.Id)
+				}
 			}
 
-			// Используем CheckGroup для множественного выбора
+			if len(disciplineOptions) == 0 {
+				log.Printf("Нет дисциплин для удаления из группы %s", group.Name)
+				dialog.ShowInformation("Информация", "Нет прикреплённых дисциплин для удаления", w)
+				return
+			}
+
 			var checkItems []fyne.CanvasObject
 			var checks []*widget.Check
 			for _, option := range disciplineOptions {
@@ -152,10 +168,12 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 			checkGroup := container.NewVBox(checkItems...)
 
 			dialog.ShowForm(
-				"Выбор дисциплин",
+				"Удалить дисциплины",
 				"OK",
 				"Отмена",
-				[]*widget.FormItem{widget.NewFormItem("Дисциплины", checkGroup)},
+				[]*widget.FormItem{
+					widget.NewFormItem("Дисциплины", checkGroup),
+				},
 				func(confirmed bool) {
 					if confirmed {
 						var selectedIDs []int32
@@ -165,27 +183,34 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 							}
 						}
 						if len(selectedIDs) > 0 {
-							resp, err := client.ManageDisciplineEntity(context.Background(), &superaccpb.ManageDisciplineEntityRequest{
-								Action:        "attach",
+							connFinal, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+							if err != nil {
+								log.Printf("Не удалось подключиться к superaccservice: %v", err)
+								return
+							}
+							defer connFinal.Close()
+							clientFinal := superaccpb.NewSuperAccServiceClient(connFinal)
+
+							resp, err := clientFinal.DetachDisciplinesFromGroup(context.Background(), &superaccpb.DetachDisciplinesFromGroupRequest{
 								GroupId:       group.Id,
 								DisciplineIds: selectedIDs,
 							})
 							if err != nil {
-								log.Printf("Failed to attach disciplines: %v", err)
+								log.Printf("Не удалось открепить дисциплины: %v", err)
 								return
 							}
 							if !resp.Success {
-								log.Printf("Attach disciplines failed: %s", resp.Message)
+								log.Printf("Открепление дисциплин не удалось: %s", resp.Message)
 							} else {
-								log.Printf("Disciplines attached successfully to group %s", group.Name)
+								log.Printf("Дисциплины успешно откреплены от группы %s", group.Name)
 								// Обновляем список дисциплин
-								conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+								connUpdate, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
 								if err == nil {
-									defer conn.Close()
-									client := superaccpb.NewSuperAccServiceClient(conn)
-									resp, err := client.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
+									defer connUpdate.Close()
+									clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
+									respUpdate, err := clientUpdate.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
 									if err == nil {
-										for _, g := range resp.Groups {
+										for _, g := range respUpdate.Groups {
 											if g.Id == group.Id {
 												commentEntry.SetText(strings.Join(g.Disciplines, ", "))
 												break
@@ -199,6 +224,271 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 				},
 				w,
 			)
+		})
+
+		// Кнопка для прикрепления дисциплины
+		attachDisciplineButton := widget.NewButton("Прикрепить дисциплину", func() {
+			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			if err != nil {
+				log.Printf("Не удалось подключиться к superaccservice: %v", err)
+				return
+			}
+			defer conn.Close()
+			client := superaccpb.NewSuperAccServiceClient(conn)
+
+			// Получаем список дисциплин
+			respDisciplines, err := client.ListDisciplines(context.Background(), &superaccpb.ListDisciplinesRequest{})
+			if err != nil {
+				log.Printf("Не удалось получить список дисциплин: %v", err)
+				dialog.ShowInformation("Ошибка", "Не удалось загрузить список дисциплин", w)
+				return
+			}
+			if len(respDisciplines.Disciplines) == 0 {
+				log.Printf("Список дисциплин пуст")
+				dialog.ShowInformation("Ошибка", "Список дисциплин пуст", w)
+				return
+			}
+
+			var disciplineOptions []string
+			var disciplineIDs []int32
+			for _, d := range respDisciplines.Disciplines {
+				if !contains(attachedDisciplines, d.Name) { // Исключаем уже прикреплённые дисциплины
+					disciplineOptions = append(disciplineOptions, d.Name)
+					disciplineIDs = append(disciplineIDs, d.Id)
+				}
+			}
+
+			if len(disciplineOptions) == 0 {
+				log.Printf("Нет доступных дисциплин для прикрепления к группе %s", group.Name)
+				dialog.ShowInformation("Информация", "Все доступные дисциплины уже прикреплены", w)
+				return
+			}
+
+			// Получаем seminarist_id и assistant_id через gRPC
+			respSeminarists, err := client.GetGroupStaff(context.Background(), &superaccpb.GetGroupStaffRequest{GroupId: group.Id})
+			if err != nil {
+				log.Printf("Не удалось получить данные о сотрудниках группы: %v", err)
+				return
+			}
+			var seminaristID, assistantID int32
+			if respSeminarists.Success {
+				seminaristID = respSeminarists.SeminaristId
+				assistantID = respSeminarists.AssistantId
+			}
+
+			var checkItems []fyne.CanvasObject
+			var checks []*widget.Check
+			for _, option := range disciplineOptions {
+				check := widget.NewCheck(option, nil)
+				checkItems = append(checkItems, check)
+				checks = append(checks, check)
+			}
+			checkGroup := container.NewVBox(checkItems...)
+
+			if seminaristID == 0 || assistantID == 0 {
+				// Если семинариста или ассистента нет, открываем диалог для выбора
+				respUsers, err := client.ListAllUsers(context.Background(), &superaccpb.ListAllUsersRequest{})
+				if err != nil {
+					log.Printf("Не удалось получить список пользователей: %v", err)
+					return
+				}
+				var userOptions []string
+				var userIDs []int32
+				for _, u := range respUsers.Users {
+					if u.Status == "seminarist" || u.Status == "assistant" {
+						userOptions = append(userOptions, fmt.Sprintf("%s (%s)", u.Fio, u.Email))
+						userIDs = append(userIDs, u.Id)
+					}
+				}
+
+				seminaristSelect := widget.NewSelect(append([]string{"None"}, userOptions...), nil)
+				assistantSelect := widget.NewSelect(append([]string{"None"}, userOptions...), nil)
+				seminaristSelect.SetSelectedIndex(0)
+				assistantSelect.SetSelectedIndex(0)
+
+				dialog.ShowForm(
+					"Выбор семинариста и ассистента",
+					"Далее",
+					"Отмена",
+					[]*widget.FormItem{
+						widget.NewFormItem("Семинарист", seminaristSelect),
+						widget.NewFormItem("Ассистент", assistantSelect),
+					},
+					func(confirmed bool) {
+						if confirmed {
+							if seminaristSelect.SelectedIndex() == 0 && assistantSelect.SelectedIndex() == 0 {
+								log.Printf("Не выбран семинарист или ассистент")
+								return
+							}
+
+							var selectedSeminaristID, selectedAssistantID int32
+							if seminaristSelect.SelectedIndex() > 0 {
+								selectedSeminaristID = userIDs[seminaristSelect.SelectedIndex()-1]
+							}
+							if assistantSelect.SelectedIndex() > 0 {
+								selectedAssistantID = userIDs[assistantSelect.SelectedIndex()-1]
+							}
+
+							// Прикрепляем выбранных семинариста и ассистента к группе
+							connInner, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+							if err != nil {
+								log.Printf("Не удалось подключиться к superaccservice: %v", err)
+								return
+							}
+							defer connInner.Close()
+							clientInner := superaccpb.NewSuperAccServiceClient(connInner)
+
+							_, err = clientInner.ManageGroup(context.Background(), &superaccpb.ManageGroupRequest{
+								GroupId: group.Id,
+								Action:  "add",
+								UserId:  selectedSeminaristID,
+								Role:    "seminarist",
+							})
+							if err != nil {
+								log.Printf("Не удалось добавить семинариста: %v", err)
+								return
+							}
+							if selectedAssistantID > 0 {
+								_, err = clientInner.ManageGroup(context.Background(), &superaccpb.ManageGroupRequest{
+									GroupId: group.Id,
+									Action:  "add",
+									UserId:  selectedAssistantID,
+									Role:    "assistant",
+								})
+								if err != nil {
+									log.Printf("Не удалось добавить ассистента: %v", err)
+									return
+								}
+							}
+
+							// Открываем диалог для выбора дисциплин
+							var selectedIDs []int32
+							dialog.ShowForm(
+								"Прикрепить дисциплины",
+								"OK",
+								"Отмена",
+								[]*widget.FormItem{
+									widget.NewFormItem("Дисциплины", checkGroup),
+								},
+								func(confirmed bool) {
+									if confirmed {
+										for i, check := range checks {
+											if check.Checked {
+												selectedIDs = append(selectedIDs, disciplineIDs[i])
+											}
+										}
+										if len(selectedIDs) > 0 {
+											connFinal, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+											if err != nil {
+												log.Printf("Не удалось подключиться к superaccservice: %v", err)
+												return
+											}
+											defer connFinal.Close()
+											clientFinal := superaccpb.NewSuperAccServiceClient(connFinal)
+
+											resp, err := clientFinal.ManageDisciplineEntity(context.Background(), &superaccpb.ManageDisciplineEntityRequest{
+												Action:        "attach",
+												GroupId:       group.Id,
+												DisciplineIds: selectedIDs,
+												SeminaristId:  selectedSeminaristID,
+												AssistantId:   selectedAssistantID,
+											})
+											if err != nil {
+												log.Printf("Не удалось прикрепить дисциплины: %v", err)
+												return
+											}
+											if !resp.Success {
+												log.Printf("Прикрепление дисциплин не удалось: %s", resp.Message)
+											} else {
+												log.Printf("Дисциплины успешно прикреплены к группе %s", group.Name)
+												// Обновляем список дисциплин
+												connUpdate, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+												if err == nil {
+													defer connUpdate.Close()
+													clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
+													respUpdate, err := clientUpdate.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
+													if err == nil {
+														for _, g := range respUpdate.Groups {
+															if g.Id == group.Id {
+																commentEntry.SetText(strings.Join(g.Disciplines, ", "))
+																break
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								},
+								w,
+							)
+						}
+					},
+					w,
+				)
+			} else {
+				// Если семинарист и ассистент уже есть, сразу прикрепляем дисциплины
+				var selectedIDs []int32
+				dialog.ShowForm(
+					"Прикрепить дисциплины",
+					"OK",
+					"Отмена",
+					[]*widget.FormItem{
+						widget.NewFormItem("Дисциплины", checkGroup),
+					},
+					func(confirmed bool) {
+						if confirmed {
+							for i, check := range checks {
+								if check.Checked {
+									selectedIDs = append(selectedIDs, disciplineIDs[i])
+								}
+							}
+							if len(selectedIDs) > 0 {
+								connFinal, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+								if err != nil {
+									log.Printf("Не удалось подключиться к superaccservice: %v", err)
+									return
+								}
+								defer connFinal.Close()
+								clientFinal := superaccpb.NewSuperAccServiceClient(connFinal)
+
+								resp, err := clientFinal.ManageDisciplineEntity(context.Background(), &superaccpb.ManageDisciplineEntityRequest{
+									Action:        "attach",
+									GroupId:       group.Id,
+									DisciplineIds: selectedIDs,
+									SeminaristId:  seminaristID,
+									AssistantId:   assistantID,
+								})
+								if err != nil {
+									log.Printf("Не удалось прикрепить дисциплины: %v", err)
+									return
+								}
+								if !resp.Success {
+									log.Printf("Прикрепление дисциплин не удалось: %s", resp.Message)
+								} else {
+									log.Printf("Дисциплины успешно прикреплены к группе %s", group.Name)
+									// Обновляем список дисциплин
+									connUpdate, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+									if err == nil {
+										defer connUpdate.Close()
+										clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
+										respUpdate, err := clientUpdate.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
+										if err == nil {
+											for _, g := range respUpdate.Groups {
+												if g.Id == group.Id {
+													commentEntry.SetText(strings.Join(g.Disciplines, ", "))
+													break
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					w,
+				)
+			}
 		})
 
 		nextButton := widget.NewButton("Подробнее", func() {
@@ -216,7 +506,7 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 					if confirmed {
 						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
 						if err != nil {
-							log.Printf("Failed to connect to superaccservice: %v", err)
+							log.Printf("Не удалось подключиться к superaccservice: %v", err)
 							return
 						}
 						defer conn.Close()
@@ -227,13 +517,13 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 							Action:  "delete",
 						})
 						if err != nil {
-							log.Printf("Failed to delete group: %v", err)
+							log.Printf("Не удалось удалить группу: %v", err)
 							return
 						}
 						if !resp.Success {
-							log.Printf("Delete group failed: %s", resp.Message)
+							log.Printf("Удаление группы не удалось: %s", resp.Message)
 						} else {
-							log.Printf("Group %s with ID %d successfully deleted", group.Name, group.Id)
+							log.Printf("Группа %s с ID %d успешно удалена", group.Name, group.Id)
 							// Удаляем строку из интерфейса
 							for i, g := range groups {
 								if g.NameEntry.Text == group.Name {
@@ -250,11 +540,12 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 			)
 		})
 
-		groupRow := container.New(layout.NewGridLayoutWithColumns(6),
+		groupRow := container.New(layout.NewGridLayoutWithColumns(7),
 			container.NewPadded(container.NewPadded(nameEntryContainer)),
 			container.NewPadded(container.NewPadded(descriptionEntryContainer)),
 			container.NewPadded(container.NewPadded(commentEntryContainer)),
-			container.NewPadded(container.NewPadded(manageDisciplinesButton)),
+			container.NewPadded(container.NewPadded(deleteDisciplineButton)),
+			container.NewPadded(container.NewPadded(attachDisciplineButton)),
 			container.NewPadded(container.NewPadded(nextButton)),
 			container.NewPadded(container.NewPadded(deleteButton)),
 		)
@@ -364,62 +655,12 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 	})
 
 	createDisciplineButton := widget.NewButton("Создать дисциплину", func() {
-		if len(groups) == 0 {
-			log.Printf("No groups available to create discipline")
-			return
-		}
-
 		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Failed to connect to superaccservice: %v", err)
+			log.Printf("Не удалось подключиться к superaccservice: %v", err)
 			return
 		}
-		// Не используем defer conn.Close() здесь, чтобы соединение оставалось открытым
 		client := superaccpb.NewSuperAccServiceClient(conn)
-
-		// Получаем список групп для определения GroupId
-		respGroups, err := client.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
-		if err != nil {
-			log.Printf("Failed to list groups: %v", err)
-			conn.Close()
-			return
-		}
-
-		// Предполагаем, что первая группа используется (нужно улучшить выбор группы)
-		var selectedGroupID int32
-		for _, g := range respGroups.Groups {
-			if g.Name == groups[0].NameEntry.Text {
-				selectedGroupID = g.Id
-				break
-			}
-		}
-		if selectedGroupID == 0 {
-			log.Printf("Group %s not found", groups[0].NameEntry.Text)
-			conn.Close()
-			return
-		}
-
-		// Получаем список пользователей для выбора семинариста и ассистента
-		respUsers, err := client.ListAllUsers(context.Background(), &superaccpb.ListAllUsersRequest{})
-		if err != nil {
-			log.Printf("Failed to list users: %v", err)
-			conn.Close()
-			return
-		}
-
-		var userOptions []string
-		var userIDs []int32
-		for _, u := range respUsers.Users {
-			if u.Status == "seminarist" || u.Status == "assistant" {
-				userOptions = append(userOptions, fmt.Sprintf("%s (%s)", u.Fio, u.Email))
-				userIDs = append(userIDs, u.Id)
-			}
-		}
-
-		seminaristSelect := widget.NewSelect(append([]string{"None"}, userOptions...), nil)
-		assistantSelect := widget.NewSelect(append([]string{"None"}, userOptions...), nil)
-		seminaristSelect.SetSelectedIndex(0)
-		assistantSelect.SetSelectedIndex(0)
 
 		nameEntry := widget.NewEntry()
 		nameEntry.SetPlaceHolder("Название дисциплины")
@@ -428,52 +669,102 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 			"Создать дисциплину",
 			"OK",
 			"Отмена",
-			[]*widget.FormItem{
-				widget.NewFormItem("Название", nameEntry),
-				widget.NewFormItem("Семинарист", seminaristSelect),
-				widget.NewFormItem("Ассистент", assistantSelect),
-			},
+			[]*widget.FormItem{widget.NewFormItem("Название", nameEntry)},
 			func(confirmed bool) {
 				if confirmed && nameEntry.Text != "" {
-					var seminaristID, assistantID int32
-					if seminaristSelect.SelectedIndex() > 0 {
-						seminaristID = userIDs[seminaristSelect.SelectedIndex()-1]
-					}
-					if assistantSelect.SelectedIndex() > 0 {
-						assistantID = userIDs[assistantSelect.SelectedIndex()-1]
-					}
-
-					// Создаём дисциплину с правильным GroupId
-					respDisc, err := client.ManageDisciplineEntity(context.Background(), &superaccpb.ManageDisciplineEntityRequest{
-						Action:       "create",
-						GroupId:      selectedGroupID,
-						Name:         nameEntry.Text,
-						SeminaristId: seminaristID,
-						AssistantId:  assistantID,
+					resp, err := client.CreateDiscipline(context.Background(), &superaccpb.ManageDisciplineEntityRequest{
+						Action: "create",
+						Name:   nameEntry.Text,
 					})
 					if err != nil {
-						log.Printf("Failed to create discipline: %v", err)
-					} else if !respDisc.Success {
-						log.Printf("Create discipline failed: %s", respDisc.Message)
+						log.Printf("Не удалось создать дисциплину: %v", err)
+					} else if !resp.Success {
+						log.Printf("Ошибка создания дисциплины: %s", resp.Message)
 					} else {
-						log.Printf("Discipline created successfully")
+						log.Printf("Дисциплина успешно создана с ID %d", resp.DisciplineId)
+					}
+				}
+				conn.Close() // Закрываем соединение после RPC
+			},
+			w,
+		)
+	})
 
-						// Обновляем список групп
-						newResp, err := client.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
-						if err == nil {
-							groupInfoListContainer.RemoveAll()
-							groups = nil
-							for _, group := range newResp.Groups {
-								addCriterionEntry(group)
-							}
-							groupInfoListContainer.Refresh()
-						} else {
-							log.Printf("Failed to refresh groups: %v", err)
+	deleteDisciplineButton := widget.NewButton("Удалить дисциплину", func() {
+		client := superaccpb.NewSuperAccServiceClient(nil) // Инициализация без соединения
+		var conn *grpc.ClientConn
+
+		// Получаем список дисциплин внутри диалога
+		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Не удалось подключиться к superaccservice: %v", err)
+			return
+		}
+		defer conn.Close()
+		client = superaccpb.NewSuperAccServiceClient(conn)
+
+		respDisciplines, err := client.ListDisciplines(context.Background(), &superaccpb.ListDisciplinesRequest{})
+		if err != nil {
+			log.Printf("Failed to list disciplines: %v", err)
+			return
+		}
+
+		var disciplineOptions []string
+		var disciplineIDs []int32
+		for _, d := range respDisciplines.Disciplines {
+			disciplineOptions = append(disciplineOptions, d.Name)
+			disciplineIDs = append(disciplineIDs, d.Id)
+		}
+
+		// Используем CheckGroup для множественного выбора
+		var checkItems []fyne.CanvasObject
+		var checks []*widget.Check
+		for _, option := range disciplineOptions {
+			check := widget.NewCheck(option, nil)
+			checkItems = append(checkItems, check)
+			checks = append(checks, check)
+		}
+		checkGroup := container.NewVBox(checkItems...)
+
+		dialog.ShowForm(
+			"Удалить дисциплины",
+			"OK",
+			"Отмена",
+			[]*widget.FormItem{
+				widget.NewFormItem("Дисциплины", checkGroup),
+			},
+			func(confirmed bool) {
+				if confirmed {
+					var selectedIDs []int32
+					for i, check := range checks {
+						if check.Checked {
+							selectedIDs = append(selectedIDs, disciplineIDs[i])
 						}
 					}
-					conn.Close() // Закрываем соединение после завершения запроса
-				} else {
-					conn.Close() // Закрываем соединение, если форма отменена
+					if len(selectedIDs) > 0 {
+						// Создаем новое соединение для удаления
+						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+						if err != nil {
+							log.Printf("Не удалось подключиться к superaccservice: %v", err)
+							return
+						}
+						defer conn.Close()
+						client = superaccpb.NewSuperAccServiceClient(conn)
+
+						resp, err := client.DeleteDiscipline(context.Background(), &superaccpb.DeleteDisciplineRequest{
+							DisciplineIds: selectedIDs,
+						})
+						if err != nil {
+							log.Printf("Failed to delete disciplines: %v", err)
+							return
+						}
+						if !resp.Success {
+							log.Printf("Delete disciplines failed: %s", resp.Message)
+						} else {
+							log.Printf("Disciplines deleted successfully: %v", selectedIDs)
+						}
+						log.Printf("Выбрано дисциплин для удаления: %d", len(selectedIDs))
+					}
 				}
 			},
 			w,
@@ -483,6 +774,7 @@ func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.Ca
 	bottomButtons := container.New(layout.NewHBoxLayout(),
 		addButton,
 		layout.NewSpacer(),
+		deleteDisciplineButton,
 		createDisciplineButton,
 		nextButton,
 	)
