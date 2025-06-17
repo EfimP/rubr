@@ -116,7 +116,7 @@ func showDateTimePickerDialog(parent fyne.Window, selectedTime *time.Time, isSel
 	d.Show()
 }
 
-func CreateLectorWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateLectorWorksPage(state *AppState) fyne.CanvasObject {
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
 		log.Printf("Invalid user ID: %v", err)
@@ -361,7 +361,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 	// Add Back button
 	backButton := widget.NewButton("Назад", func() {
 		state.currentPage = "lector_works"
-		w.SetContent(CreateLectorWorksPage(state, nil))
+		w.SetContent(CreateLectorWorksPage(state))
 	})
 
 	titleEntry := widget.NewEntry()
