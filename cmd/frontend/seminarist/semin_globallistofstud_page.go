@@ -15,7 +15,7 @@ import (
 )
 
 // Структура для хранения информации о работе
-type Work struct {
+type Work1 struct {
 	Date        time.Time
 	Title       string
 	Studentname string
@@ -23,19 +23,19 @@ type Work struct {
 }
 
 // Структура для хранения информации об ассистентах
-type Assistant struct {
+type Assistant1 struct {
 	ID   int
 	Name string
 }
 
 // Симуляция данных из базы данных
-var works = []Work{
+var works1 = []Work1{
 	{Date: time.Date(2025, 6, 10, 0, 0, 0, 0, time.UTC), Title: "Лабораторная работа 1", Studentname: "Иванов И.И.", Email: "ivanov@example.com"},
 	{Date: time.Date(2025, 6, 15, 0, 0, 0, 0, time.UTC), Title: "Проект 1", Studentname: "Петров П.П.", Email: "petrov@example.com"},
 	{Date: time.Date(2025, 6, 20, 0, 0, 0, 0, time.UTC), Title: "Лабораторная работа 2", Studentname: "Сидоров С.С.", Email: "sidorov@example.com"},
 }
 
-var assistants = []Assistant{
+var assistants1 = []Assistant1{
 	{ID: 1, Name: "Ассистент 1"},
 	{ID: 2, Name: "Ассистент 2"},
 	{ID: 3, Name: "Ассистент 3"},
@@ -43,7 +43,7 @@ var assistants = []Assistant{
 
 func ListofStudensandAssistanse() {
 	myApp := app.New()
-	myWindow := myApp.NewWindow("ассистент: Задание")
+	myWindow := myApp.NewWindow("seminarist")
 	myWindow.Resize(fyne.NewSize(1920, 1080)) // Разрешение 16:9
 
 	// Цвета
@@ -56,7 +56,7 @@ func ListofStudensandAssistanse() {
 	logo.TextSize = 28
 	logoContainer := container.New(layout.NewMaxLayout(), logo)
 
-	headerTitleText := canvas.NewText("Семинарист", headerTextColor)
+	headerTitleText := canvas.NewText("Студенты", headerTextColor)
 	headerTitleText.TextStyle.Bold = true
 	headerTitleText.Alignment = fyne.TextAlignCenter
 
@@ -80,7 +80,7 @@ func ListofStudensandAssistanse() {
 
 	// --- Таблица с данными ---
 	table := widget.NewTable(
-		func() (int, int) { return len(works), 3 }, // Количество строк и столбцов
+		func() (int, int) { return len(works1), 3 }, // Количество строк и столбцов
 		func() fyne.CanvasObject {
 			// Шаблон для ячейки
 			return container.NewVBox(widget.NewLabel(""))
@@ -98,16 +98,16 @@ func ListofStudensandAssistanse() {
 
 			switch col {
 			case 0: // ФИО (не кликабельное)
-				label := widget.NewLabel(works[row].Studentname)
+				label := widget.NewLabel(works1[row].Studentname)
 				label.Wrapping = fyne.TextWrapWord
 				containerObj.Objects = []fyne.CanvasObject{label}
 			case 1: // Почта (не кликабельная)
-				label := widget.NewLabel(works[row].Email)
+				label := widget.NewLabel(works1[row].Email)
 				label.Wrapping = fyne.TextWrapWord
 				containerObj.Objects = []fyne.CanvasObject{label}
 			case 2: // Выпадающий список ассистентов
-				assistantNames := make([]string, len(assistants))
-				for i, a := range assistants {
+				assistantNames := make([]string, len(assistants1))
+				for i, a := range assistants1 {
 					assistantNames[i] = a.Name
 				}
 				selectAssistant := widget.NewSelect(assistantNames, func(selected string) {
