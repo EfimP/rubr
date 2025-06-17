@@ -1,4 +1,6 @@
 # Go-specific
+*.exe
+*.exe~
 *.dll
 *.so
 *.dylib
