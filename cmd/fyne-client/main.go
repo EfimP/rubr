@@ -34,7 +34,7 @@ func main() {
 }
 
 func createContent(state *AppState) fyne.CanvasObject {
-	leftBackground := canvas.NewImageFromFile("bin/logo/hse_logo.svg")
+	leftBackground := canvas.NewImageFromResource(resourceHselogoSvg)
 	leftBackground.FillMode = canvas.ImageFillStretch
 
 	switch state.currentPage {

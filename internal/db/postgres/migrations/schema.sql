@@ -1,6 +1,6 @@
 
 -- Создание ENUM
---CREATE TYPE user_role AS ENUM ('student', 'assistant', 'seminarist', 'lecturer', 'superaccount');
+CREATE TYPE user_role AS ENUM ('student', 'assistant', 'seminarist', 'lecturer', 'superaccount');
 
 -- 1) USERS
 CREATE TABLE users (
@@ -106,6 +106,8 @@ CREATE TABLE student_works (
     status TEXT NOT NULL CHECK (status IN ('pending', 'submitted', 'graded by assistant', 'graded by seminarist')),
     task_id BIGINT NOT NULL,
 	assistant_id BIGINT,
+	seminarist_id BIGINT,
+	content_url TEXT NOT NULL DEFAULT '', 
 	FOREIGN KEY (assistant_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
@@ -117,10 +119,11 @@ CREATE TABLE student_criteria_marks (
     id SERIAL PRIMARY KEY,
     student_work_id BIGINT NOT NULL,
     criteria_id BIGINT NOT NULL,
-    mark NUMERIC(3,2) NOT NULL CHECK (mark >= 0 AND mark <= 1), -- Специальный тип для точных значений (0.00 - 1.00)
+    mark NUMERIC(3,2) NOT NULL CHECK (mark >= 0),
     comment TEXT,
     FOREIGN KEY (student_work_id) REFERENCES student_works(id) ON DELETE CASCADE,
-    FOREIGN KEY (criteria_id) REFERENCES criteria(id) ON DELETE CASCADE
+    FOREIGN KEY (criteria_id) REFERENCES criteria(id) ON DELETE CASCADE,
+    CONSTRAINT unique_student_work_criteria UNIQUE (student_work_id, criteria_id)
 );
 
 -- Остальные таблицы
