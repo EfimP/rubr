@@ -3,7 +3,6 @@ package main
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -34,29 +33,26 @@ func main() {
 }
 
 func createContent(state *AppState) fyne.CanvasObject {
-	leftBackground := canvas.NewImageFromResource(resourceHselogoSvg)
-	leftBackground.FillMode = canvas.ImageFillStretch
-
 	switch state.currentPage {
 	//authorization
 	case "greeting":
-		return CreateGreetingPage(state, leftBackground)
+		return CreateGreetingPage(state)
 	case "authorization":
-		return CreateAuthorizationPage(state, leftBackground)
+		return CreateAuthorizationPage(state)
 	case "registration":
-		return CreateRegistrationPage(state, leftBackground)
+		return CreateRegistrationPage(state)
 	//superacc
 	case "superacc-groups":
-		return СreateGroupListPage(state, leftBackground)
+		return СreateGroupListPage(state)
 	case "superacc-users-of-group":
-		return СreateGroupUsersPage(state, leftBackground, GroupName)
+		return СreateGroupUsersPage(state, GroupName)
 	case "superacc-all-users":
-		return СreateUsersListPage(state, leftBackground)
+		return СreateUsersListPage(state)
 		// lector
 	case "lector_works":
-		return CreateLectorWorksPage(state, leftBackground)
+		return CreateLectorWorksPage(state)
 	case "assistant_works":
-		return CreateAssistantWorksPage(state, leftBackground)
+		return CreateAssistantWorksPage(state)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
 	}

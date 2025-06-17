@@ -31,7 +31,7 @@ type GroupEntry struct {
 	Container        *fyne.Container
 }
 
-func СreateGroupListPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
+func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 	w := state.window
 	headerTextColor := color.White
 
@@ -817,7 +817,7 @@ type UserEntry struct {
 	Status   string
 }
 
-func СreateGroupUsersPage(state *AppState, leftBackground *canvas.Image, groupName string) fyne.CanvasObject {
+func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject {
 	w := state.window
 	logoText := canvas.NewText("ВШЭ", color.White)
 	logoText.TextStyle.Bold = true
@@ -1244,7 +1244,7 @@ type User struct {
 	Status string // Статус пользователя (асс, студ, лек, семи)
 }
 
-func СreateUsersListPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
+func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 	w := state.window
 
 	var currentDisplayedUsers []*User

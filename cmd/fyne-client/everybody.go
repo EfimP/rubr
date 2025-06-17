@@ -14,7 +14,11 @@ import (
 	userpb "rubr/proto/user"
 )
 
-func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateGreetingPage(state *AppState) fyne.CanvasObject {
+	logo := canvas.NewImageFromResource(resourceHselogoSvg)
+	logo.FillMode = canvas.ImageFillOriginal
+	logo.SetMinSize(fyne.NewSize(100, 100))
+
 	loginButton := widget.NewButton("Авторизоваться", func() {
 		state.currentPage = "authorization"
 		state.window.SetContent(createContent(state))
@@ -27,16 +31,20 @@ func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.Canv
 	})
 	registerButton.Importance = widget.MediumImportance
 
-	leftContent := container.NewVBox(
-		layout.NewSpacer(),
+	// Централизуем всё содержимое: логотип + кнопки
+	centeredContent := container.NewVBox(
+		logo,
+		widget.NewLabel(""), // Можно использовать spacer при желании
 		loginButton,
 		registerButton,
-		layout.NewSpacer(),
 	)
-	leftContainer := container.NewStack(leftBackground, container.NewCenter(leftContent))
 
+	leftContainer := container.NewCenter(centeredContent)
+
+	// Правая часть — белый прямоугольник с текстом
 	rightBackground := canvas.NewRectangle(color.RGBA{23, 44, 101, 255})
-	rightText := widget.NewLabel("Вход в систему оценивания")
+	rightText := canvas.NewText("Вход в систему оценивания", color.White)
+	rightText.TextSize = 32
 	rightText.TextStyle = fyne.TextStyle{Bold: true}
 	rightContent := container.NewCenter(rightText)
 	rightContainer := container.NewStack(rightBackground, rightContent)
@@ -44,7 +52,11 @@ func CreateGreetingPage(state *AppState, leftBackground *canvas.Image) fyne.Canv
 	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
 }
 
-func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
+	logo := canvas.NewImageFromResource(resourceHselogoSvg)
+	logo.FillMode = canvas.ImageFillOriginal
+	logo.SetMinSize(fyne.NewSize(100, 100))
+
 	loginEntry := widget.NewEntry()
 	loginEntry.SetPlaceHolder("Введите логин")
 
@@ -75,38 +87,56 @@ func CreateAuthorizationPage(state *AppState, leftBackground *canvas.Image) fyne
 
 		state.userID = resp.UserId
 		state.role = resp.Role
-		if state.role == "lecturer" {
+		switch state.role {
+		case "lecturer":
 			state.currentPage = "lector_works"
-		} else if state.role == "superaccount" {
+		case "superaccount":
 			state.currentPage = "superacc-groups"
-		} else if state.role == "assistant" {
+		case "assistant":
 			state.currentPage = "assistant_works"
-		} else {
+		default:
 			state.currentPage = "greeting"
 		}
 		state.window.SetContent(createContent(state))
 	})
 	enterButton.Importance = widget.HighImportance
 
-	leftContent := container.NewVBox(
+	backButton := widget.NewButton("← Назад", func() {
+		state.currentPage = "greeting"
+		state.window.SetContent(createContent(state))
+	})
+	backFull := container.NewHBox(backButton)
+
+	form := container.NewVBox(
+		logo,
 		layout.NewSpacer(),
 		loginEntry,
 		passwordEntry,
 		enterButton,
 		layout.NewSpacer(),
 	)
-	leftContainer := container.NewStack(leftBackground, container.NewCenter(leftContent))
+
+	leftContent := container.NewBorder(
+		nil, backFull, nil, nil,
+		container.NewCenter(form),
+	)
 
 	rightBackground := canvas.NewRectangle(color.RGBA{23, 44, 101, 255})
-	rightText := widget.NewLabel("Войдите в аккаунт")
+
+	rightText := canvas.NewText("Войдите в аккаунт", color.White)
+	rightText.TextSize = 32
 	rightText.TextStyle = fyne.TextStyle{Bold: true}
+
 	rightContent := container.NewCenter(rightText)
 	rightContainer := container.NewStack(rightBackground, rightContent)
 
-	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
+	return container.New(layout.NewGridLayout(2), leftContent, rightContainer)
 }
+func CreateRegistrationPage(state *AppState) fyne.CanvasObject {
+	logo := canvas.NewImageFromResource(resourceHselogoSvg)
+	logo.FillMode = canvas.ImageFillOriginal
+	logo.SetMinSize(fyne.NewSize(100, 100))
 
-func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
 	emailEntry := widget.NewEntry()
 	emailEntry.SetPlaceHolder("Введите почту")
 
@@ -152,7 +182,14 @@ func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 	})
 	enterButton.Importance = widget.HighImportance
 
-	leftContent := container.NewVBox(
+	backButton := widget.NewButton("← Назад", func() {
+		state.currentPage = "greeting"
+		state.window.SetContent(createContent(state))
+	})
+	backFull := container.NewHBox(backButton)
+
+	form := container.NewVBox(
+		logo,
 		layout.NewSpacer(),
 		nameEntry,
 		surnameEntry,
@@ -162,13 +199,20 @@ func CreateRegistrationPage(state *AppState, leftBackground *canvas.Image) fyne.
 		enterButton,
 		layout.NewSpacer(),
 	)
-	leftContainer := container.NewStack(leftBackground, container.NewCenter(leftContent))
+
+	leftContent := container.NewBorder(
+		nil, backFull, nil, nil,
+		container.NewCenter(form),
+	)
 
 	rightBackground := canvas.NewRectangle(color.RGBA{23, 44, 101, 255})
-	rightText := widget.NewLabel("Зарегистрируйтесь")
+
+	rightText := canvas.NewText("Зарегистрируйтесь", color.White)
+	rightText.TextSize = 32
 	rightText.TextStyle = fyne.TextStyle{Bold: true}
+
 	rightContent := container.NewCenter(rightText)
 	rightContainer := container.NewStack(rightBackground, rightContent)
 
-	return container.New(layout.NewGridLayout(2), leftContainer, rightContainer)
+	return container.New(layout.NewGridLayout(2), leftContent, rightContainer)
 }

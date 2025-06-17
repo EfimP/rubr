@@ -45,7 +45,7 @@ type MainCriterionEntry struct {
 	CommentEntry *widget.Entry
 }
 
-func CreateAssistantWorksPage(state *AppState, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateAssistantWorksPage(state *AppState) fyne.CanvasObject {
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
 		log.Printf("Некорректный ID пользователя: %v", err)
@@ -251,7 +251,7 @@ func CreateAssistantWorksPage(state *AppState, leftBackground *canvas.Image) fyn
 		workID := data[id].WorkID
 		taskID := data[id].TaskID
 		state.currentPage = "assistant_work_details"
-		state.window.SetContent(CreateAssistantWorkDetailsPage(state, workID, taskID, leftBackground))
+		state.window.SetContent(CreateAssistantWorkDetailsPage(state, workID, taskID))
 		myListWidget.UnselectAll()
 	}
 
@@ -270,7 +270,7 @@ func CreateAssistantWorksPage(state *AppState, leftBackground *canvas.Image) fyn
 		),
 	)
 }
-func CreateAssistantWorkDetailsPage(state *AppState, workID int32, taskID int32, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateAssistantWorkDetailsPage(state *AppState, workID int32, taskID int32) fyne.CanvasObject {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -368,12 +368,12 @@ func CreateAssistantWorkDetailsPage(state *AppState, workID int32, taskID int32,
 
 	gradeButton := widget.NewButton("Оценить", func() {
 		state.currentPage = "grading_blocking"
-		state.window.SetContent(CreateBlockingCriteriaGradingPage(state, workID, taskID, leftBackground))
+		state.window.SetContent(CreateBlockingCriteriaGradingPage(state, workID, taskID))
 	})
 
 	backButton := widget.NewButton("Назад", func() {
 		state.currentPage = "assistant_works"
-		state.window.SetContent(CreateAssistantWorksPage(state, leftBackground))
+		state.window.SetContent(CreateAssistantWorksPage(state))
 	})
 
 	buttonsContainer := container.NewHBox(backButton, layout.NewSpacer(), downloadButton, gradeButton)
@@ -402,7 +402,7 @@ func CreateAssistantWorkDetailsPage(state *AppState, workID int32, taskID int32,
 	)
 }
 
-func CreateBlockingCriteriaGradingPage(state *AppState, workID int32, taskID int32, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateBlockingCriteriaGradingPage(state *AppState, workID int32, taskID int32) fyne.CanvasObject {
 	w := state.window
 
 	// Подключение к gRPC сервисам
@@ -472,7 +472,7 @@ func CreateBlockingCriteriaGradingPage(state *AppState, workID int32, taskID int
 
 	backButton := widget.NewButton("Назад", func() {
 		state.currentPage = "assistant_work_details"
-		w.SetContent(CreateAssistantWorkDetailsPage(state, workID, taskID, leftBackground))
+		w.SetContent(CreateAssistantWorkDetailsPage(state, workID, taskID))
 	})
 	backButtonContainer := container.NewHBox(layout.NewSpacer(), backButton)
 
@@ -587,7 +587,7 @@ func CreateBlockingCriteriaGradingPage(state *AppState, workID int32, taskID int
 		}
 		log.Printf("All blocking criteria marks saved successfully")
 		state.currentPage = "grading_main"
-		w.SetContent(CreateMainCriteriaGradingPage(state, workID, taskID, leftBackground))
+		w.SetContent(CreateMainCriteriaGradingPage(state, workID, taskID))
 	})
 
 	// Нижняя панель с кнопкой "Далее"
@@ -621,7 +621,7 @@ func CreateBlockingCriteriaGradingPage(state *AppState, workID int32, taskID int
 	)
 }
 
-func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32, leftBackground *canvas.Image) fyne.CanvasObject {
+func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32) fyne.CanvasObject {
 	w := state.window
 
 	// Подключение к gRPC сервисам
@@ -849,7 +849,7 @@ func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32, 
 	// Кнопки
 	backButton := widget.NewButton("Назад", func() {
 		state.currentPage = "grading_blocking"
-		w.SetContent(CreateBlockingCriteriaGradingPage(state, workID, taskID, leftBackground))
+		w.SetContent(CreateBlockingCriteriaGradingPage(state, workID, taskID))
 	})
 
 	finalizeButton := widget.NewButton("Завершить оценку", func() {
@@ -938,7 +938,7 @@ func CreateMainCriteriaGradingPage(state *AppState, workID int32, taskID int32, 
 		log.Printf("Все оценки для работы %d сохранены, статус обновлен на 'graded by assistant' (время выполнения: %v)", workID, time.Since(start))
 		dialog.ShowInformation("Успех", "Оценка завершена", w)
 		state.currentPage = "assistant_works"
-		w.SetContent(CreateAssistantWorksPage(state, leftBackground))
+		w.SetContent(CreateAssistantWorksPage(state))
 	})
 
 	// Нижняя панель с кнопками
