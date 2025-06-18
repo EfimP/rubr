@@ -124,7 +124,7 @@ func CreateLectorWorksPage(state *AppState) fyne.CanvasObject {
 	}
 	userID := int32(userIDint64)
 
-	conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	conn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to workservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису работ"))
@@ -208,7 +208,7 @@ func CreateLectorWorksPage(state *AppState) fyne.CanvasObject {
 				fmt.Sprintf("Вы уверены, что хотите удалить работу '%s'?", data[currentID].Name),
 				func(confirmed bool) {
 					if confirmed {
-						conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+						conn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 						if err != nil {
 							log.Printf("Failed to connect to workservice: %v", err)
 							return
@@ -276,7 +276,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 	}
 	userID := int32(userIDint64)
 
-	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to workservice: %v", err)
 		dialog.ShowError(err, w)
@@ -449,7 +449,7 @@ func CreateWorkPage(state *AppState, taskID *int32) {
 		}
 		deadline := selectedDateTime.Format(time.RFC3339)
 
-		workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+		workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to workservice: %v", err)
 			dialog.ShowError(err, w)
@@ -569,7 +569,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to rubricservice: %v", err)
 		dialog.ShowError(err, w)
@@ -726,7 +726,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 
 				// Если критерий существует в базе (ID != 0), удаляем его
 				if selectedCriterion.ID != 0 {
-					rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+					rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 					if err != nil {
 						log.Printf("Failed to connect to rubricservice: %v", err)
 						dialog.ShowError(err, w)
@@ -775,7 +775,7 @@ func CreateBlockingCriteriaPage(state *AppState, taskID int32) {
 	addButton := widget.NewButton("Добавить", func() { addCriterionEntry(nil) })
 	deleteButton := widget.NewButton("Удалить", func() { deleteCriterionEntry() })
 	nextButton := widget.NewButton("Далее", func() {
-		rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+		rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to rubricservice: %v", err)
 			dialog.ShowError(err, w)
@@ -869,7 +869,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to rubricservice: %v", err)
 		dialog.ShowError(err, w)
@@ -964,7 +964,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 			{Text: "Название группы", Widget: entry},
 		}, func(b bool) {
 			if b && entry.Text != "" {
-				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Failed to connect to rubricservice: %v", err)
 					dialog.ShowError(err, w)
@@ -1030,7 +1030,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 					return
 				}
 
-				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Failed to connect to rubricservice: %v", err)
 					dialog.ShowError(err, w)
@@ -1096,7 +1096,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 			{Text: "Название критерия", Widget: entry},
 		}, func(b bool) {
 			if b && entry.Text != "" {
-				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Failed to connect to rubricservice: %v", err)
 					dialog.ShowError(err, w)
@@ -1167,7 +1167,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 					return
 				}
 
-				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Failed to connect to rubricservice: %v", err)
 					dialog.ShowError(err, w)
@@ -1224,7 +1224,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 				}
 			}
 
-			rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+			rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Failed to connect to rubricservice: %v", err)
 				dialog.ShowError(err, w)
@@ -1272,7 +1272,7 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 			})
 
 			saveButton := widget.NewButton("Сохранить", func() {
-				rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+				rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Failed to connect to rubricservice: %v", err)
 					dialog.ShowError(err, w)
