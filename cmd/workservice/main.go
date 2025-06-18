@@ -19,6 +19,142 @@ type server struct {
 	db *sql.DB
 }
 
+func (s *server) UpdateWork(ctx context.Context, req *pb.UpdateWorkRequest) (*pb.UpdateWorkResponse, error) {
+	_, err := s.db.ExecContext(ctx, `
+		UPDATE student_works
+		SET status = $1, assistant_id = NULL
+		WHERE id = $2
+	`, req.Status, req.WorkId)
+	if err != nil {
+		log.Printf("Failed to update work %d: %v", req.WorkId, err)
+		return &pb.UpdateWorkResponse{Error: err.Error()}, err
+	}
+	return &pb.UpdateWorkResponse{}, nil
+}
+
+func (s *server) GetStudentWorksByTask(ctx context.Context, req *pb.GetStudentWorksByTaskRequest) (*pb.GetStudentWorksByTaskResponse, error) {
+	query := `
+		SELECT sw.id, u.name, u.surname, COALESCE(u.patronymic, ''), u.email
+		FROM student_works sw
+		JOIN users u ON sw.student_id = u.id
+		WHERE sw.task_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.TaskId)
+	if err != nil {
+		log.Printf("Failed to query student works by task: %v", err)
+		return &pb.GetStudentWorksByTaskResponse{
+			Error: fmt.Sprintf("Failed to query student works: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var works []*pb.GetStudentWorksByTaskResponse_StudentWork
+	for rows.Next() {
+		var id int32
+		var name, surname, patronymic, email string
+		if err := rows.Scan(&id, &name, &surname, &patronymic, &email); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		works = append(works, &pb.GetStudentWorksByTaskResponse_StudentWork{
+			Id:                id,
+			StudentName:       name,
+			StudentSurname:    surname,
+			StudentPatronymic: patronymic,
+			StudentEmail:      email,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetStudentWorksByTaskResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetStudentWorksByTaskResponse{
+		Works: works,
+	}, nil
+}
+
+func (s *server) GetAssistantsByDiscipline(ctx context.Context, req *pb.GetAssistantsByDisciplineRequest) (*pb.GetAssistantsByDisciplineResponse, error) {
+	query := `
+		SELECT DISTINCT u.id, u.name, u.surname, COALESCE(u.patronymic, '')
+		FROM users u
+		JOIN users_in_groups ug ON u.id = ug.user_id
+		JOIN groups_in_disciplines gd ON ug.group_id = gd.group_id
+		WHERE gd.discipline_id = $1 AND u.role = 'assistant'
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.DisciplineId)
+	if err != nil {
+		log.Printf("Failed to query assistants: %v", err)
+		return &pb.GetAssistantsByDisciplineResponse{
+			Error: fmt.Sprintf("Failed to query assistants: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var assistants []*pb.GetAssistantsByDisciplineResponse_Assistant
+	for rows.Next() {
+		var id int32
+		var name, surname, patronymic string
+		if err := rows.Scan(&id, &name, &surname, &patronymic); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		assistants = append(assistants, &pb.GetAssistantsByDisciplineResponse_Assistant{
+			Id:         id,
+			Name:       name,
+			Surname:    surname,
+			Patronymic: patronymic,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetAssistantsByDisciplineResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetAssistantsByDisciplineResponse{
+		Assistants: assistants,
+	}, nil
+}
+
+func (s *server) AssignAssistantsToWorks(ctx context.Context, req *pb.AssignAssistantsToWorksRequest) (*pb.AssignAssistantsToWorksResponse, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Printf("Failed to begin transaction: %v", err)
+		return &pb.AssignAssistantsToWorksResponse{
+			Error: fmt.Sprintf("Failed to begin transaction: %v", err),
+		}, nil
+	}
+	defer tx.Rollback()
+
+	query := `UPDATE student_works SET assistant_id = $1 WHERE id = $2`
+	for _, assignment := range req.Assignments {
+		_, err := tx.ExecContext(ctx, query, assignment.AssistantId, assignment.WorkId)
+		if err != nil {
+			log.Printf("Failed to update assistant_id for work %d: %v", assignment.WorkId, err)
+			return &pb.AssignAssistantsToWorksResponse{
+				Error: fmt.Sprintf("Failed to update assistant_id for work %d: %v", assignment.WorkId, err),
+			}, nil
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Printf("Failed to commit transaction: %v", err)
+		return &pb.AssignAssistantsToWorksResponse{
+			Error: fmt.Sprintf("Failed to commit transaction: %v", err),
+		}, nil
+	}
+
+	return &pb.AssignAssistantsToWorksResponse{
+		Success: true,
+	}, nil
+}
+
 func (s *server) GetTasksForSeminarist(ctx context.Context, req *pb.GetTasksForSeminaristRequest) (*pb.GetTasksForSeminaristResponse, error) {
 	query := `
 		SELECT DISTINCT t.id, t.title, t.deadline
@@ -66,7 +202,7 @@ func (s *server) GetTasksForSeminarist(ctx context.Context, req *pb.GetTasksForS
 
 func (s *server) GetStudentWorksForSeminarist(ctx context.Context, req *pb.GetStudentWorksForSeminaristRequest) (*pb.GetStudentWorksForSeminaristResponse, error) {
 	query := `
-		SELECT sw.id, t.title, sw.created_at, CONCAT(u.name, ' ', u.surname) AS student_name
+		SELECT sw.id, t.title, sw.created_at, CONCAT(u.name, ' ', u.surname) AS student_name, sw.task_id
 		FROM student_works sw
 		JOIN tasks t ON sw.task_id = t.id
 		JOIN users u ON sw.student_id = u.id
@@ -86,7 +222,8 @@ func (s *server) GetStudentWorksForSeminarist(ctx context.Context, req *pb.GetSt
 		var id int32
 		var title, studentName string
 		var createdAt time.Time
-		if err := rows.Scan(&id, &title, &createdAt, &studentName); err != nil {
+		var task_id int32
+		if err := rows.Scan(&id, &title, &createdAt, &studentName, &task_id); err != nil {
 			log.Printf("Failed to scan row: %v", err)
 			continue
 		}
@@ -95,6 +232,7 @@ func (s *server) GetStudentWorksForSeminarist(ctx context.Context, req *pb.GetSt
 			Title:       title,
 			CreatedAt:   createdAt.Format(time.RFC3339),
 			StudentName: studentName,
+			TaskId:      task_id,
 		})
 	}
 
@@ -263,23 +401,34 @@ func (s *server) GetDisciplines(ctx context.Context, req *pb.GetDisciplinesReque
 
 func (s *server) GetTaskDetails(ctx context.Context, req *pb.GetTaskDetailsRequest) (*pb.GetTaskDetailsResponse, error) {
 	query := `
-        SELECT t.title, t.description, t.deadline, sg.name AS group_name, d.name AS discipline_name
-        FROM tasks t
-        JOIN student_groups sg ON t.group_id = sg.id
-        JOIN disciplines d ON t.discipline_id = d.id
-        WHERE t.id = $1
-    `
-	var title, description, deadline, groupName, disciplineName string
-	err := s.db.QueryRowContext(ctx, query, req.TaskId).Scan(&title, &description, &deadline, &groupName, &disciplineName)
+		SELECT t.title, t.description, t.deadline, sg.name, d.name, u.name, u.surname, COALESCE(u.patronymic, ''), t.discipline_id
+		FROM tasks t
+		JOIN student_groups sg ON t.group_id = sg.id
+		JOIN disciplines d ON t.discipline_id = d.id
+		JOIN users u ON t.lector_id = u.id
+		WHERE t.id = $1
+	`
+	var title, description, groupName, disciplineName, lectorName, lectorSurname, lectorPatronymic string
+	var deadline time.Time
+	var disciplineID int32
+	err := s.db.QueryRowContext(ctx, query, req.TaskId).Scan(&title, &description, &deadline, &groupName, &disciplineName, &lectorName, &lectorSurname, &lectorPatronymic, &disciplineID)
 	if err != nil {
-		return &pb.GetTaskDetailsResponse{Error: err.Error()}, nil
+		log.Printf("Failed to query task details: %v", err)
+		return &pb.GetTaskDetailsResponse{
+			Error: fmt.Sprintf("Failed to query task details: %v", err),
+		}, nil
 	}
+
 	return &pb.GetTaskDetailsResponse{
-		Title:          title,
-		Description:    description,
-		Deadline:       deadline,
-		GroupName:      groupName,
-		DisciplineName: disciplineName,
+		Title:            title,
+		Description:      description,
+		Deadline:         deadline.Format(time.RFC3339),
+		GroupName:        groupName,
+		DisciplineName:   disciplineName,
+		LectorName:       lectorName,
+		LectorSurname:    lectorSurname,
+		LectorPatronymic: lectorPatronymic,
+		DisciplineId:     disciplineID,
 	}, nil
 }
 

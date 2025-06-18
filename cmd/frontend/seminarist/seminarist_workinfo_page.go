@@ -37,7 +37,7 @@ var assistants2 = []Assistant2{
 	{ID: 3, Name: "Ассистент 3"},
 }
 
-func AssignmentScreen() {
+func AssignmentScreen2() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Семиннарист: Задание")
 	myWindow.Resize(fyne.NewSize(1920, 1080)) // Разрешение 16:9
