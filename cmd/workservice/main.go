@@ -11,11 +11,103 @@ import (
 	"os"
 	pb "rubr/proto/work"
 	"strconv"
+	"time"
 )
 
 type server struct {
 	pb.UnimplementedWorkServiceServer
 	db *sql.DB
+}
+
+func (s *server) GetTasksForSeminarist(ctx context.Context, req *pb.GetTasksForSeminaristRequest) (*pb.GetTasksForSeminaristResponse, error) {
+	query := `
+		SELECT DISTINCT t.id, t.title, t.deadline
+		FROM tasks t
+		JOIN groups_in_disciplines gd ON t.discipline_id = gd.discipline_id
+		JOIN users_in_groups ug ON gd.group_id = ug.group_id
+		WHERE ug.user_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.SeminaristId)
+	if err != nil {
+		log.Printf("Failed to query tasks: %v", err)
+		return &pb.GetTasksForSeminaristResponse{
+			Error: fmt.Sprintf("Failed to query tasks: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var tasks []*pb.GetTasksForSeminaristResponse_Task
+	for rows.Next() {
+		var id int32
+		var title string
+		var deadline time.Time
+		if err := rows.Scan(&id, &title, &deadline); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		tasks = append(tasks, &pb.GetTasksForSeminaristResponse_Task{
+			Id:       id,
+			Title:    title,
+			Deadline: deadline.Format(time.RFC3339),
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetTasksForSeminaristResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetTasksForSeminaristResponse{
+		Tasks: tasks,
+	}, nil
+}
+
+func (s *server) GetStudentWorksForSeminarist(ctx context.Context, req *pb.GetStudentWorksForSeminaristRequest) (*pb.GetStudentWorksForSeminaristResponse, error) {
+	query := `
+		SELECT sw.id, t.title, sw.created_at, CONCAT(u.name, ' ', u.surname) AS student_name
+		FROM student_works sw
+		JOIN tasks t ON sw.task_id = t.id
+		JOIN users u ON sw.student_id = u.id
+		WHERE sw.seminarist_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.SeminaristId)
+	if err != nil {
+		log.Printf("Failed to query student works: %v", err)
+		return &pb.GetStudentWorksForSeminaristResponse{
+			Error: fmt.Sprintf("Failed to query student works: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var works []*pb.GetStudentWorksForSeminaristResponse_StudentWork
+	for rows.Next() {
+		var id int32
+		var title, studentName string
+		var createdAt time.Time
+		if err := rows.Scan(&id, &title, &createdAt, &studentName); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		works = append(works, &pb.GetStudentWorksForSeminaristResponse_StudentWork{
+			Id:          id,
+			Title:       title,
+			CreatedAt:   createdAt.Format(time.RFC3339),
+			StudentName: studentName,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetStudentWorksForSeminaristResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetStudentWorksForSeminaristResponse{
+		Works: works,
+	}, nil
 }
 
 // возвращает слайс работ из массивов состоящих из id работы, name, deadline

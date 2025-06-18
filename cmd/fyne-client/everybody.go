@@ -94,6 +94,8 @@ func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
 			state.currentPage = "superacc-groups"
 		case "assistant":
 			state.currentPage = "assistant_works"
+		case "seminarist":
+			state.currentPage = "seminarist_works"
 		default:
 			state.currentPage = "greeting"
 		}

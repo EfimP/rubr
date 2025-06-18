@@ -17,7 +17,42 @@ service WorkService {
   rpc GetDisciplines(GetDisciplinesRequest) returns (GetDisciplinesResponse);
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse) {}
   rpc UpdateTaskGroupAndDiscipline (UpdateTaskGroupAndDisciplineRequest) returns (UpdateTaskGroupAndDisciplineResponse) {}
+
+  rpc GetStudentWorksForSeminarist (GetStudentWorksForSeminaristRequest) returns (GetStudentWorksForSeminaristResponse) {}
+  rpc GetTasksForSeminarist (GetTasksForSeminaristRequest) returns (GetTasksForSeminaristResponse) {}
+
 }
+
+
+message GetTasksForSeminaristRequest {
+  string seminarist_id = 1;
+}
+
+message GetTasksForSeminaristResponse {
+  message Task {
+    int32 id = 1;
+    string title = 2;
+    string deadline = 3;
+  }
+  repeated Task tasks = 1;
+  string error = 2;
+}
+
+message GetStudentWorksForSeminaristRequest {
+  string seminarist_id = 1;
+}
+
+message GetStudentWorksForSeminaristResponse {
+  message StudentWork {
+    int32 id = 1;
+    string title = 2;
+    string created_at = 3;
+    string student_name = 4;
+  }
+  repeated StudentWork works = 1;
+  string error = 2;
+}
+
 
 message GetTaskDetailsRequest {
   int32 task_id = 1;
