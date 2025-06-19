@@ -194,7 +194,3 @@ message LoadTaskMainCriteriasResponse {
   repeated CriteriaGroup groups = 1;
   string error = 2;
 }
-
-
-
-

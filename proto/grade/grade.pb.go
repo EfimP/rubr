@@ -273,7 +273,6 @@ func (x *CriterionMark) GetComment() string {
 	return ""
 }
 
-// Добавить в конец message определений
 type SetBlockingCriteriaMarkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	WorkId        int32                  `protobuf:"varint,1,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`
@@ -498,6 +497,162 @@ func (x *SetMainCriteriaMarkResponse) GetError() string {
 	return ""
 }
 
+type ListSubjectsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StudentId     int32                  `protobuf:"varint,1,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSubjectsRequest) Reset() {
+	*x = ListSubjectsRequest{}
+	mi := &file_proto_grade_grade_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSubjectsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSubjectsRequest) ProtoMessage() {}
+
+func (x *ListSubjectsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSubjectsRequest.ProtoReflect.Descriptor instead.
+func (*ListSubjectsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListSubjectsRequest) GetStudentId() int32 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
+}
+
+type Subject struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Grades        []float32              `protobuf:"fixed32,2,rep,packed,name=grades,proto3" json:"grades,omitempty"`
+	Average       float32                `protobuf:"fixed32,3,opt,name=average,proto3" json:"average,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Subject) Reset() {
+	*x = Subject{}
+	mi := &file_proto_grade_grade_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Subject) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Subject) ProtoMessage() {}
+
+func (x *Subject) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Subject.ProtoReflect.Descriptor instead.
+func (*Subject) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Subject) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Subject) GetGrades() []float32 {
+	if x != nil {
+		return x.Grades
+	}
+	return nil
+}
+
+func (x *Subject) GetAverage() float32 {
+	if x != nil {
+		return x.Average
+	}
+	return 0
+}
+
+type ListSubjectsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Subjects      []*Subject             `protobuf:"bytes,1,rep,name=subjects,proto3" json:"subjects,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSubjectsResponse) Reset() {
+	*x = ListSubjectsResponse{}
+	mi := &file_proto_grade_grade_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSubjectsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSubjectsResponse) ProtoMessage() {}
+
+func (x *ListSubjectsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_grade_grade_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSubjectsResponse.ProtoReflect.Descriptor instead.
+func (*ListSubjectsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_grade_grade_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListSubjectsResponse) GetSubjects() []*Subject {
+	if x != nil {
+		return x.Subjects
+	}
+	return nil
+}
+
+func (x *ListSubjectsResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 var File_proto_grade_grade_proto protoreflect.FileDescriptor
 
 const file_proto_grade_grade_proto_rawDesc = "" +
@@ -530,12 +685,23 @@ const file_proto_grade_grade_proto_rawDesc = "" +
 	"\x04mark\x18\x03 \x01(\x02R\x04mark\x12\x18\n" +
 	"\acomment\x18\x04 \x01(\tR\acomment\"3\n" +
 	"\x1bSetMainCriteriaMarkResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\tR\x05error2\x86\x03\n" +
+	"\x05error\x18\x01 \x01(\tR\x05error\"4\n" +
+	"\x13ListSubjectsRequest\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x01 \x01(\x05R\tstudentId\"O\n" +
+	"\aSubject\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06grades\x18\x02 \x03(\x02R\x06grades\x12\x18\n" +
+	"\aaverage\x18\x03 \x01(\x02R\aaverage\"X\n" +
+	"\x14ListSubjectsResponse\x12*\n" +
+	"\bsubjects\x18\x01 \x03(\v2\x0e.grade.SubjectR\bsubjects\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error2\xcf\x03\n" +
 	"\x0eGradingService\x12j\n" +
 	"\x17SetBlockingCriteriaMark\x12%.grade.SetBlockingCriteriaMarkRequest\x1a&.grade.SetBlockingCriteriaMarkResponse\"\x00\x12^\n" +
 	"\x13SetMainCriteriaMark\x12!.grade.SetMainCriteriaMarkRequest\x1a\".grade.SetMainCriteriaMarkResponse\"\x00\x12S\n" +
 	"\x10GetCriteriaMarks\x12\x1e.grade.GetCriteriaMarksRequest\x1a\x1f.grade.GetCriteriaMarksResponse\x12S\n" +
-	"\x10UpdateWorkStatus\x12\x1e.grade.UpdateWorkStatusRequest\x1a\x1f.grade.UpdateWorkStatusResponseB\x15Z\x13./proto/grade;gradeb\x06proto3"
+	"\x10UpdateWorkStatus\x12\x1e.grade.UpdateWorkStatusRequest\x1a\x1f.grade.UpdateWorkStatusResponse\x12G\n" +
+	"\fListSubjects\x12\x1a.grade.ListSubjectsRequest\x1a\x1b.grade.ListSubjectsResponseB\x15Z\x13./proto/grade;gradeb\x06proto3"
 
 var (
 	file_proto_grade_grade_proto_rawDescOnce sync.Once
@@ -549,7 +715,7 @@ func file_proto_grade_grade_proto_rawDescGZIP() []byte {
 	return file_proto_grade_grade_proto_rawDescData
 }
 
-var file_proto_grade_grade_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_proto_grade_grade_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_proto_grade_grade_proto_goTypes = []any{
 	(*UpdateWorkStatusRequest)(nil),         // 0: grade.UpdateWorkStatusRequest
 	(*UpdateWorkStatusResponse)(nil),        // 1: grade.UpdateWorkStatusResponse
@@ -560,22 +726,28 @@ var file_proto_grade_grade_proto_goTypes = []any{
 	(*SetBlockingCriteriaMarkResponse)(nil), // 6: grade.SetBlockingCriteriaMarkResponse
 	(*SetMainCriteriaMarkRequest)(nil),      // 7: grade.SetMainCriteriaMarkRequest
 	(*SetMainCriteriaMarkResponse)(nil),     // 8: grade.SetMainCriteriaMarkResponse
+	(*ListSubjectsRequest)(nil),             // 9: grade.ListSubjectsRequest
+	(*Subject)(nil),                         // 10: grade.Subject
+	(*ListSubjectsResponse)(nil),            // 11: grade.ListSubjectsResponse
 }
 var file_proto_grade_grade_proto_depIdxs = []int32{
-	4, // 0: grade.GetCriteriaMarksResponse.marks:type_name -> grade.CriterionMark
-	5, // 1: grade.GradingService.SetBlockingCriteriaMark:input_type -> grade.SetBlockingCriteriaMarkRequest
-	7, // 2: grade.GradingService.SetMainCriteriaMark:input_type -> grade.SetMainCriteriaMarkRequest
-	2, // 3: grade.GradingService.GetCriteriaMarks:input_type -> grade.GetCriteriaMarksRequest
-	0, // 4: grade.GradingService.UpdateWorkStatus:input_type -> grade.UpdateWorkStatusRequest
-	6, // 5: grade.GradingService.SetBlockingCriteriaMark:output_type -> grade.SetBlockingCriteriaMarkResponse
-	8, // 6: grade.GradingService.SetMainCriteriaMark:output_type -> grade.SetMainCriteriaMarkResponse
-	3, // 7: grade.GradingService.GetCriteriaMarks:output_type -> grade.GetCriteriaMarksResponse
-	1, // 8: grade.GradingService.UpdateWorkStatus:output_type -> grade.UpdateWorkStatusResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	4,  // 0: grade.GetCriteriaMarksResponse.marks:type_name -> grade.CriterionMark
+	10, // 1: grade.ListSubjectsResponse.subjects:type_name -> grade.Subject
+	5,  // 2: grade.GradingService.SetBlockingCriteriaMark:input_type -> grade.SetBlockingCriteriaMarkRequest
+	7,  // 3: grade.GradingService.SetMainCriteriaMark:input_type -> grade.SetMainCriteriaMarkRequest
+	2,  // 4: grade.GradingService.GetCriteriaMarks:input_type -> grade.GetCriteriaMarksRequest
+	0,  // 5: grade.GradingService.UpdateWorkStatus:input_type -> grade.UpdateWorkStatusRequest
+	9,  // 6: grade.GradingService.ListSubjects:input_type -> grade.ListSubjectsRequest
+	6,  // 7: grade.GradingService.SetBlockingCriteriaMark:output_type -> grade.SetBlockingCriteriaMarkResponse
+	8,  // 8: grade.GradingService.SetMainCriteriaMark:output_type -> grade.SetMainCriteriaMarkResponse
+	3,  // 9: grade.GradingService.GetCriteriaMarks:output_type -> grade.GetCriteriaMarksResponse
+	1,  // 10: grade.GradingService.UpdateWorkStatus:output_type -> grade.UpdateWorkStatusResponse
+	11, // 11: grade.GradingService.ListSubjects:output_type -> grade.ListSubjectsResponse
+	7,  // [7:12] is the sub-list for method output_type
+	2,  // [2:7] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_grade_grade_proto_init() }
@@ -589,7 +761,7 @@ func file_proto_grade_grade_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_grade_grade_proto_rawDesc), len(file_proto_grade_grade_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

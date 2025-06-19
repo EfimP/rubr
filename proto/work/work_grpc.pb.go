@@ -32,6 +32,8 @@ const (
 	WorkService_GetDisciplines_FullMethodName               = "/work.WorkService/GetDisciplines"
 	WorkService_GetTaskDetails_FullMethodName               = "/work.WorkService/GetTaskDetails"
 	WorkService_UpdateTaskGroupAndDiscipline_FullMethodName = "/work.WorkService/UpdateTaskGroupAndDiscipline"
+	WorkService_ListTasksForStudent_FullMethodName          = "/work.WorkService/ListTasksForStudent"
+	WorkService_ListWorksForStudent_FullMethodName          = "/work.WorkService/ListWorksForStudent"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -51,6 +53,8 @@ type WorkServiceClient interface {
 	GetDisciplines(ctx context.Context, in *GetDisciplinesRequest, opts ...grpc.CallOption) (*GetDisciplinesResponse, error)
 	GetTaskDetails(ctx context.Context, in *GetTaskDetailsRequest, opts ...grpc.CallOption) (*GetTaskDetailsResponse, error)
 	UpdateTaskGroupAndDiscipline(ctx context.Context, in *UpdateTaskGroupAndDisciplineRequest, opts ...grpc.CallOption) (*UpdateTaskGroupAndDisciplineResponse, error)
+	ListTasksForStudent(ctx context.Context, in *ListTasksForStudentRequest, opts ...grpc.CallOption) (*ListTasksForStudentResponse, error)
+	ListWorksForStudent(ctx context.Context, in *ListWorksForStudentRequest, opts ...grpc.CallOption) (*ListWorksForStudentResponse, error)
 }
 
 type workServiceClient struct {
@@ -191,6 +195,26 @@ func (c *workServiceClient) UpdateTaskGroupAndDiscipline(ctx context.Context, in
 	return out, nil
 }
 
+func (c *workServiceClient) ListTasksForStudent(ctx context.Context, in *ListTasksForStudentRequest, opts ...grpc.CallOption) (*ListTasksForStudentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTasksForStudentResponse)
+	err := c.cc.Invoke(ctx, WorkService_ListTasksForStudent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workServiceClient) ListWorksForStudent(ctx context.Context, in *ListWorksForStudentRequest, opts ...grpc.CallOption) (*ListWorksForStudentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListWorksForStudentResponse)
+	err := c.cc.Invoke(ctx, WorkService_ListWorksForStudent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -208,6 +232,8 @@ type WorkServiceServer interface {
 	GetDisciplines(context.Context, *GetDisciplinesRequest) (*GetDisciplinesResponse, error)
 	GetTaskDetails(context.Context, *GetTaskDetailsRequest) (*GetTaskDetailsResponse, error)
 	UpdateTaskGroupAndDiscipline(context.Context, *UpdateTaskGroupAndDisciplineRequest) (*UpdateTaskGroupAndDisciplineResponse, error)
+	ListTasksForStudent(context.Context, *ListTasksForStudentRequest) (*ListTasksForStudentResponse, error)
+	ListWorksForStudent(context.Context, *ListWorksForStudentRequest) (*ListWorksForStudentResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -256,6 +282,12 @@ func (UnimplementedWorkServiceServer) GetTaskDetails(context.Context, *GetTaskDe
 }
 func (UnimplementedWorkServiceServer) UpdateTaskGroupAndDiscipline(context.Context, *UpdateTaskGroupAndDisciplineRequest) (*UpdateTaskGroupAndDisciplineResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTaskGroupAndDiscipline not implemented")
+}
+func (UnimplementedWorkServiceServer) ListTasksForStudent(context.Context, *ListTasksForStudentRequest) (*ListTasksForStudentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTasksForStudent not implemented")
+}
+func (UnimplementedWorkServiceServer) ListWorksForStudent(context.Context, *ListWorksForStudentRequest) (*ListWorksForStudentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWorksForStudent not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -512,6 +544,42 @@ func _WorkService_UpdateTaskGroupAndDiscipline_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_ListTasksForStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTasksForStudentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).ListTasksForStudent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_ListTasksForStudent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).ListTasksForStudent(ctx, req.(*ListTasksForStudentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkService_ListWorksForStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWorksForStudentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).ListWorksForStudent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_ListWorksForStudent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).ListWorksForStudent(ctx, req.(*ListWorksForStudentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -570,6 +638,14 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateTaskGroupAndDiscipline",
 			Handler:    _WorkService_UpdateTaskGroupAndDiscipline_Handler,
+		},
+		{
+			MethodName: "ListTasksForStudent",
+			Handler:    _WorkService_ListTasksForStudent_Handler,
+		},
+		{
+			MethodName: "ListWorksForStudent",
+			Handler:    _WorkService_ListWorksForStudent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

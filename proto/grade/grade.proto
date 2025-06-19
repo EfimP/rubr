@@ -8,6 +8,7 @@ service GradingService {
   rpc SetMainCriteriaMark (SetMainCriteriaMarkRequest) returns (SetMainCriteriaMarkResponse) {}
   rpc GetCriteriaMarks(GetCriteriaMarksRequest) returns (GetCriteriaMarksResponse);
   rpc UpdateWorkStatus(UpdateWorkStatusRequest) returns (UpdateWorkStatusResponse);
+  rpc ListSubjects (ListSubjectsRequest) returns (ListSubjectsResponse);
 }
 
 message UpdateWorkStatusRequest {
@@ -52,4 +53,19 @@ message SetMainCriteriaMarkRequest {
 
 message SetMainCriteriaMarkResponse {
   string error = 1;
+}
+
+message ListSubjectsRequest {
+  int32 student_id = 1;
+}
+
+message Subject {
+  string name = 1;
+  repeated float grades = 2;
+  float average = 3;
+}
+
+message ListSubjectsResponse {
+  repeated Subject subjects = 1;
+  string error = 2;
 }

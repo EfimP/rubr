@@ -1315,6 +1315,7 @@ type ManageDisciplineEntityRequest struct {
 	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	SeminaristId  int32                  `protobuf:"varint,5,opt,name=seminarist_id,json=seminaristId,proto3" json:"seminarist_id,omitempty"`
 	AssistantId   int32                  `protobuf:"varint,6,opt,name=assistant_id,json=assistantId,proto3" json:"assistant_id,omitempty"`
+	LectorId      int32                  `protobuf:"varint,7,opt,name=lector_id,json=lectorId,proto3" json:"lector_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1387,6 +1388,13 @@ func (x *ManageDisciplineEntityRequest) GetSeminaristId() int32 {
 func (x *ManageDisciplineEntityRequest) GetAssistantId() int32 {
 	if x != nil {
 		return x.AssistantId
+	}
+	return 0
+}
+
+func (x *ManageDisciplineEntityRequest) GetLectorId() int32 {
+	if x != nil {
+		return x.LectorId
 	}
 	return 0
 }
@@ -1849,14 +1857,15 @@ const file_proto_superacc_superacc_proto_rawDesc = "" +
 	"\x17ListDisciplinesResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x126\n" +
-	"\vdisciplines\x18\x03 \x03(\v2\x14.superacc.DisciplineR\vdisciplines\"\xd5\x01\n" +
+	"\vdisciplines\x18\x03 \x03(\v2\x14.superacc.DisciplineR\vdisciplines\"\xf2\x01\n" +
 	"\x1dManageDisciplineEntityRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x19\n" +
 	"\bgroup_id\x18\x02 \x01(\x05R\agroupId\x12%\n" +
 	"\x0ediscipline_ids\x18\x03 \x03(\x05R\rdisciplineIds\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12#\n" +
 	"\rseminarist_id\x18\x05 \x01(\x05R\fseminaristId\x12!\n" +
-	"\fassistant_id\x18\x06 \x01(\x05R\vassistantId\"y\n" +
+	"\fassistant_id\x18\x06 \x01(\x05R\vassistantId\x12\x1b\n" +
+	"\tlector_id\x18\a \x01(\x05R\blectorId\"y\n" +
 	"\x1eManageDisciplineEntityResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12#\n" +

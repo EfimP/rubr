@@ -17,6 +17,8 @@ service WorkService {
   rpc GetDisciplines(GetDisciplinesRequest) returns (GetDisciplinesResponse);
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse) {}
   rpc UpdateTaskGroupAndDiscipline (UpdateTaskGroupAndDisciplineRequest) returns (UpdateTaskGroupAndDisciplineResponse) {}
+  rpc ListTasksForStudent (ListTasksForStudentRequest) returns (ListTasksForStudentResponse);
+  rpc ListWorksForStudent (ListWorksForStudentRequest) returns (ListWorksForStudentResponse);
 }
 
 message GetTaskDetailsRequest {
@@ -161,5 +163,35 @@ message GetDisciplinesResponse {
     string name = 2;
   }
   repeated Discipline disciplines = 1;
+  string error = 2;
+}
+
+message ListTasksForStudentRequest {
+  int32 student_id = 1;
+}
+
+message ListTasksForStudentResponse {
+  repeated Tasks tasks = 1;
+  string error = 2;
+}
+
+message Tasks {
+  int32 id = 1;
+  string title = 2;
+  string deadline = 3; // Из tasks.deadline
+  string status = 4;  // Из student_works.status
+}
+
+message ListWorksForStudentRequest {
+  int32 student_id = 1;
+}
+message Work {
+  int32 id = 1;
+  string title = 2;
+  string deadline = 3; // Из tasks.deadline
+  string status = 4;  // Из student_works.status
+}
+message ListWorksForStudentResponse {
+  repeated Work works = 1;
   string error = 2;
 }

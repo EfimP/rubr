@@ -13,6 +13,7 @@ import (
 	"os"
 	pb "rubr/proto/grade"
 	"strconv"
+	"strings"
 )
 
 type server struct {
@@ -128,6 +129,34 @@ func (s *server) SetMainCriteriaMark(ctx context.Context, req *pb.SetMainCriteri
 		return &pb.SetMainCriteriaMarkResponse{Error: err.Error()}, nil
 	}
 	return &pb.SetMainCriteriaMarkResponse{}, nil
+}
+
+func (s *server) ListSubjects(ctx context.Context, req *pb.ListSubjectsRequest) (*pb.ListSubjectsResponse, error) {
+	query := `SELECT name, grades, average FROM student_subjects WHERE student_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, req.StudentId)
+	if err != nil {
+		return &pb.ListSubjectsResponse{Error: err.Error()}, nil
+	}
+	defer rows.Close()
+
+	var subjects []*pb.Subject
+	for rows.Next() {
+		var subject pb.Subject
+		var gradesStr string
+		if err := rows.Scan(&subject.Name, &gradesStr, &subject.Average); err != nil {
+			return &pb.ListSubjectsResponse{Error: err.Error()}, nil
+		}
+		// Парсинг grades (предполагается, что grades хранится как строка, например, "4.0,3.5,4.5")
+		for _, g := range strings.Split(gradesStr, ",") {
+			grade, _ := strconv.ParseFloat(g, 32)
+			subject.Grades = append(subject.Grades, float32(grade))
+		}
+		subjects = append(subjects, &subject)
+	}
+	if err := rows.Err(); err != nil {
+		return &pb.ListSubjectsResponse{Error: err.Error()}, nil
+	}
+	return &pb.ListSubjectsResponse{Subjects: subjects}, nil
 }
 
 func main() {

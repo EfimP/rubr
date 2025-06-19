@@ -1449,6 +1449,334 @@ func (x *GetDisciplinesResponse) GetError() string {
 	return ""
 }
 
+type ListTasksForStudentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StudentId     int32                  `protobuf:"varint,1,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksForStudentRequest) Reset() {
+	*x = ListTasksForStudentRequest{}
+	mi := &file_proto_work_work_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksForStudentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksForStudentRequest) ProtoMessage() {}
+
+func (x *ListTasksForStudentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksForStudentRequest.ProtoReflect.Descriptor instead.
+func (*ListTasksForStudentRequest) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListTasksForStudentRequest) GetStudentId() int32 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
+}
+
+type ListTasksForStudentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tasks         []*Tasks               `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksForStudentResponse) Reset() {
+	*x = ListTasksForStudentResponse{}
+	mi := &file_proto_work_work_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksForStudentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksForStudentResponse) ProtoMessage() {}
+
+func (x *ListTasksForStudentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksForStudentResponse.ProtoReflect.Descriptor instead.
+func (*ListTasksForStudentResponse) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ListTasksForStudentResponse) GetTasks() []*Tasks {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+func (x *ListTasksForStudentResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type Tasks struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Deadline      string                 `protobuf:"bytes,3,opt,name=deadline,proto3" json:"deadline,omitempty"` // Из tasks.deadline
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`     // Из student_works.status
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Tasks) Reset() {
+	*x = Tasks{}
+	mi := &file_proto_work_work_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Tasks) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Tasks) ProtoMessage() {}
+
+func (x *Tasks) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Tasks.ProtoReflect.Descriptor instead.
+func (*Tasks) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *Tasks) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Tasks) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *Tasks) GetDeadline() string {
+	if x != nil {
+		return x.Deadline
+	}
+	return ""
+}
+
+func (x *Tasks) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type ListWorksForStudentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StudentId     int32                  `protobuf:"varint,1,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorksForStudentRequest) Reset() {
+	*x = ListWorksForStudentRequest{}
+	mi := &file_proto_work_work_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorksForStudentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorksForStudentRequest) ProtoMessage() {}
+
+func (x *ListWorksForStudentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorksForStudentRequest.ProtoReflect.Descriptor instead.
+func (*ListWorksForStudentRequest) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ListWorksForStudentRequest) GetStudentId() int32 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
+}
+
+type Work struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Deadline      string                 `protobuf:"bytes,3,opt,name=deadline,proto3" json:"deadline,omitempty"` // Из tasks.deadline
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`     // Из student_works.status
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Work) Reset() {
+	*x = Work{}
+	mi := &file_proto_work_work_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Work) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Work) ProtoMessage() {}
+
+func (x *Work) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Work.ProtoReflect.Descriptor instead.
+func (*Work) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *Work) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Work) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *Work) GetDeadline() string {
+	if x != nil {
+		return x.Deadline
+	}
+	return ""
+}
+
+func (x *Work) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type ListWorksForStudentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Works         []*Work                `protobuf:"bytes,1,rep,name=works,proto3" json:"works,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWorksForStudentResponse) Reset() {
+	*x = ListWorksForStudentResponse{}
+	mi := &file_proto_work_work_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWorksForStudentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWorksForStudentResponse) ProtoMessage() {}
+
+func (x *ListWorksForStudentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_work_work_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWorksForStudentResponse.ProtoReflect.Descriptor instead.
+func (*ListWorksForStudentResponse) Descriptor() ([]byte, []int) {
+	return file_proto_work_work_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ListWorksForStudentResponse) GetWorks() []*Work {
+	if x != nil {
+		return x.Works
+	}
+	return nil
+}
+
+func (x *ListWorksForStudentResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 type GetGroupsResponse_Group struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1459,7 +1787,7 @@ type GetGroupsResponse_Group struct {
 
 func (x *GetGroupsResponse_Group) Reset() {
 	*x = GetGroupsResponse_Group{}
-	mi := &file_proto_work_work_proto_msgTypes[27]
+	mi := &file_proto_work_work_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1471,7 +1799,7 @@ func (x *GetGroupsResponse_Group) String() string {
 func (*GetGroupsResponse_Group) ProtoMessage() {}
 
 func (x *GetGroupsResponse_Group) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[27]
+	mi := &file_proto_work_work_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1511,7 +1839,7 @@ type GetDisciplinesResponse_Discipline struct {
 
 func (x *GetDisciplinesResponse_Discipline) Reset() {
 	*x = GetDisciplinesResponse_Discipline{}
-	mi := &file_proto_work_work_proto_msgTypes[28]
+	mi := &file_proto_work_work_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1523,7 +1851,7 @@ func (x *GetDisciplinesResponse_Discipline) String() string {
 func (*GetDisciplinesResponse_Discipline) ProtoMessage() {}
 
 func (x *GetDisciplinesResponse_Discipline) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_work_work_proto_msgTypes[28]
+	mi := &file_proto_work_work_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1651,7 +1979,30 @@ const file_proto_work_work_proto_rawDesc = "" +
 	"\n" +
 	"Discipline\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name2\xb0\b\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\";\n" +
+	"\x1aListTasksForStudentRequest\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x01 \x01(\x05R\tstudentId\"V\n" +
+	"\x1bListTasksForStudentResponse\x12!\n" +
+	"\x05tasks\x18\x01 \x03(\v2\v.work.TasksR\x05tasks\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"a\n" +
+	"\x05Tasks\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1a\n" +
+	"\bdeadline\x18\x03 \x01(\tR\bdeadline\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\";\n" +
+	"\x1aListWorksForStudentRequest\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x01 \x01(\x05R\tstudentId\"`\n" +
+	"\x04Work\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1a\n" +
+	"\bdeadline\x18\x03 \x01(\tR\bdeadline\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\"U\n" +
+	"\x1bListWorksForStudentResponse\x12 \n" +
+	"\x05works\x18\x01 \x03(\v2\n" +
+	".work.WorkR\x05works\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error2\xe8\t\n" +
 	"\vWorkService\x12V\n" +
 	"\x11GetTasksForLector\x12\x1e.work.GetTasksForLectorRequest\x1a\x1f.work.GetTasksForLectorResponse\"\x00\x12A\n" +
 	"\n" +
@@ -1667,7 +2018,9 @@ const file_proto_work_work_proto_rawDesc = "" +
 	"\tGetGroups\x12\x16.work.GetGroupsRequest\x1a\x17.work.GetGroupsResponse\x12K\n" +
 	"\x0eGetDisciplines\x12\x1b.work.GetDisciplinesRequest\x1a\x1c.work.GetDisciplinesResponse\x12M\n" +
 	"\x0eGetTaskDetails\x12\x1b.work.GetTaskDetailsRequest\x1a\x1c.work.GetTaskDetailsResponse\"\x00\x12w\n" +
-	"\x1cUpdateTaskGroupAndDiscipline\x12).work.UpdateTaskGroupAndDisciplineRequest\x1a*.work.UpdateTaskGroupAndDisciplineResponse\"\x00B\x13Z\x11./proto/work;workb\x06proto3"
+	"\x1cUpdateTaskGroupAndDiscipline\x12).work.UpdateTaskGroupAndDisciplineRequest\x1a*.work.UpdateTaskGroupAndDisciplineResponse\"\x00\x12Z\n" +
+	"\x13ListTasksForStudent\x12 .work.ListTasksForStudentRequest\x1a!.work.ListTasksForStudentResponse\x12Z\n" +
+	"\x13ListWorksForStudent\x12 .work.ListWorksForStudentRequest\x1a!.work.ListWorksForStudentResponseB\x13Z\x11./proto/work;workb\x06proto3"
 
 var (
 	file_proto_work_work_proto_rawDescOnce sync.Once
@@ -1681,7 +2034,7 @@ func file_proto_work_work_proto_rawDescGZIP() []byte {
 	return file_proto_work_work_proto_rawDescData
 }
 
-var file_proto_work_work_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_proto_work_work_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_proto_work_work_proto_goTypes = []any{
 	(*GetTaskDetailsRequest)(nil),                // 0: work.GetTaskDetailsRequest
 	(*GetTaskDetailsResponse)(nil),               // 1: work.GetTaskDetailsResponse
@@ -1710,44 +2063,56 @@ var file_proto_work_work_proto_goTypes = []any{
 	(*GetGroupsResponse)(nil),                    // 24: work.GetGroupsResponse
 	(*GetDisciplinesRequest)(nil),                // 25: work.GetDisciplinesRequest
 	(*GetDisciplinesResponse)(nil),               // 26: work.GetDisciplinesResponse
-	(*GetGroupsResponse_Group)(nil),              // 27: work.GetGroupsResponse.Group
-	(*GetDisciplinesResponse_Discipline)(nil),    // 28: work.GetDisciplinesResponse.Discipline
+	(*ListTasksForStudentRequest)(nil),           // 27: work.ListTasksForStudentRequest
+	(*ListTasksForStudentResponse)(nil),          // 28: work.ListTasksForStudentResponse
+	(*Tasks)(nil),                                // 29: work.Tasks
+	(*ListWorksForStudentRequest)(nil),           // 30: work.ListWorksForStudentRequest
+	(*Work)(nil),                                 // 31: work.Work
+	(*ListWorksForStudentResponse)(nil),          // 32: work.ListWorksForStudentResponse
+	(*GetGroupsResponse_Group)(nil),              // 33: work.GetGroupsResponse.Group
+	(*GetDisciplinesResponse_Discipline)(nil),    // 34: work.GetDisciplinesResponse.Discipline
 }
 var file_proto_work_work_proto_depIdxs = []int32{
 	5,  // 0: work.GetTasksForLectorResponse.tasks:type_name -> work.Task
-	27, // 1: work.GetGroupsResponse.groups:type_name -> work.GetGroupsResponse.Group
-	28, // 2: work.GetDisciplinesResponse.disciplines:type_name -> work.GetDisciplinesResponse.Discipline
-	4,  // 3: work.WorkService.GetTasksForLector:input_type -> work.GetTasksForLectorRequest
-	7,  // 4: work.WorkService.DeleteTask:input_type -> work.DeleteTaskRequest
-	9,  // 5: work.WorkService.SetTaskTitle:input_type -> work.SetTaskTitleRequest
-	11, // 6: work.WorkService.SetTaskDescription:input_type -> work.SetTaskDescriptionRequest
-	13, // 7: work.WorkService.SetTaskDeadline:input_type -> work.SetTaskDeadlineRequest
-	15, // 8: work.WorkService.CreateWork:input_type -> work.CreateWorkRequest
-	17, // 9: work.WorkService.LoadTaskName:input_type -> work.LoadTaskNameRequest
-	19, // 10: work.WorkService.LoadTaskDescription:input_type -> work.LoadTaskDescriptionRequest
-	21, // 11: work.WorkService.LoadTaskDeadline:input_type -> work.LoadTaskDeadlineRequest
-	23, // 12: work.WorkService.GetGroups:input_type -> work.GetGroupsRequest
-	25, // 13: work.WorkService.GetDisciplines:input_type -> work.GetDisciplinesRequest
-	0,  // 14: work.WorkService.GetTaskDetails:input_type -> work.GetTaskDetailsRequest
-	2,  // 15: work.WorkService.UpdateTaskGroupAndDiscipline:input_type -> work.UpdateTaskGroupAndDisciplineRequest
-	6,  // 16: work.WorkService.GetTasksForLector:output_type -> work.GetTasksForLectorResponse
-	8,  // 17: work.WorkService.DeleteTask:output_type -> work.DeleteTaskResponse
-	10, // 18: work.WorkService.SetTaskTitle:output_type -> work.SetTaskTitleResponse
-	12, // 19: work.WorkService.SetTaskDescription:output_type -> work.SetTaskDescriptionResponse
-	14, // 20: work.WorkService.SetTaskDeadline:output_type -> work.SetTaskDeadlineResponse
-	16, // 21: work.WorkService.CreateWork:output_type -> work.CreateWorkResponse
-	18, // 22: work.WorkService.LoadTaskName:output_type -> work.LoadTaskNameResponse
-	20, // 23: work.WorkService.LoadTaskDescription:output_type -> work.LoadTaskDescriptionResponse
-	22, // 24: work.WorkService.LoadTaskDeadline:output_type -> work.LoadTaskDeadlineResponse
-	24, // 25: work.WorkService.GetGroups:output_type -> work.GetGroupsResponse
-	26, // 26: work.WorkService.GetDisciplines:output_type -> work.GetDisciplinesResponse
-	1,  // 27: work.WorkService.GetTaskDetails:output_type -> work.GetTaskDetailsResponse
-	3,  // 28: work.WorkService.UpdateTaskGroupAndDiscipline:output_type -> work.UpdateTaskGroupAndDisciplineResponse
-	16, // [16:29] is the sub-list for method output_type
-	3,  // [3:16] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	33, // 1: work.GetGroupsResponse.groups:type_name -> work.GetGroupsResponse.Group
+	34, // 2: work.GetDisciplinesResponse.disciplines:type_name -> work.GetDisciplinesResponse.Discipline
+	29, // 3: work.ListTasksForStudentResponse.tasks:type_name -> work.Tasks
+	31, // 4: work.ListWorksForStudentResponse.works:type_name -> work.Work
+	4,  // 5: work.WorkService.GetTasksForLector:input_type -> work.GetTasksForLectorRequest
+	7,  // 6: work.WorkService.DeleteTask:input_type -> work.DeleteTaskRequest
+	9,  // 7: work.WorkService.SetTaskTitle:input_type -> work.SetTaskTitleRequest
+	11, // 8: work.WorkService.SetTaskDescription:input_type -> work.SetTaskDescriptionRequest
+	13, // 9: work.WorkService.SetTaskDeadline:input_type -> work.SetTaskDeadlineRequest
+	15, // 10: work.WorkService.CreateWork:input_type -> work.CreateWorkRequest
+	17, // 11: work.WorkService.LoadTaskName:input_type -> work.LoadTaskNameRequest
+	19, // 12: work.WorkService.LoadTaskDescription:input_type -> work.LoadTaskDescriptionRequest
+	21, // 13: work.WorkService.LoadTaskDeadline:input_type -> work.LoadTaskDeadlineRequest
+	23, // 14: work.WorkService.GetGroups:input_type -> work.GetGroupsRequest
+	25, // 15: work.WorkService.GetDisciplines:input_type -> work.GetDisciplinesRequest
+	0,  // 16: work.WorkService.GetTaskDetails:input_type -> work.GetTaskDetailsRequest
+	2,  // 17: work.WorkService.UpdateTaskGroupAndDiscipline:input_type -> work.UpdateTaskGroupAndDisciplineRequest
+	27, // 18: work.WorkService.ListTasksForStudent:input_type -> work.ListTasksForStudentRequest
+	30, // 19: work.WorkService.ListWorksForStudent:input_type -> work.ListWorksForStudentRequest
+	6,  // 20: work.WorkService.GetTasksForLector:output_type -> work.GetTasksForLectorResponse
+	8,  // 21: work.WorkService.DeleteTask:output_type -> work.DeleteTaskResponse
+	10, // 22: work.WorkService.SetTaskTitle:output_type -> work.SetTaskTitleResponse
+	12, // 23: work.WorkService.SetTaskDescription:output_type -> work.SetTaskDescriptionResponse
+	14, // 24: work.WorkService.SetTaskDeadline:output_type -> work.SetTaskDeadlineResponse
+	16, // 25: work.WorkService.CreateWork:output_type -> work.CreateWorkResponse
+	18, // 26: work.WorkService.LoadTaskName:output_type -> work.LoadTaskNameResponse
+	20, // 27: work.WorkService.LoadTaskDescription:output_type -> work.LoadTaskDescriptionResponse
+	22, // 28: work.WorkService.LoadTaskDeadline:output_type -> work.LoadTaskDeadlineResponse
+	24, // 29: work.WorkService.GetGroups:output_type -> work.GetGroupsResponse
+	26, // 30: work.WorkService.GetDisciplines:output_type -> work.GetDisciplinesResponse
+	1,  // 31: work.WorkService.GetTaskDetails:output_type -> work.GetTaskDetailsResponse
+	3,  // 32: work.WorkService.UpdateTaskGroupAndDiscipline:output_type -> work.UpdateTaskGroupAndDisciplineResponse
+	28, // 33: work.WorkService.ListTasksForStudent:output_type -> work.ListTasksForStudentResponse
+	32, // 34: work.WorkService.ListWorksForStudent:output_type -> work.ListWorksForStudentResponse
+	20, // [20:35] is the sub-list for method output_type
+	5,  // [5:20] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_work_work_proto_init() }
@@ -1761,7 +2126,7 @@ func file_proto_work_work_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_work_work_proto_rawDesc), len(file_proto_work_work_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   29,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

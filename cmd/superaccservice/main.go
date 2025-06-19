@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 	"log"
 	"net"
 	"os"
@@ -483,42 +484,6 @@ func (s *Service) ManageDisciplineEntity(ctx context.Context, req *pb.ManageDisc
 	return &pb.ManageDisciplineEntityResponse{Message: "Discipline managed successfully", Success: true}, nil
 }
 
-func (s *Service) CreateDiscipline(ctx context.Context, req *pb.ManageDisciplineEntityRequest) (*pb.ManageDisciplineEntityResponse, error) {
-	log.Printf("CreateDiscipline вызван с action=%s, name=%s, groupID=%d, seminaristID=%d, assistantID=%d", req.Action, req.Name, req.GroupId, req.SeminaristId, req.AssistantId)
-	tx, err := s.repo.db.BeginTx(ctx, nil)
-	if err != nil {
-		return &pb.ManageDisciplineEntityResponse{Message: "Ошибка начала транзакции", Success: false}, err
-	}
-	defer func() {
-		if err != nil {
-			log.Printf("Откат транзакции: %v", tx.Rollback())
-		}
-	}()
-
-	if req.Action != "create" {
-		return &pb.ManageDisciplineEntityResponse{Message: "Недопустимое действие, должно быть 'create'", Success: false}, nil
-	}
-
-	if req.Name == "" {
-		return &pb.ManageDisciplineEntityResponse{Message: "Для создания дисциплины требуется название", Success: false}, nil
-	}
-
-	query := "INSERT INTO disciplines (name) VALUES ($1) RETURNING id"
-	var newDisciplineID int32
-	err = tx.QueryRowContext(ctx, query, req.Name).Scan(&newDisciplineID)
-	if err != nil {
-		return &pb.ManageDisciplineEntityResponse{Message: "Ошибка вставки в disciplines", Success: false}, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return &pb.ManageDisciplineEntityResponse{Message: "Ошибка коммита транзакции", Success: false}, err
-	}
-
-	log.Printf("Дисциплина успешно создана с ID: %d", newDisciplineID)
-	return &pb.ManageDisciplineEntityResponse{Message: "Дисциплина успешно создана", Success: true, DisciplineId: newDisciplineID}, nil
-}
-
 func (r *Repository) DeleteDiscipline(ctx context.Context, disciplineIDs []int32) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -527,28 +492,97 @@ func (r *Repository) DeleteDiscipline(ctx context.Context, disciplineIDs []int32
 	defer tx.Rollback()
 
 	for _, id := range disciplineIDs {
+		// Проверка на наличие зависимостей
+		var count int
+		err = tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM groups_in_disciplines WHERE discipline_id = $1", id).Scan(&count)
+		if err != nil {
+			return err
+		}
+		if count > 0 {
+			return fmt.Errorf("дисциплина с ID %d имеет зависимости и не может быть удалена", id)
+		}
+
 		query := "DELETE FROM disciplines WHERE id = $1"
 		result, err := tx.ExecContext(ctx, query, id)
 		if err != nil {
 			return err
 		}
 		if affected, _ := result.RowsAffected(); affected == 0 {
-			return fmt.Errorf("discipline with ID %d not found", id)
+			return fmt.Errorf("дисциплина с ID %d не найдена", id)
 		}
 	}
 
 	return tx.Commit()
 }
 
-func (s *Service) DeleteDiscipline(ctx context.Context, req *pb.DeleteDisciplineRequest) (*pb.DeleteDisciplineResponse, error) {
-	if len(req.DisciplineIds) == 0 {
-		return &pb.DeleteDisciplineResponse{Message: "at least one discipline ID is required", Success: false}, nil
+func (s *Service) CreateDiscipline(ctx context.Context, req *pb.ManageDisciplineEntityRequest) (*pb.ManageDisciplineEntityResponse, error) {
+	if req.Action != "create" {
+		return &pb.ManageDisciplineEntityResponse{Message: "Недопустимое действие, должно быть 'create'", Success: false}, nil
 	}
-	err := s.repo.DeleteDiscipline(ctx, req.DisciplineIds)
+
+	if req.Name == "" {
+		return &pb.ManageDisciplineEntityResponse{Message: "Для создания дисциплины требуется название", Success: false}, nil
+	}
+
+	newDisciplineID := int32(0)
+	query := `INSERT INTO disciplines (name, lector_id) VALUES ($1, $2) RETURNING id`
+	var id int
+	err := s.repo.db.QueryRow(query, req.Name, req.LectorId).Scan(&id)
 	if err != nil {
-		return &pb.DeleteDisciplineResponse{Message: err.Error(), Success: false}, err
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" { // Уникальность email
+			return &pb.ManageDisciplineEntityResponse{Message: "Discipline already exists", Success: false, DisciplineId: newDisciplineID}, nil
+		}
+		return &pb.ManageDisciplineEntityResponse{Message: err.Error(), Success: true, DisciplineId: newDisciplineID}, nil
 	}
-	return &pb.DeleteDisciplineResponse{Message: "Disciplines deleted successfully", Success: true}, nil
+	newDisciplineID = int32(id)
+
+	log.Printf("Discipline created successfully with ID: %d", newDisciplineID)
+	return &pb.ManageDisciplineEntityResponse{Message: "", Success: true, DisciplineId: newDisciplineID}, nil
+}
+
+func (s *Service) DeleteDiscipline(ctx context.Context, req *pb.DeleteDisciplineRequest) (*pb.DeleteDisciplineResponse, error) {
+	log.Printf("Received DeleteDiscipline request for IDs: %v", req.DisciplineIds)
+	tx, err := s.repo.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: false})
+	if err != nil {
+		log.Printf("Failed to begin transaction: %v", err)
+		return &pb.DeleteDisciplineResponse{Message: "Ошибка начала транзакции", Success: false}, err
+	}
+	defer func() {
+		if err != nil {
+			log.Printf("Rolling back transaction: %v", tx.Rollback())
+		} else {
+			log.Printf("Committing transaction")
+			tx.Commit()
+		}
+	}()
+
+	if len(req.DisciplineIds) == 0 {
+		return &pb.DeleteDisciplineResponse{Message: "Список ID дисциплин пуст", Success: false}, nil
+	}
+
+	for _, id := range req.DisciplineIds {
+		var count int
+		err = tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM groups_in_disciplines WHERE discipline_id = $1", id).Scan(&count)
+		if err != nil {
+			log.Printf("Failed to check dependencies for discipline ID %d: %v", id, err)
+			return &pb.DeleteDisciplineResponse{Message: "Ошибка проверки зависимостей", Success: false}, err
+		}
+		if count > 0 {
+			return &pb.DeleteDisciplineResponse{Message: fmt.Sprintf("Дисциплина с ID %d имеет зависимости и не может быть удалена", id), Success: false}, nil
+		}
+
+		result, err := tx.ExecContext(ctx, "DELETE FROM disciplines WHERE id = $1", id)
+		if err != nil {
+			log.Printf("Failed to delete discipline ID %d: %v", id, err)
+			return &pb.DeleteDisciplineResponse{Message: "Ошибка удаления дисциплины", Success: false}, err
+		}
+		if affected, _ := result.RowsAffected(); affected == 0 {
+			log.Printf("Discipline with ID %d not found", id)
+			return &pb.DeleteDisciplineResponse{Message: fmt.Sprintf("Дисциплина с ID %d не найдена", id), Success: false}, nil
+		}
+		log.Printf("Discipline ID %d deleted successfully", id)
+	}
+	return &pb.DeleteDisciplineResponse{Message: "Дисциплины удалены успешно", Success: true}, nil
 }
 
 func (r *Repository) ListDisciplines(ctx context.Context) ([]*pb.Discipline, error) {

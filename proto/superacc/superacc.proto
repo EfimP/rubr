@@ -153,6 +153,7 @@ message ManageDisciplineEntityRequest {
   string name = 4;
   int32 seminarist_id = 5;
   int32 assistant_id = 6;
+  int32 lector_id = 7;
 }
 
 message ManageDisciplineEntityResponse {
