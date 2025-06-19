@@ -16,7 +16,7 @@ type AppState struct {
 }
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("rubr")
 	a.Settings().SetTheme(theme.LightTheme())
 	w := a.NewWindow("Rubric Grader")
 

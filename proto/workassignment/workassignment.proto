@@ -9,6 +9,9 @@ service WorkAssignmentService {
   rpc UploadAssignmentFile (UploadAssignmentFileRequest) returns (UploadAssignmentFileResponse);
   rpc SubmitWork (SubmitWorkRequest) returns (SubmitWorkResponse);
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse);
+  rpc DownloadAssignmentFile (DownloadAssignmentFileRequest) returns (DownloadAssignmentFileResponse);
+  rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
+  rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
 }
 
 message GetWorksForAssistantRequest {
@@ -83,4 +86,36 @@ message GetTaskDetailsResponse {
   repeated CriteriaGroup main_criteria_groups = 6;    // Основные группы критериев
   repeated CriteriaGroup blocking_criteria_groups = 7; // Блокирующие группы критериев
   string error = 8;              // Сообщение об ошибке, если есть
+}
+
+message DownloadAssignmentFileRequest {
+  int32 work_id = 1;    // ID работы (student_works.id)
+  string file_name = 2; // Имя файла
+  bytes content = 3;    // Содержимое файла
+}
+
+message DownloadAssignmentFileResponse {
+  string error = 1; // Сообщение об ошибке, если есть
+}
+
+message CreateWorkRequest {
+  int32 student_id = 1; // ID студента (users.id)
+  int32 task_id = 2;    // ID задания (tasks.id)
+}
+
+message CreateWorkResponse {
+  int32 work_id = 1;    // ID созданной работы (student_works.id)
+  string error = 2;     // Сообщение об ошибке, если есть
+}
+
+message CheckExistingWorkRequest {
+  int32 student_id = 1; // ID студента (users.id)
+  int32 task_id = 2;   // ID задания (tasks.id)
+}
+
+message CheckExistingWorkResponse {
+  bool exists = 1;     // Существует ли работа
+  int32 work_id = 2;   // ID работы, если существует
+  int32 student_id = 3; // ID студента для проверки
+  string error = 4;    // Сообщение об ошибке, если есть
 }

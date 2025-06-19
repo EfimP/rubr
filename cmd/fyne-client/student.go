@@ -11,12 +11,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"google.golang.org/grpc"
 	"image/color"
+	"io"
 	"log"
-	pbGrade "rubr/proto/grade"
 	"strconv"
-	"strings"
 	"time"
 
+	gradingpb "rubr/proto/grade"
+	pbGrade "rubr/proto/grade"
 	rubricpb "rubr/proto/rubric"
 	pbWork "rubr/proto/work"
 	workassignmentpb "rubr/proto/workassignment"
@@ -305,6 +306,34 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 		return container.NewVBox(widget.NewLabel(resp.Error))
 	}
 
+	connCheck, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к сервису для проверки работы: %v", err)
+		// Продолжаем выполнение, так как это не критично
+	}
+	defer connCheck.Close()
+
+	clientCheck := workassignmentpb.NewWorkAssignmentServiceClient(connCheck)
+	checkResp, err := clientCheck.CheckExistingWork(ctx, &workassignmentpb.CheckExistingWorkRequest{
+		StudentId: func() int32 {
+			userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
+			if err != nil {
+				log.Printf("Invalid user ID: %v", err)
+				return 0
+			}
+			return int32(userIDint64)
+		}(),
+		TaskId: TaskID,
+	})
+	if err != nil {
+		log.Printf("Ошибка проверки существующей работы для task_id %d: %v", TaskID, err)
+	} else if checkResp.Exists && checkResp.WorkId != 0 {
+		WorkID = checkResp.WorkId // Сохранение WorkId в глобальную переменную
+		log.Printf("Найдена существующая работа с ID %d для student_id %d и task_id %d", WorkID, checkResp.StudentId, TaskID)
+	} else {
+		WorkID = 0
+	}
+
 	// Настройка заголовка
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
@@ -340,7 +369,83 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	deadlineLabel := widget.NewLabel("Дедлайн: " + deadlineTime.Format("02.01.2006 15:04"))
 
 	downloadButton := widget.NewButton("Загрузить работу", func() {
-		//add download
+		w := state.window
+		fileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil || reader == nil {
+				log.Printf("Ошибка при выборе файла: %v", err)
+				dialog.ShowError(fmt.Errorf("Не удалось открыть файл: %v", err), w)
+				return
+			}
+			defer reader.Close()
+
+			// Читаем содержимое файла
+			fileData, err := io.ReadAll(reader)
+			if err != nil {
+				log.Printf("Ошибка чтения файла: %v", err)
+				dialog.ShowError(fmt.Errorf("Не удалось прочитать файл: %v", err), w)
+				return
+			}
+
+			// Сохраняем файл во временную память
+			fileName := reader.URI().Name()
+
+			// Подключение к сервису
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			conn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+			if err != nil {
+				log.Printf("Не удалось подключиться к WorkAssignmentService: %v", err)
+				dialog.ShowError(fmt.Errorf("Ошибка подключения к сервису: %v", err), w)
+				return
+			}
+			defer conn.Close()
+
+			client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
+
+			userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
+			if err != nil {
+				log.Printf("Invalid user ID: %v", err)
+			}
+			studentID32 := int32(userIDint64)
+			// Создание новой работы, если она еще не существует
+			createResp, err := client.CreateWork(ctx, &workassignmentpb.CreateWorkRequest{
+				StudentId: studentID32, // Предполагается, что StudentId доступен в state
+				TaskId:    TaskID,
+			})
+			if err != nil {
+				log.Printf("Ошибка создания работы для task_id %d: %v", TaskID, err)
+				dialog.ShowError(fmt.Errorf("Не удалось создать работу: %v", err), w)
+				return
+			}
+			if createResp.Error != "" {
+				log.Printf("Ошибка от сервера при создании работы: %s", createResp.Error)
+				dialog.ShowError(fmt.Errorf("Ошибка сервера: %s", createResp.Error), w)
+				return
+			}
+			workID := createResp.WorkId
+			WorkID = workID
+
+			// Отправка файла на S3 и обновление записи
+			uploadResp, err := client.DownloadAssignmentFile(ctx, &workassignmentpb.DownloadAssignmentFileRequest{
+				WorkId:   workID,
+				FileName: fileName,
+				Content:  fileData,
+			})
+			if err != nil {
+				log.Printf("Ошибка отправки файла для работы %d: %v", workID, err)
+				dialog.ShowError(fmt.Errorf("Не удалось отправить файл: %v", err), w)
+				return
+			}
+			if uploadResp.Error != "" {
+				log.Printf("Ошибка от сервера при загрузке файла: %s", uploadResp.Error)
+				dialog.ShowError(fmt.Errorf("Ошибка сервера: %s", uploadResp.Error), w)
+				return
+			}
+
+			log.Printf("Файл %s успешно загружен для работы %d", fileName, workID)
+			dialog.ShowInformation("Успех", fmt.Sprintf("Файл %s успешно загружен", fileName), w)
+		}, w)
+		fileDialog.Show()
 	})
 
 	backButton := widget.NewButton("Назад", func() {
@@ -348,7 +453,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 		state.window.SetContent(createContent(state))
 	})
 
-	nextButton := widget.NewButton("Далее", func() {
+	nextButton := widget.NewButton("Критерии", func() {
 		state.currentPage = "student_block_criteria"
 		state.window.SetContent(createContent(state))
 	})
@@ -380,6 +485,13 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	)
 }
 
+type blockingCriterionEntry struct {
+	CriterionID     int32
+	CommentEntry    *widget.Label
+	EvaluationEntry *widget.Label
+	Container       *fyne.Container
+}
+
 func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 	w := state.window
 
@@ -394,30 +506,33 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 	defer rubricConn.Close()
 	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
 
-	//gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
-	//if err != nil {
-	//	log.Printf("Failed to connect to gradingservice: %v", err)
-	//	return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
-	//}
-	//defer gradingConn.Close()
-	//gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
-	//
-	////Загрузка существующих оценок
-	//marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: workID})
-	//if err != nil {
-	//	log.Printf("Не удалось загрузить оценки для работы %d: %v", workID, err)
-	//	return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + err.Error()))
-	//}
-	//if marksResp.Error != "" {
-	//	log.Printf("Ошибка загрузки оценок для работы %d: %s", workID, marksResp.Error)
-	//	return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + marksResp.Error))
-	//}
-	//
-	//// Создаем карту для быстрого доступа к оценкам по criterion_id
-	//marksMap := make(map[int32]gradingpb.CriterionMark)
-	//for _, mark := range marksResp.Marks {
-	//	marksMap[mark.CriterionId] = *mark
-	//}
+	marksMap := make(map[int32]gradingpb.CriterionMark)
+
+	if WorkID != 0 {
+		gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Failed to connect to gradingservice: %v", err)
+			return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+		}
+		defer gradingConn.Close()
+		gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
+
+		//Загрузка существующих оценок
+		marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: WorkID})
+		if err != nil {
+			log.Printf("Не удалось загрузить оценки для работы %d: %v", WorkID, err)
+			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + err.Error()))
+		}
+		if marksResp.Error != "" {
+			log.Printf("Ошибка загрузки оценок для работы %d: %s", WorkID, marksResp.Error)
+			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + marksResp.Error))
+		}
+
+		// Создаем карту для быстрого доступа к оценкам по criterion_id
+		for _, mark := range marksResp.Marks {
+			marksMap[mark.CriterionId] = *mark
+		}
+	}
 
 	// Загрузка блокирующих критериев
 	resp, err := rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: TaskID})
@@ -463,7 +578,7 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 	)
 
 	// Список критериев
-	var activeCriteria []*BlockingCriterionEntry
+	var activeCriteria []*blockingCriterionEntry
 	for _, crit := range resp.Criteria {
 		// Поля только для чтения
 		nameEntry := widget.NewLabel(crit.Name)
@@ -474,21 +589,23 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 		descriptionEntryContainer := container.NewMax(descriptionEntry)
 		descriptionEntryContainer.Resize(fyne.NewSize(250, 60))
 
-		// Редактируемое поле комментария
-		commentEntry := widget.NewEntry()
-		// Редактируемое поле оценки
-		evaluationEntry := widget.NewEntry()
+		textCommentEntry := ""
+		textEvaluationEntry := ""
+		if WorkID != 0 {
+			//Загружаем существующие данные
+			if mark, exists := marksMap[crit.Id]; exists {
+				textCommentEntry = mark.Comment
+				textEvaluationEntry = fmt.Sprintf("%.2f", mark.Mark)
+				log.Printf("Загружена оценка для блокирующего критерия ID %d: mark=%.2f, comment=%s", crit.Id, mark.Mark, mark.Comment)
+			} else {
+				textCommentEntry = crit.Comment
+				textEvaluationEntry = strconv.FormatInt(crit.FinalMark, 10)
+				log.Printf("Оценка не найдена для блокирующего критерия ID %d, установлена оценка по умолчанию 0.0 и комментарий лектора: %s", crit.Id, crit.Comment)
+			}
 
-		// Загружаем существующие данные
-		//if mark, exists := marksMap[crit.Id]; exists {
-		//	commentEntry.SetText(mark.Comment)
-		//	evaluationEntry.SetText(fmt.Sprintf("%.2f", mark.Mark))
-		//	log.Printf("Загружена оценка для блокирующего критерия ID %d: mark=%.2f, comment=%s", crit.Id, mark.Mark, mark.Comment)
-		//} else {
-		//	commentEntry.SetText(crit.Comment)
-		//	evaluationEntry.SetText(strconv.FormatInt(crit.FinalMark, 10))
-		//	log.Printf("Оценка не найдена для блокирующего критерия ID %d, установлена оценка по умолчанию 0.0 и комментарий лектора: %s", crit.Id, crit.Comment)
-		//}
+		}
+		commentEntry := widget.NewLabel(textCommentEntry)
+		evaluationEntry := widget.NewLabel(textEvaluationEntry)
 
 		commentEntryContainer := container.NewMax(commentEntry)
 		commentEntryContainer.Resize(fyne.NewSize(250, 60))
@@ -505,7 +622,7 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 		criteriaListContainer.Add(criterionRow)
 		criteriaListContainer.Refresh()
 
-		activeCriteria = append(activeCriteria, &BlockingCriterionEntry{
+		activeCriteria = append(activeCriteria, &blockingCriterionEntry{
 			CriterionID:     crit.Id,
 			CommentEntry:    commentEntry,
 			EvaluationEntry: evaluationEntry,
@@ -519,49 +636,6 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 
 	// Кнопка "Далее"
 	nextButton := widget.NewButton("Далее", func() {
-		// Создаем новый контекст и соединение для сохранения данных
-		//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		//defer cancel()
-		//
-		//gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
-		//if err != nil {
-		//	log.Printf("Failed to connect to gradingservice: %v", err)
-		//	dialog.ShowError(err, w)
-		//	return
-		//}
-		//defer gradingConn.Close()
-		//
-		//gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
-
-		// Проверка ввода и сохранение оценок
-		//for _, criterion := range activeCriteria {
-		//	if criterion.EvaluationEntry.Text == "" {
-		//		dialog.ShowInformation("Ошибка", "Введите оценку для всех критериев", w)
-		//		return
-		//	}
-		//	finalMark, err := strconv.ParseFloat(criterion.EvaluationEntry.Text, 32)
-		//	if err != nil {
-		//		dialog.ShowInformation("Ошибка", "Оценка должна быть числом", w)
-		//		return
-		//	}
-		//	log.Printf("Saving mark for criterion ID %d: mark=%f, comment=%s", criterion.CriterionID, finalMark, criterion.CommentEntry.Text)
-		//	resp, err := gradingClient.SetBlockingCriteriaMark(ctx, &gradingpb.SetBlockingCriteriaMarkRequest{
-		//		WorkId:      workID,
-		//		CriterionId: criterion.CriterionID,
-		//		Mark:        float32(finalMark),
-		//		Comment:     criterion.CommentEntry.Text,
-		//	})
-		//	if err != nil {
-		//		log.Printf("Failed to save blocking criteria mark for criterion ID %d: %v", criterion.CriterionID, err)
-		//		dialog.ShowError(err, w)
-		//		return
-		//	}
-		//	if resp.Error != "" {
-		//		log.Printf("SetBlockingCriteriaMark error for criterion ID %d: %s", criterion.CriterionID, resp.Error)
-		//		dialog.ShowInformation("Ошибка", resp.Error, w)
-		//		return
-		//	}
-		//}
 		log.Printf("All blocking criteria marks saved successfully")
 		state.currentPage = "student_main_criteria"
 		w.SetContent(createContent(state))
@@ -598,6 +672,12 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 	)
 }
 
+type mainCriterionEntry struct {
+	CriterionID  int32
+	Select       *widget.Label
+	CommentEntry *widget.Label
+}
+
 func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 	w := state.window
 
@@ -613,30 +693,32 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 	defer rubricConn.Close()
 	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
 
-	//gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
-	//if err != nil {
-	//	log.Printf("Не удалось подключиться к GradingService: %v", err)
-	//	return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
-	//}
-	//defer gradingConn.Close()
-	//gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
-	//
-	//// Загрузка существующих оценок
-	//marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: workID})
-	//if err != nil {
-	//	log.Printf("Не удалось загрузить оценки для работы %d: %v", workID, err)
-	//	return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + err.Error()))
-	//}
-	//if marksResp.Error != "" {
-	//	log.Printf("Ошибка загрузки оценок для работы %d: %s", workID, marksResp.Error)
-	//	return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + marksResp.Error))
-	//}
+	marksMap := make(map[int32]gradingpb.CriterionMark)
+	if WorkID != 0 {
+		gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Не удалось подключиться к GradingService: %v", err)
+			return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+		}
+		defer gradingConn.Close()
+		gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
-	// Создаем карту для быстрого доступа к оценкам по criterion_id
-	//marksMap := make(map[int32]gradingpb.CriterionMark)
-	//for _, mark := range marksResp.Marks {
-	//	marksMap[mark.CriterionId] = *mark
-	//}
+		// Загрузка существующих оценок
+		marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: WorkID})
+		if err != nil {
+			log.Printf("Не удалось загрузить оценки для работы %d: %v", WorkID, err)
+			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + err.Error()))
+		}
+		if marksResp.Error != "" {
+			log.Printf("Ошибка загрузки оценок для работы %d: %s", WorkID, marksResp.Error)
+			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + marksResp.Error))
+		}
+
+		// Создаем карту для быстрого доступа к оценкам по criterion_id
+		for _, mark := range marksResp.Marks {
+			marksMap[mark.CriterionId] = *mark
+		}
+	}
 
 	// Загрузка основных критериев
 	resp, err := rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: TaskID})
@@ -670,7 +752,7 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 
 	// Список групп и критериев
 	selectedGroupIndex := -1
-	var entries []MainCriterionEntry
+	var entries []mainCriterionEntry
 	type criterionInfo struct {
 		groupName string
 		critName  string
@@ -681,47 +763,29 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 	// Инициализация entries для всех критериев
 	for _, group := range resp.Groups {
 		for _, crit := range group.Criteria {
-			commentEntry := widget.NewEntry()
 			selectOptions := []string{"0.0", "0.25", "0.50", "0.75", "1.00"}
 			hasMark := false
-			//var currentMark string
-			//
-			//// Проверяем наличие оценки
-			//if mark, exists := marksMap[crit.Id]; exists {
-			//	markStr := fmt.Sprintf("%.2f", mark.Mark)
-			//	if contains(selectOptions, markStr) {
-			//		currentMark = markStr
-			//		hasMark = true
-			//		log.Printf("Загружена оценка для основного критерия ID %d: mark=%.2f, comment=%s", crit.Id, mark.Mark, mark.Comment)
-			//	}
-			//}
+			var currentMark string
 
-			selectWidget := widget.NewSelect(selectOptions, func(s string) {
-				if !hasMark {
-					// Устанавливаем комментарий лектора только если оценка не была ранее проставлена
-					switch s {
-					case "0.0":
-						commentEntry.SetText(crit.Comment_000)
-					case "0.25":
-						commentEntry.SetText(crit.Comment_025)
-					case "0.50":
-						commentEntry.SetText(crit.Comment_050)
-					case "0.75":
-						commentEntry.SetText(crit.Comment_075)
-					case "1.00":
-						commentEntry.SetText(crit.Comment_100)
-					}
+			// Проверяем наличие оценки
+			if mark, exists := marksMap[crit.Id]; exists {
+				markStr := fmt.Sprintf("%.2f", mark.Mark)
+				if contains(selectOptions, markStr) {
+					currentMark = markStr
+					hasMark = true
+					log.Printf("Загружена оценка для основного критерия ID %d: mark=%.2f, comment=%s", crit.Id, mark.Mark, mark.Comment)
 				}
-				// Если оценка уже была, комментарий не меняется автоматически
-			})
+			}
 
-			// Устанавливаем начальные значения
-			//if hasMark {
-			//	selectWidget.SetSelected(currentMark)
-			//	commentEntry.SetText(marksMap[crit.Id].Comment)
-			//}
+			// Инициализация виджетов с значениями по умолчанию
+			selectWidget := widget.NewLabel("0.0") // Значение по умолчанию
+			commentEntry := widget.NewLabel("")    // Пустой комментарий по умолчанию
+			if hasMark {
+				selectWidget.SetText(currentMark)
+				commentEntry.SetText(marksMap[crit.Id].Comment)
+			}
 
-			entries = append(entries, MainCriterionEntry{
+			entries = append(entries, mainCriterionEntry{
 				CriterionID:  crit.Id,
 				Select:       selectWidget,
 				CommentEntry: commentEntry,
@@ -779,7 +843,7 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 			crit := resp.Groups[selectedGroupIndex].Criteria[id]
 
 			// Находим соответствующий entry для критерия
-			var selectedEntry *MainCriterionEntry
+			var selectedEntry *mainCriterionEntry
 			for i := range entries {
 				if entries[i].CriterionID == crit.Id {
 					selectedEntry = &entries[i]
@@ -792,10 +856,21 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 				return
 			}
 
+			// Проверка на nil и создание контейнера для отображения
+			selectLabel := selectedEntry.Select
+			if selectLabel == nil {
+				selectLabel = widget.NewLabel("0.0") // Значение по умолчанию
+			}
+
+			commentLabel := selectedEntry.CommentEntry
+			if commentLabel == nil {
+				commentLabel = widget.NewLabel("") // Пустой комментарий по умолчанию
+			}
+
 			// Создаем контейнер для отображения комментариев
 			commentsContainer := container.NewVBox(
 				widget.NewLabelWithStyle("Комментарии лектора:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-				widget.NewLabel(fmt.Sprintf("Для 0.0: %s", crit.Comment_000)),
+				widget.NewLabel(fmt.Sprintf("Для 0.00: %s", crit.Comment_000)),
 				widget.NewLabel(fmt.Sprintf("Для 0.25: %s", crit.Comment_025)),
 				widget.NewLabel(fmt.Sprintf("Для 0.50: %s", crit.Comment_050)),
 				widget.NewLabel(fmt.Sprintf("Для 0.75: %s", crit.Comment_075)),
@@ -804,9 +879,9 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 
 			content := container.NewVBox(
 				widget.NewLabel("Критерий: "+crit.Name),
-				container.NewHBox(widget.NewLabel("Оценка:"), selectedEntry.Select),
-				container.NewHBox(widget.NewLabel("Комментарий:"), selectedEntry.CommentEntry),
 				commentsContainer,
+				container.NewHBox(widget.NewLabel("Оценка:"), selectLabel),
+				container.NewHBox(widget.NewLabel("Комментарий:"), commentLabel),
 			)
 
 			contentContainer.Objects = []fyne.CanvasObject{content}
@@ -829,91 +904,8 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 		w.SetContent(createContent(state))
 	})
 
-	finalizeButton := widget.NewButton("Завершить оценку", func() {
-		// Создаем новый контекст и соединение
-		//ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		//defer cancel()
-		//
-		//gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
-		//if err != nil {
-		//	log.Printf("Не удалось подключиться к GradingService: %v", err)
-		//	dialog.ShowError(err, w)
-		//	return
-		//}
-		//defer gradingConn.Close()
-		//gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
-
-		// Проверка, что все критерии оценены
-		evaluatedCriteria := make(map[int32]struct{})
-		var missingCriteria []string
-		for _, entry := range entries {
-			if entry.Select.Selected == "" {
-				info, exists := criteriaInfo[entry.CriterionID]
-				if exists {
-					missingCriteria = append(missingCriteria, fmt.Sprintf("- Группа: %s, Критерий: %s", info.groupName, info.critName))
-					log.Printf("Критерий ID %d (Группа: %s, Имя: %s) не имеет выбранной оценки", entry.CriterionID, info.groupName, info.critName)
-				} else {
-					log.Printf("Критерий ID %d не имеет выбранной оценки (информация о группе отсутствует)", entry.CriterionID)
-				}
-				continue
-			}
-			evaluatedCriteria[entry.CriterionID] = struct{}{}
-		}
-
-		if len(missingCriteria) > 0 {
-			errorMsg := "Необходимо оценить все критерии. Пропущены следующие критерии:\n" + strings.Join(missingCriteria, "\n")
-			dialog.ShowInformation("Ошибка", errorMsg, w)
-			return
-		}
-
-		// Сохранение оценок
-		//for _, entry := range entries {
-		//	mark, err := strconv.ParseFloat(entry.Select.Selected, 32)
-		//	if err != nil {
-		//		log.Printf("Не удалось разобрать оценку для критерия ID %d: %v", entry.CriterionID, err)
-		//		dialog.ShowInformation("Ошибка", "Некорректное значение оценки", w)
-		//		return
-		//	}
-		//	start := time.Now()
-		//	log.Printf("Сохранение оценки для критерия ID %d: mark=%f, comment=%s", entry.CriterionID, mark, entry.CommentEntry.Text)
-		//	resp, err := gradingClient.SetMainCriteriaMark(ctx, &gradingpb.SetMainCriteriaMarkRequest{
-		//		WorkId:      workID,
-		//		CriterionId: entry.CriterionID,
-		//		Mark:        float32(mark),
-		//		Comment:     entry.CommentEntry.Text,
-		//	})
-		//	if err != nil {
-		//		log.Printf("Не удалось сохранить оценку основного критерия для ID %d: %v (время выполнения: %v)", entry.CriterionID, err, time.Since(start))
-		//		dialog.ShowError(err, w)
-		//		return
-		//	}
-		//	if resp.Error != "" {
-		//		log.Printf("Ошибка SetMainCriteriaMark для критерия ID %d: %s (время выполнения: %v)", entry.CriterionID, resp.Error, time.Since(start))
-		//		dialog.ShowInformation("Ошибка", resp.Error, w)
-		//		return
-		//	}
-		//	log.Printf("Оценка для критерия ID %d сохранена успешно (время выполнения: %v)", entry.CriterionID, time.Since(start))
-		//}
-
-		// Обновление статуса работы
-		//start := time.Now()
-		//updateResp, err := gradingClient.UpdateWorkStatus(ctx, &gradingpb.UpdateWorkStatusRequest{
-		//	WorkId: workID,
-		//	Status: "graded by assistant",
-		//})
-		//if err != nil {
-		//	log.Printf("Не удалось обновить статус работы %d: %v (время выполнения: %v)", workID, err, time.Since(start))
-		//	dialog.ShowError(err, w)
-		//	return
-		//}
-		//if updateResp.Error != "" {
-		//	log.Printf("Ошибка UpdateWorkStatus для работы %d: %s (время выполнения: %v)", workID, updateResp.Error, time.Since(start))
-		//	dialog.ShowInformation("Ошибка", updateResp.Error, w)
-		//	return
-		//}
-
-		//log.Printf("Все оценки для работы %d сохранены, статус обновлен на 'graded by assistant' (время выполнения: %v)", workID, time.Since(start))
-		//dialog.ShowInformation("Успех", "Оценка завершена", w)
+	finalizeButton := widget.NewButton("Вернуться к описанию", func() {
+		// Логика отправки работы (временно закомментирована)
 		state.currentPage = "student_assignment"
 		w.SetContent(createContent(state))
 	})
@@ -934,13 +926,3 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 		),
 	)
 }
-
-// Вспомогательная функция для проверки наличия строки в срезе
-//func contains(slice []string, item string) bool {
-//	for _, s := range slice {
-//		if s == item {
-//			return true
-//		}
-//	}
-//	return false
-//}
