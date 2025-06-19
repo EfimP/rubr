@@ -65,6 +65,9 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return CreateStudentBlockingCriteriaPage(state)
 	case "student_main_criteria":
 		return CreateStudentMainCriteriaPage(state)
+  //seminarist  
+	case "seminarist_works":
+		return CreateSeminaristWorksPage(state)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
 	}

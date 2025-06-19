@@ -64,7 +64,7 @@ func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
 	passwordEntry.SetPlaceHolder("Введите пароль")
 
 	enterButton := widget.NewButton("Войти в аккаунт", func() {
-		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+		conn, err := grpc.Dial("89.169.39.161:50051", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to userservice: %v", err)
 			return
@@ -96,6 +96,8 @@ func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
 			state.currentPage = "assistant_works"
 		case "student":
 			state.currentPage = "student_grades"
+		case "seminarist":
+			state.currentPage = "seminarist_works"
 		default:
 			state.currentPage = "greeting"
 		}
@@ -155,7 +157,7 @@ func CreateRegistrationPage(state *AppState) fyne.CanvasObject {
 	passwordEntry.SetPlaceHolder("Введите пароль")
 
 	enterButton := widget.NewButton("Зарегистрироваться", func() {
-		conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+		conn, err := grpc.Dial("89.169.39.161:50051", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to userservice: %v", err)
 			return

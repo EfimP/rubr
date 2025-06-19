@@ -91,7 +91,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		descriptionEntryContainer := container.NewMax(descriptionEntry)
 		descriptionEntryContainer.Resize(fyne.NewSize(250, 60))
 
-		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+		// Получаем прикреплённые дисциплины через gRPC
+		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Не удалось подключиться к superaccservice: %v", err)
 			return
@@ -125,7 +126,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		}
 
 		deleteDisciplineButton := widget.NewButton("Удалить дисциплину", func() {
-			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Не удалось подключиться к superaccservice: %v", err)
 				return
@@ -180,7 +181,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 							}
 						}
 						if len(selectedIDs) > 0 {
-							connFinal, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+							connFinal, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 							if err != nil {
 								log.Printf("Не удалось подключиться к superaccservice: %v", err)
 								return
@@ -200,7 +201,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 								log.Printf("Открепление дисциплин не удалось: %s", resp.Message)
 							} else {
 								log.Printf("Дисциплины успешно откреплены от группы %s", group.Name)
-								connUpdate, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+								// Обновляем список дисциплин
+								connUpdate, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 								if err == nil {
 									defer connUpdate.Close()
 									clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
@@ -223,7 +225,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		})
 
 		attachDisciplineButton := widget.NewButton("Прикрепить дисциплину", func() {
-			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Не удалось подключиться к superaccservice: %v", err)
 				return
@@ -311,7 +313,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 								selectedAssistantID = userIDs[assistantSelect.SelectedIndex()-1]
 							}
 
-							connInner, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+							// Прикрепляем выбранных семинариста и ассистента к группе
+							connInner, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 							if err != nil {
 								log.Printf("Не удалось подключиться к superaccservice: %v", err)
 								return
@@ -358,7 +361,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 											}
 										}
 										if len(selectedIDs) > 0 {
-											connFinal, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+											connFinal, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 											if err != nil {
 												log.Printf("Не удалось подключиться к superaccservice: %v", err)
 												return
@@ -381,7 +384,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 												log.Printf("Прикрепление дисциплин не удалось: %s", resp.Message)
 											} else {
 												log.Printf("Дисциплины успешно прикреплены к группе %s", group.Name)
-												connUpdate, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+												// Обновляем список дисциплин
+												connUpdate, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 												if err == nil {
 													defer connUpdate.Close()
 													clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
@@ -422,7 +426,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 								}
 							}
 							if len(selectedIDs) > 0 {
-								connFinal, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+								connFinal, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 								if err != nil {
 									log.Printf("Не удалось подключиться к superaccservice: %v", err)
 									return
@@ -445,7 +449,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 									log.Printf("Прикрепление дисциплин не удалось: %s", resp.Message)
 								} else {
 									log.Printf("Дисциплины успешно прикреплены к группе %s", group.Name)
-									connUpdate, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+									// Обновляем список дисциплин
+									connUpdate, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 									if err == nil {
 										defer connUpdate.Close()
 										clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
@@ -481,7 +486,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 				fmt.Sprintf("Удалить группу '%s'?", group.Name),
 				func(confirmed bool) {
 					if confirmed {
-						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+						conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 						if err != nil {
 							log.Printf("Не удалось подключиться к superaccservice: %v", err)
 							return
@@ -537,7 +542,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		})
 	}
 
-	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+	conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to superaccservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к серверу"))
@@ -580,7 +585,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			},
 			func(confirmed bool) {
 				if confirmed && nameEntry.Text != "" {
-					conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+					conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 					if err != nil {
 						log.Printf("Failed to connect to superaccservice: %v", err)
 						return
@@ -628,8 +633,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 	})
 
 	createDisciplineButton := widget.NewButton("Создать дисциплину", func() {
-		log.Printf("Attempting to connect to superaccservice at localhost:50052")
-		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(15*time.Second))
+		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to superaccservice: %v", err)
 			dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
@@ -716,8 +720,11 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 	})
 
 	deleteDisciplineButton := widget.NewButton("Удалить дисциплину", func() {
-		log.Printf("Attempting to connect to superaccservice at localhost:50052")
-		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(15*time.Second))
+		client := superaccpb.NewSuperAccServiceClient(nil) // Инициализация без соединения
+		var conn *grpc.ClientConn
+
+		// Получаем список дисциплин внутри диалога
+		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to superaccservice: %v", err)
 			dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
@@ -772,7 +779,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 						}
 					}
 					if len(selectedIDs) > 0 {
-						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(15*time.Second))
+						// Создаем новое соединение для удаления
+						conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 						if err != nil {
 							log.Printf("Failed to connect to superaccservice: %v", err)
 							dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
@@ -913,7 +921,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 			usersData[idx].Status = selected
 			fmt.Printf("Статус пользователя %s изменен на: %s\n", usersData[idx].FIOEmail, selected)
 
-			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Failed to connect to superaccservice: %v", err)
 				return
@@ -961,7 +969,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 				fmt.Sprintf("Удалить пользователя '%s' из группы?", user.FIOEmail),
 				func(confirmed bool) {
 					if confirmed {
-						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+						conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 						if err != nil {
 							log.Printf("Failed to connect to superaccservice: %v", err)
 							return
@@ -1071,7 +1079,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 		usersListContainer.Refresh()
 	}
 
-	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+	conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to superaccservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к серверу"))
@@ -1108,7 +1116,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 			query := strings.ToLower(searchEntry.Text)
 			filteredUsers = nil
 
-			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Failed to connect to superaccservice: %v", err)
 				return
@@ -1143,7 +1151,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 
 		userList.OnSelected = func(id widget.ListItemID) {
 			selectedUser := filteredUsers[id]
-			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Failed to connect to superaccservice: %v", err)
 				return
@@ -1352,7 +1360,7 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 			user.Status = selectedStatus
 			fmt.Printf("Статус пользователя %s (%s) изменен на: %s\n", user.FIO, user.Email, selectedStatus)
 
-			conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Failed to connect to superaccservice: %v", err)
 				return
@@ -1382,7 +1390,7 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 				fmt.Sprintf("Удалить пользователя '%s (%s)'?", user.FIO, user.Email),
 				func(confirmed bool) {
 					if confirmed {
-						conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+						conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 						if err != nil {
 							log.Printf("Failed to connect to superaccservice: %v", err)
 							return
@@ -1431,7 +1439,7 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 	updateUsersTableUI = func(searchText string) {
 		tableRowsContainer.RemoveAll()
 
-		conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to superaccservice: %v", err)
 			return

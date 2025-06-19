@@ -1,7 +1,5 @@
 package main
 
-import "rubr/cmd/frontend/student"
-
 func main() {
 	//everybody.GreetingPage()
 	//everybody.RegistrationPage()
@@ -20,5 +18,6 @@ func main() {
 
 	//student.StudentGradesScreen()
 	//student.AllWorksScreen()
-	student.AssignmentScreen()
+	//student.AssignmentScreen()
+	//seminarist.AssignmentScreen()
 }
