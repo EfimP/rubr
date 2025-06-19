@@ -16,7 +16,7 @@ type AppState struct {
 }
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("rubr")
 	a.Settings().SetTheme(theme.LightTheme())
 	w := a.NewWindow("Rubric Grader")
 
@@ -48,11 +48,24 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return СreateGroupUsersPage(state, GroupName)
 	case "superacc-all-users":
 		return СreateUsersListPage(state)
-		// lector
+	// lector
 	case "lector_works":
 		return CreateLectorWorksPage(state)
+	//assistant
 	case "assistant_works":
 		return CreateAssistantWorksPage(state)
+	//student
+	case "student_grades":
+		return СreateStudentGradesPage(state)
+	case "student_works":
+		return СreateStudentWorksPage(state)
+	case "student_assignment":
+		return CreateStudentWorkDetailsPage(state)
+	case "student_block_criteria":
+		return CreateStudentBlockingCriteriaPage(state)
+	case "student_main_criteria":
+		return CreateStudentMainCriteriaPage(state)
+  //seminarist  
 	case "seminarist_works":
 		return CreateSeminaristWorksPage(state)
 	default:

@@ -13,6 +13,7 @@ import (
 	"image/color"
 	"log"
 	"strings"
+	"time"
 
 	superaccpb "rubr/proto/superacc"
 )
@@ -46,7 +47,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 	headerTitle.TextSize = 20
 	headerTitle.Alignment = fyne.TextAlignCenter
 
-	// логотип слева, текст заголовка по центру
 	headerContent := container.New(layout.NewBorderLayout(nil, nil, leftHeaderObject, nil),
 		leftHeaderObject,
 		container.NewCenter(headerTitle),
@@ -76,7 +76,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		container.NewPadded(widget.NewLabelWithStyle("Дисциплины", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})),
 	)
 
-	// add group function
 	var groups []*GroupEntry
 
 	addCriterionEntry := func(group *superaccpb.Group) {
@@ -135,7 +134,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			defer conn.Close()
 			client := superaccpb.NewSuperAccServiceClient(conn)
 
-			// Получаем список прикреплённых дисциплин
 			respDisciplines, err := client.ListDisciplines(context.Background(), &superaccpb.ListDisciplinesRequest{})
 			if err != nil {
 				log.Printf("Не удалось получить список дисциплин: %v", err)
@@ -146,7 +144,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			var disciplineOptions []string
 			var disciplineIDs []int32
 			for _, d := range respDisciplines.Disciplines {
-				if contains(attachedDisciplines, d.Name) { // Только прикреплённые дисциплины
+				if contains(attachedDisciplines, d.Name) {
 					disciplineOptions = append(disciplineOptions, d.Name)
 					disciplineIDs = append(disciplineIDs, d.Id)
 				}
@@ -226,7 +224,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			)
 		})
 
-		// Кнопка для прикрепления дисциплины
 		attachDisciplineButton := widget.NewButton("Прикрепить дисциплину", func() {
 			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 			if err != nil {
@@ -236,23 +233,17 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			defer conn.Close()
 			client := superaccpb.NewSuperAccServiceClient(conn)
 
-			// Получаем список дисциплин
 			respDisciplines, err := client.ListDisciplines(context.Background(), &superaccpb.ListDisciplinesRequest{})
 			if err != nil {
 				log.Printf("Не удалось получить список дисциплин: %v", err)
 				dialog.ShowInformation("Ошибка", "Не удалось загрузить список дисциплин", w)
 				return
 			}
-			if len(respDisciplines.Disciplines) == 0 {
-				log.Printf("Список дисциплин пуст")
-				dialog.ShowInformation("Ошибка", "Список дисциплин пуст", w)
-				return
-			}
 
 			var disciplineOptions []string
 			var disciplineIDs []int32
 			for _, d := range respDisciplines.Disciplines {
-				if !contains(attachedDisciplines, d.Name) { // Исключаем уже прикреплённые дисциплины
+				if !contains(attachedDisciplines, d.Name) {
 					disciplineOptions = append(disciplineOptions, d.Name)
 					disciplineIDs = append(disciplineIDs, d.Id)
 				}
@@ -264,7 +255,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 				return
 			}
 
-			// Получаем seminarist_id и assistant_id через gRPC
 			respSeminarists, err := client.GetGroupStaff(context.Background(), &superaccpb.GetGroupStaffRequest{GroupId: group.Id})
 			if err != nil {
 				log.Printf("Не удалось получить данные о сотрудниках группы: %v", err)
@@ -286,7 +276,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			checkGroup := container.NewVBox(checkItems...)
 
 			if seminaristID == 0 || assistantID == 0 {
-				// Если семинариста или ассистента нет, открываем диалог для выбора
 				respUsers, err := client.ListAllUsers(context.Background(), &superaccpb.ListAllUsersRequest{})
 				if err != nil {
 					log.Printf("Не удалось получить список пользователей: %v", err)
@@ -316,11 +305,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 					},
 					func(confirmed bool) {
 						if confirmed {
-							if seminaristSelect.SelectedIndex() == 0 && assistantSelect.SelectedIndex() == 0 {
-								log.Printf("Не выбран семинарист или ассистент")
-								return
-							}
-
 							var selectedSeminaristID, selectedAssistantID int32
 							if seminaristSelect.SelectedIndex() > 0 {
 								selectedSeminaristID = userIDs[seminaristSelect.SelectedIndex()-1]
@@ -361,7 +345,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 								}
 							}
 
-							// Открываем диалог для выбора дисциплин
 							var selectedIDs []int32
 							dialog.ShowForm(
 								"Прикрепить дисциплины",
@@ -427,7 +410,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 					w,
 				)
 			} else {
-				// Если семинарист и ассистент уже есть, сразу прикрепляем дисциплины
 				var selectedIDs []int32
 				dialog.ShowForm(
 					"Прикрепить дисциплины",
@@ -524,7 +506,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 							log.Printf("Удаление группы не удалось: %s", resp.Message)
 						} else {
 							log.Printf("Группа %s с ID %d успешно удалена", group.Name, group.Id)
-							// Удаляем строку из интерфейса
 							for i, g := range groups {
 								if g.NameEntry.Text == group.Name {
 									groupInfoListContainer.Remove(g.Container)
@@ -583,12 +564,10 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		addCriterionEntry(group)
 	}
 
-	// Метка для списка критериев
 	listLabel := widget.NewLabelWithStyle("Список групп", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
-	// скролл для списка критериев
 	scrollableCriteria := container.NewVScroll(groupInfoListContainer)
-	scrollableCriteria.SetMinSize(fyne.NewSize(0, 400)) // Устанавливаем минимальную высоту для прокрутки
+	scrollableCriteria.SetMinSize(fyne.NewSize(0, 400))
 
 	addButton := widget.NewButton("Добавить", func() {
 		nameEntry := widget.NewEntry()
@@ -628,7 +607,6 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 						return
 					}
 
-					// Обновляем список групп
 					newResp, err := client.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
 					if err != nil {
 						log.Printf("Failed to refresh groups: %v", err)
@@ -657,34 +635,85 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 	createDisciplineButton := widget.NewButton("Создать дисциплину", func() {
 		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Не удалось подключиться к superaccservice: %v", err)
+			log.Printf("Failed to connect to superaccservice: %v", err)
+			dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
 			return
 		}
+		defer conn.Close()
+		log.Printf("Connection established, creating client")
 		client := superaccpb.NewSuperAccServiceClient(conn)
 
 		nameEntry := widget.NewEntry()
 		nameEntry.SetPlaceHolder("Название дисциплины")
 
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		respUsers, err := client.ListAllUsers(ctx, &superaccpb.ListAllUsersRequest{})
+		if err != nil {
+			log.Printf("Failed to list users: %v", err)
+			dialog.ShowInformation("Ошибка", "Не удалось загрузить список пользователей", w)
+			return
+		}
+		var lecturerOptions []string
+		var lecturerIDs []int32
+		for _, u := range respUsers.Users {
+			if u.Status == "lecturer" {
+				lecturerOptions = append(lecturerOptions, fmt.Sprintf("%s (%s)", u.Fio, u.Email))
+				lecturerIDs = append(lecturerIDs, u.Id)
+			}
+		}
+		lecturerSelect := widget.NewSelect(append([]string{"None"}, lecturerOptions...), nil)
+		lecturerSelect.SetSelectedIndex(0)
+
 		dialog.ShowForm(
 			"Создать дисциплину",
 			"OK",
 			"Отмена",
-			[]*widget.FormItem{widget.NewFormItem("Название", nameEntry)},
+			[]*widget.FormItem{
+				widget.NewFormItem("Название", nameEntry),
+				widget.NewFormItem("Лектор", lecturerSelect),
+			},
 			func(confirmed bool) {
 				if confirmed && nameEntry.Text != "" {
-					resp, err := client.CreateDiscipline(context.Background(), &superaccpb.ManageDisciplineEntityRequest{
-						Action: "create",
-						Name:   nameEntry.Text,
+					var lectorID int32
+					if lecturerSelect.SelectedIndex() > 0 {
+						lectorID = lecturerIDs[lecturerSelect.SelectedIndex()-1]
+					} else {
+						dialog.ShowInformation("Ошибка", "Не выбран лектор", w)
+						return
+					}
+
+					conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(15*time.Second))
+					if err != nil {
+						log.Printf("Failed to connect to superaccservice: %v", err)
+						dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
+						return
+					}
+					defer conn.Close()
+					log.Printf("Connection established, creating client")
+					client := superaccpb.NewSuperAccServiceClient(conn)
+
+					ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+					defer cancel()
+					log.Printf("Sending CreateDiscipline request for %s with lectorID %d", nameEntry.Text, lectorID)
+					resp, err := client.CreateDiscipline(ctx, &superaccpb.ManageDisciplineEntityRequest{
+						Action:   "create",
+						Name:     nameEntry.Text,
+						LectorId: lectorID,
 					})
 					if err != nil {
 						log.Printf("Не удалось создать дисциплину: %v", err)
-					} else if !resp.Success {
-						log.Printf("Ошибка создания дисциплины: %s", resp.Message)
-					} else {
-						log.Printf("Дисциплина успешно создана с ID %d", resp.DisciplineId)
+						dialog.ShowInformation("Ошибка", "Не удалось создать дисциплину", w)
+						return
 					}
+					if !resp.Success {
+						log.Printf("Ошибка создания дисциплины: %s", resp.Message)
+						dialog.ShowInformation("Ошибка", resp.Message, w)
+						return
+					}
+					log.Printf("Дисциплина успешно создана с ID %d", resp.DisciplineId)
+					dialog.ShowInformation("Успех", fmt.Sprintf("Дисциплина '%s' создана с ID %d", nameEntry.Text, resp.DisciplineId), w)
 				}
-				conn.Close() // Закрываем соединение после RPC
 			},
 			w,
 		)
@@ -697,15 +726,20 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		// Получаем список дисциплин внутри диалога
 		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Не удалось подключиться к superaccservice: %v", err)
+			log.Printf("Failed to connect to superaccservice: %v", err)
+			dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
 			return
 		}
 		defer conn.Close()
-		client = superaccpb.NewSuperAccServiceClient(conn)
+		log.Printf("Connection established, creating client")
+		client := superaccpb.NewSuperAccServiceClient(conn)
 
-		respDisciplines, err := client.ListDisciplines(context.Background(), &superaccpb.ListDisciplinesRequest{})
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		respDisciplines, err := client.ListDisciplines(ctx, &superaccpb.ListDisciplinesRequest{})
 		if err != nil {
-			log.Printf("Failed to list disciplines: %v", err)
+			log.Printf("Не удалось получить список дисциплин: %v", err)
+			dialog.ShowInformation("Ошибка", "Не удалось загрузить список дисциплин", w)
 			return
 		}
 
@@ -716,7 +750,12 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			disciplineIDs = append(disciplineIDs, d.Id)
 		}
 
-		// Используем CheckGroup для множественного выбора
+		if len(disciplineOptions) == 0 {
+			log.Printf("Нет дисциплин для удаления")
+			dialog.ShowInformation("Информация", "Нет дисциплин для удаления", w)
+			return
+		}
+
 		var checkItems []fyne.CanvasObject
 		var checks []*widget.Check
 		for _, option := range disciplineOptions {
@@ -730,9 +769,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 			"Удалить дисциплины",
 			"OK",
 			"Отмена",
-			[]*widget.FormItem{
-				widget.NewFormItem("Дисциплины", checkGroup),
-			},
+			[]*widget.FormItem{widget.NewFormItem("Дисциплины", checkGroup)},
 			func(confirmed bool) {
 				if confirmed {
 					var selectedIDs []int32
@@ -745,25 +782,32 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 						// Создаем новое соединение для удаления
 						conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 						if err != nil {
-							log.Printf("Не удалось подключиться к superaccservice: %v", err)
+							log.Printf("Failed to connect to superaccservice: %v", err)
+							dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
 							return
 						}
 						defer conn.Close()
-						client = superaccpb.NewSuperAccServiceClient(conn)
-
-						resp, err := client.DeleteDiscipline(context.Background(), &superaccpb.DeleteDisciplineRequest{
+						log.Printf("Connection established, creating client")
+						client := superaccpb.NewSuperAccServiceClient(conn)
+						
+						ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+						defer cancel()
+						log.Printf("Sending DeleteDiscipline request for IDs %v", selectedIDs)
+						resp, err := client.DeleteDiscipline(ctx, &superaccpb.DeleteDisciplineRequest{
 							DisciplineIds: selectedIDs,
 						})
 						if err != nil {
-							log.Printf("Failed to delete disciplines: %v", err)
+							log.Printf("Не удалось удалить дисциплины: %v", err)
+							dialog.ShowInformation("Ошибка", "Не удалось удалить дисциплины", w)
 							return
 						}
 						if !resp.Success {
-							log.Printf("Delete disciplines failed: %s", resp.Message)
-						} else {
-							log.Printf("Disciplines deleted successfully: %v", selectedIDs)
+							log.Printf("Удаление дисциплин не удалось: %s", resp.Message)
+							dialog.ShowInformation("Ошибка", resp.Message, w)
+							return
 						}
-						log.Printf("Выбрано дисциплин для удаления: %d", len(selectedIDs))
+						log.Printf("Дисциплины удалены успешно: %v", selectedIDs)
+						dialog.ShowInformation("Успех", fmt.Sprintf("Дисциплины с ID %v удалены успешно", selectedIDs), w)
 					}
 				}
 			},
@@ -781,31 +825,29 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 
 	bottomButtonsWithPadding := container.NewPadded(bottomButtons)
 
-	// Фон центральной области (белый прямоугольник)
 	contentBackground := canvas.NewRectangle(color.White)
 
-	// Панель критериев, содержащая заголовки, метку и прокручиваемую область
 	criteriaPanel := container.NewVBox(
 		container.NewPadded(columnHeaders),
 		listLabel,
 		scrollableCriteria,
 	)
 
-	// Центральный контент с фоном и отступами
 	centralContent := container.NewStack(
 		contentBackground,
 		container.NewPadded(criteriaPanel),
 	)
 
 	return container.NewStack(
-		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}), // Фон окна
+		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}),
 		container.NewBorder(
 			container.NewVBox(headerContent, backButtonContainer),
 			bottomButtonsWithPadding,
 			nil,
 			nil,
 			centralContent,
-		))
+		),
+	)
 }
 
 //****************************************
@@ -847,7 +889,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 	headerFIOEmail := widget.NewLabelWithStyle("ФИО, почта", fyne.TextAlignCenter, fyne.TextStyle{Bold: false})
 	headerStatus := widget.NewLabelWithStyle("Статус", fyne.TextAlignCenter, fyne.TextStyle{Bold: false})
 
-	headerCellBackground := canvas.NewRectangle(color.NRGBA{R: 255, G: 255, B: 255, A: 255}) // White background
+	headerCellBackground := canvas.NewRectangle(color.NRGBA{R: 255, G: 255, B: 255, A: 255})
 	verticalHeaderDivider := canvas.NewRectangle(color.NRGBA{R: 180, G: 180, B: 180, A: 255})
 	verticalHeaderDivider.SetMinSize(fyne.NewSize(1, 0))
 
@@ -905,7 +947,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 				return
 			}
 
-			// Отправляем запрос на обновление роли
 			updateResp, err := client.UpdateUserRole(context.Background(), &superaccpb.UpdateRoleRequest{
 				UserId: userID,
 				Role:   selected,
@@ -938,7 +979,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 						client := superaccpb.NewSuperAccServiceClient(conn)
 						email := extractEmail(user.FIOEmail)
 
-						// Находим userID по email
 						respUsers, err := client.ListAllUsers(context.Background(), &superaccpb.ListAllUsersRequest{})
 						if err != nil {
 							log.Printf("Failed to list users: %v", err)
@@ -956,7 +996,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 							return
 						}
 
-						// Находим groupID по имени группы
 						respGroups, err := client.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
 						if err != nil {
 							log.Printf("Failed to list groups: %v", err)
@@ -974,12 +1013,11 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 							return
 						}
 
-						// Открепляем пользователя от группы
 						resp, err := client.ManageGroup(context.Background(), &superaccpb.ManageGroupRequest{
 							GroupId: groupID,
 							Action:  "remove",
 							UserId:  userID,
-							Role:    user.Status, // Сохраняем текущую роль, если нужно
+							Role:    user.Status,
 						})
 						if err != nil {
 							log.Printf("Failed to remove user from group: %v", err)
@@ -989,7 +1027,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 							log.Printf("Remove user from group failed: %s", resp.Message)
 						} else {
 							log.Printf("User %s removed from group %s", user.FIOEmail, groupName)
-							// Обновляем список пользователей
 							respUsersByGroup, err := client.ListUsersByGroup(context.Background(), &superaccpb.ListUsersByGroupRequest{GroupName: groupName})
 							if err == nil {
 								usersData = make([]UserEntry, len(respUsersByGroup.Users))
@@ -1068,7 +1105,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 	updateUsersListUI()
 
 	scrollableUsersList := container.NewVScroll(usersListContainer)
-	scrollableUsersList.SetMinSize(fyne.NewSize(215, 450)) // Set minimum height for scrolling
+	scrollableUsersList.SetMinSize(fyne.NewSize(215, 450))
 
 	addButton := widget.NewButton("Добавить", func() {
 		searchEntry := widget.NewEntry()
@@ -1095,14 +1132,13 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 
 			for _, user := range allUsersResp.Users {
 				if strings.Contains(strings.ToLower(user.Fio), query) || strings.Contains(strings.ToLower(user.Email), query) {
-					if user.Group == groupName || user.Group == "" { // Добавляем только пользователей с подходящей группой или без группы
+					if user.Group == groupName || user.Group == "" {
 						filteredUsers = append(filteredUsers, UserEntry{FIOEmail: user.Fio + ", " + user.Email, Status: user.Status})
 					}
 				}
 			}
 		}
 
-		// List to display search results
 		userList := widget.NewList(
 			func() int { return len(filteredUsers) },
 			func() fyne.CanvasObject {
@@ -1125,7 +1161,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 			client := superaccpb.NewSuperAccServiceClient(conn)
 			email := extractEmail(selectedUser.FIOEmail)
 
-			// Находим userID по email
 			respUsers, err := client.ListAllUsers(context.Background(), &superaccpb.ListAllUsersRequest{})
 			if err != nil {
 				log.Printf("Failed to list users: %v", err)
@@ -1143,7 +1178,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 				return
 			}
 
-			// Корректировка GroupId
 			var groupID int32
 			respGroups, err := client.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
 			if err != nil {
@@ -1161,7 +1195,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 				return
 			}
 
-			// Прикрепляем пользователя к группе
 			resp, err := client.ManageGroup(context.Background(), &superaccpb.ManageGroupRequest{
 				GroupId: groupID,
 				Action:  "add",
@@ -1179,7 +1212,6 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 				return
 			}
 
-			// Обновляем список пользователей
 			respUsersByGroup, err := client.ListUsersByGroup(context.Background(), &superaccpb.ListUsersByGroupRequest{GroupName: groupName})
 			if err != nil {
 				log.Printf("Failed to refresh users: %v", err)
@@ -1193,12 +1225,11 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 			log.Printf("Пользователь %s прикреплён к группе %s", selectedUser.FIOEmail, groupName)
 		}
 
-		// Update filtered users on text change
 		searchEntry.OnChanged = func(s string) {
 			updateFilteredUsers()
 			userList.Refresh()
 		}
-		updateFilteredUsers() // Initial update
+		updateFilteredUsers()
 
 		dialogContent := container.NewVBox(
 			searchEntry,
@@ -1221,7 +1252,7 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 	)
 
 	return container.NewStack(
-		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}), // Window background
+		canvas.NewRectangle(color.NRGBA{R: 20, G: 40, B: 80, A: 255}),
 		container.NewBorder(
 			headerContent,
 			nil,
@@ -1238,10 +1269,10 @@ func СreateGroupUsersPage(state *AppState, groupName string) fyne.CanvasObject 
 
 type User struct {
 	ID     int
-	FIO    string // Имя и Фамилия
-	Email  string // Электронная почта
-	Group  string // Группа, в которой состоит пользователь
-	Status string // Статус пользователя (асс, студ, лек, семи)
+	FIO    string
+	Email  string
+	Group  string
+	Status string
 }
 
 func СreateUsersListPage(state *AppState) fyne.CanvasObject {
@@ -1270,7 +1301,7 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 	headerTitleText := canvas.NewText("Список пользователей", headerTextColor)
 	headerTitleText.TextStyle.Bold = true
 	headerTitleText.TextSize = 24
-	headerTitleText.Alignment = fyne.TextAlignCenter // Заголовок по центру
+	headerTitleText.Alignment = fyne.TextAlignCenter
 
 	header := container.New(layout.NewBorderLayout(backButtonContainer, nil, logoContainer, nil),
 		backButtonContainer,
@@ -1282,32 +1313,28 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 
 	sidePanelBackground := canvas.NewRectangle(darkBlue)
 	sidePanel := container.NewVBox()
-	//sidePanel.Size()
 	sidePanelWithBackground := container.NewStack(sidePanelBackground, sidePanel)
 
-	// --- Центральный контент ---
-	tableRowsContainer := container.NewVBox() // Контейнер для строк таблицы
+	tableRowsContainer := container.NewVBox()
 	scrollableTable := container.NewVScroll(tableRowsContainer)
-	scrollableTable.SetMinSize(fyne.NewSize(0, 450)) // Минимальная высота для прокрутки
+	scrollableTable.SetMinSize(fyne.NewSize(0, 450))
 
-	// Строка поиска
 	searchEntry := widget.NewEntry()
-	searchEntry.PlaceHolder = "поиск                                     " // Как на макете
+	searchEntry.PlaceHolder = "поиск                                     "
 	searchEntry.OnChanged = func(s string) {
-		updateUsersTableUI(s) // Обновляем список при изменении поиска
+		updateUsersTableUI(s)
 	}
 	searchBox := container.New(layout.NewVBoxLayout(),
-		widget.NewLabel("поиск"), // Метка "поиск"
+		widget.NewLabel("поиск"),
 		searchEntry,
-		layout.NewSpacer(), // Растягивает поле поиска
+		layout.NewSpacer(),
 	)
 
-	// Заголовки таблицы: "ФИО, почта", "группы", "Статус"
 	headerFIOEmail := widget.NewLabelWithStyle("ФИО почта", fyne.TextAlignCenter, fyne.TextStyle{Bold: false})
 	headerGroup := widget.NewLabelWithStyle("группа", fyne.TextAlignCenter, fyne.TextStyle{Bold: false})
 	headerStatus := widget.NewLabelWithStyle("Статус", fyne.TextAlignCenter, fyne.TextStyle{Bold: false})
 
-	headerCellBackground := canvas.NewRectangle(color.White) // Темно-синий фон заголовков
+	headerCellBackground := canvas.NewRectangle(color.White)
 
 	verticalHeaderDivider := canvas.NewRectangle(mediumGrayDivider)
 	verticalHeaderDivider.SetMinSize(fyne.NewSize(1, 0))
@@ -1321,7 +1348,6 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 	)
 	columnHeadersContainer := container.New(layout.NewHBoxLayout(), columnHeaders, layout.NewSpacer())
 
-	// --- Функция для создания одной строки таблицы пользователя ---
 	createUserTableRow := func(user *User, idx int) *fyne.Container {
 		fioEmailCombinedLabel := widget.NewLabel(fmt.Sprintf("%s, %s", user.FIO, user.Email))
 		fioEmailCombinedLabel.Wrapping = fyne.TextWrapWord
@@ -1331,7 +1357,7 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 
 		statusOptions := []string{"student", "assistant", "seminarist", "lecturer", "superaccount"}
 		statusSelect := widget.NewSelect(statusOptions, func(selectedStatus string) {
-			user.Status = selectedStatus // Обновляем статус пользователя в данных
+			user.Status = selectedStatus
 			fmt.Printf("Статус пользователя %s (%s) изменен на: %s\n", user.FIO, user.Email, selectedStatus)
 
 			conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
@@ -1356,7 +1382,7 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 				log.Printf("Role updated successfully for user %s", user.FIO)
 			}
 		})
-		statusSelect.SetSelected(user.Status) // Устанавливаем текущий статус
+		statusSelect.SetSelected(user.Status)
 
 		deleteButton := widget.NewButton("Удалить", func() {
 			dialog.ShowConfirm(
@@ -1383,7 +1409,6 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 							log.Printf("Remove user failed: %s", resp.Message)
 						} else {
 							log.Printf("User %s (%s) successfully removed", user.FIO, user.Email)
-							// Обновляем список пользователей
 							updateUsersTableUI(searchEntry.Text)
 						}
 					}
@@ -1392,7 +1417,6 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 			)
 		})
 
-		// Отступы и растягивание для ячеек
 		cellFIOEmail := container.NewPadded(container.NewMax(fioEmailCombinedLabel))
 		cellGroup := container.NewPadded(container.NewMax(groupLabel))
 		cellStatus := container.NewPadded(container.NewMax(statusSelect))
@@ -1412,10 +1436,8 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 		return rowContainer
 	}
 
-	// --- updateUsersTableUI: Функция для обновления всего UI таблицы пользователей ---
-	// searchText: текст из поля поиска для фильтрации
 	updateUsersTableUI = func(searchText string) {
-		tableRowsContainer.RemoveAll() // Очищаем все текущие строки
+		tableRowsContainer.RemoveAll()
 
 		conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
 		if err != nil {
@@ -1464,30 +1486,29 @@ func СreateUsersListPage(state *AppState) fyne.CanvasObject {
 		} else {
 			for i, user := range currentDisplayedUsers {
 				tableRowsContainer.Add(createUserTableRow(user, i))
-				tableRowsContainer.Add(canvas.NewRectangle(lightGrayDivider)) // Горизонтальный разделитель
+				tableRowsContainer.Add(canvas.NewRectangle(lightGrayDivider))
 			}
 		}
-		tableRowsContainer.Refresh()  // Важно обновить контейнер после всех изменений
-		scrollableTable.ScrollToTop() // Прокрутка к началу после обновления
+		tableRowsContainer.Refresh()
+		scrollableTable.ScrollToTop()
 	}
 
 	updateUsersTableUI("")
 
-	// Центральный контент страницы
 	centralContentPanel := container.NewVBox(
-		container.NewPadded(searchBox), // Поле поиска
-		columnHeadersContainer,         // Заголовки таблицы
-		scrollableTable,                // Прокручиваемая таблица
+		container.NewPadded(searchBox),
+		columnHeadersContainer,
+		scrollableTable,
 	)
 
 	contentBackground := canvas.NewRectangle(color.White)
 	centralContentWithBackground := container.NewStack(contentBackground, container.NewPadded(centralContentPanel))
 
 	return container.NewBorder(
-		headerWithBackground,         // Верхняя панель
-		nil,                          // Нижняя панель (пусто на этом макете)
-		sidePanelWithBackground,      // Левая боковая панель
-		nil,                          // Правая панель (пусто)
-		centralContentWithBackground, // Центральный контент
+		headerWithBackground,
+		nil,
+		sidePanelWithBackground,
+		nil,
+		centralContentWithBackground,
 	)
 }

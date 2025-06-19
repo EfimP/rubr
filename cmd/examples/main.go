@@ -1,17 +1,12 @@
 package main
 
-import (
-	"rubr/cmd/frontend/lector"
-	"rubr/cmd/frontend/seminarist"
-)
-
 func main() {
 	//everybody.GreetingPage()
 	//everybody.RegistrationPage()
 	//everybody.AuthorizationPage()
 
 	//lector.CreateWorkPage()
-	lector.Testpage()
+	//lector.Testpage()
 	//lector.LectorWorksPage()
 	//lector.ShowBlockingCriteriaPage()
 
@@ -20,5 +15,9 @@ func main() {
 	//superacc.ShowUsersListPage()
 	//superacc.ShowGroupUsersPage("")
 	//superacc.GroupListPage()
-	seminarist.AssignmentScreen()
+
+	//student.StudentGradesScreen()
+	//student.AllWorksScreen()
+	//student.AssignmentScreen()
+	//seminarist.AssignmentScreen()
 }

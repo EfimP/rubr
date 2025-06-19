@@ -493,6 +493,79 @@ func (s *server) UpdateTaskGroupAndDiscipline(ctx context.Context, req *pb.Updat
 	return &pb.UpdateTaskGroupAndDisciplineResponse{Success: true}, nil
 }
 
+func (s *server) ListTasksForStudent(ctx context.Context, req *pb.ListTasksForStudentRequest) (*pb.ListTasksForStudentResponse, error) {
+	// Проверка контекста
+	if ctx.Err() != nil {
+		return nil, status.Errorf(codes.Canceled, "Request canceled: %v", ctx.Err())
+	}
+
+	query := `
+        SELECT t.id, t.title, t.deadline, COALESCE(w.status, 'pending') AS status
+        FROM tasks t
+        JOIN student_groups sg ON t.group_id = sg.id
+        JOIN users_in_groups ug ON sg.id = ug.group_id
+        LEFT JOIN student_works w ON t.id = w.task_id AND w.student_id = $1
+        WHERE ug.user_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, req.StudentId)
+	if err != nil {
+		log.Printf("Ошибка запроса работ для student_id %d: %v", req.StudentId, err)
+		return nil, status.Errorf(codes.Internal, "Ошибка выполнения запроса: %v", err)
+	}
+	defer rows.Close()
+
+	var tasks []*pb.Tasks
+	for rows.Next() {
+		var task pb.Tasks
+		var deadline time.Time
+		if err := rows.Scan(&task.Id, &task.Title, &deadline, &task.Status); err != nil {
+			log.Printf("Ошибка сканирования строки для student_id %d: %v", req.StudentId, err)
+			return nil, status.Errorf(codes.Internal, "Ошибка обработки данных: %v", err)
+		}
+		// Преобразование deadline в строку (RFC3339)
+		task.Deadline = deadline.Format(time.RFC3339)
+		tasks = append(tasks, &task)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации строк для student_id %d: %v", req.StudentId, err)
+		return nil, status.Errorf(codes.Internal, "Ошибка итерации данных: %v", err)
+	}
+
+	if len(tasks) == 0 {
+		log.Printf("Нет работ для student_id %d", req.StudentId)
+	}
+
+	return &pb.ListTasksForStudentResponse{Tasks: tasks}, nil
+}
+
+func (s *server) ListWorksForStudent(ctx context.Context, req *pb.ListWorksForStudentRequest) (*pb.ListWorksForStudentResponse, error) {
+	query := `
+    SELECT w.id, t.title, t.deadline, w.status
+    FROM student_works w
+    JOIN tasks t ON w.task_id = t.id
+    WHERE w.student_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, req.StudentId)
+	if err != nil {
+		log.Printf("Ошибка запроса работ для student_id %d: %v", req.StudentId, err)
+		return &pb.ListWorksForStudentResponse{Error: err.Error()}, nil
+	}
+	defer rows.Close()
+
+	var works []*pb.Work
+	for rows.Next() {
+		var work pb.Work
+		if err := rows.Scan(&work.Id, &work.Title, &work.Deadline, &work.Status); err != nil {
+			log.Printf("Ошибка сканирования строки для student_id %d: %v", req.StudentId, err)
+			return &pb.ListWorksForStudentResponse{Error: err.Error()}, nil
+		}
+		works = append(works, &work)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации строк для student_id %d: %v", req.StudentId, err)
+		return &pb.ListWorksForStudentResponse{Error: err.Error()}, nil
+	}
+	return &pb.ListWorksForStudentResponse{Works: works}, nil
+}
+
 func main() {
 
 	dbHost := os.Getenv("DB_HOST")

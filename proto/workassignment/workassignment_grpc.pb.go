@@ -19,8 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkAssignmentService_GetWorksForAssistant_FullMethodName = "/workassignment.WorkAssignmentService/GetWorksForAssistant"
-	WorkAssignmentService_GetWorkDetails_FullMethodName       = "/workassignment.WorkAssignmentService/GetWorkDetails"
+	WorkAssignmentService_GetWorksForAssistant_FullMethodName   = "/workassignment.WorkAssignmentService/GetWorksForAssistant"
+	WorkAssignmentService_GetWorkDetails_FullMethodName         = "/workassignment.WorkAssignmentService/GetWorkDetails"
+	WorkAssignmentService_UploadAssignmentFile_FullMethodName   = "/workassignment.WorkAssignmentService/UploadAssignmentFile"
+	WorkAssignmentService_SubmitWork_FullMethodName             = "/workassignment.WorkAssignmentService/SubmitWork"
+	WorkAssignmentService_GetTaskDetails_FullMethodName         = "/workassignment.WorkAssignmentService/GetTaskDetails"
+	WorkAssignmentService_DownloadAssignmentFile_FullMethodName = "/workassignment.WorkAssignmentService/DownloadAssignmentFile"
+	WorkAssignmentService_CreateWork_FullMethodName             = "/workassignment.WorkAssignmentService/CreateWork"
+	WorkAssignmentService_CheckExistingWork_FullMethodName      = "/workassignment.WorkAssignmentService/CheckExistingWork"
 )
 
 // WorkAssignmentServiceClient is the client API for WorkAssignmentService service.
@@ -29,6 +35,12 @@ const (
 type WorkAssignmentServiceClient interface {
 	GetWorksForAssistant(ctx context.Context, in *GetWorksForAssistantRequest, opts ...grpc.CallOption) (*GetWorksForAssistantResponse, error)
 	GetWorkDetails(ctx context.Context, in *GetWorkDetailsRequest, opts ...grpc.CallOption) (*GetWorkDetailsResponse, error)
+	UploadAssignmentFile(ctx context.Context, in *UploadAssignmentFileRequest, opts ...grpc.CallOption) (*UploadAssignmentFileResponse, error)
+	SubmitWork(ctx context.Context, in *SubmitWorkRequest, opts ...grpc.CallOption) (*SubmitWorkResponse, error)
+	GetTaskDetails(ctx context.Context, in *GetTaskDetailsRequest, opts ...grpc.CallOption) (*GetTaskDetailsResponse, error)
+	DownloadAssignmentFile(ctx context.Context, in *DownloadAssignmentFileRequest, opts ...grpc.CallOption) (*DownloadAssignmentFileResponse, error)
+	CreateWork(ctx context.Context, in *CreateWorkRequest, opts ...grpc.CallOption) (*CreateWorkResponse, error)
+	CheckExistingWork(ctx context.Context, in *CheckExistingWorkRequest, opts ...grpc.CallOption) (*CheckExistingWorkResponse, error)
 }
 
 type workAssignmentServiceClient struct {
@@ -59,12 +71,78 @@ func (c *workAssignmentServiceClient) GetWorkDetails(ctx context.Context, in *Ge
 	return out, nil
 }
 
+func (c *workAssignmentServiceClient) UploadAssignmentFile(ctx context.Context, in *UploadAssignmentFileRequest, opts ...grpc.CallOption) (*UploadAssignmentFileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadAssignmentFileResponse)
+	err := c.cc.Invoke(ctx, WorkAssignmentService_UploadAssignmentFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workAssignmentServiceClient) SubmitWork(ctx context.Context, in *SubmitWorkRequest, opts ...grpc.CallOption) (*SubmitWorkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubmitWorkResponse)
+	err := c.cc.Invoke(ctx, WorkAssignmentService_SubmitWork_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workAssignmentServiceClient) GetTaskDetails(ctx context.Context, in *GetTaskDetailsRequest, opts ...grpc.CallOption) (*GetTaskDetailsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTaskDetailsResponse)
+	err := c.cc.Invoke(ctx, WorkAssignmentService_GetTaskDetails_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workAssignmentServiceClient) DownloadAssignmentFile(ctx context.Context, in *DownloadAssignmentFileRequest, opts ...grpc.CallOption) (*DownloadAssignmentFileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DownloadAssignmentFileResponse)
+	err := c.cc.Invoke(ctx, WorkAssignmentService_DownloadAssignmentFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workAssignmentServiceClient) CreateWork(ctx context.Context, in *CreateWorkRequest, opts ...grpc.CallOption) (*CreateWorkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateWorkResponse)
+	err := c.cc.Invoke(ctx, WorkAssignmentService_CreateWork_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workAssignmentServiceClient) CheckExistingWork(ctx context.Context, in *CheckExistingWorkRequest, opts ...grpc.CallOption) (*CheckExistingWorkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckExistingWorkResponse)
+	err := c.cc.Invoke(ctx, WorkAssignmentService_CheckExistingWork_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkAssignmentServiceServer is the server API for WorkAssignmentService service.
 // All implementations must embed UnimplementedWorkAssignmentServiceServer
 // for forward compatibility.
 type WorkAssignmentServiceServer interface {
 	GetWorksForAssistant(context.Context, *GetWorksForAssistantRequest) (*GetWorksForAssistantResponse, error)
 	GetWorkDetails(context.Context, *GetWorkDetailsRequest) (*GetWorkDetailsResponse, error)
+	UploadAssignmentFile(context.Context, *UploadAssignmentFileRequest) (*UploadAssignmentFileResponse, error)
+	SubmitWork(context.Context, *SubmitWorkRequest) (*SubmitWorkResponse, error)
+	GetTaskDetails(context.Context, *GetTaskDetailsRequest) (*GetTaskDetailsResponse, error)
+	DownloadAssignmentFile(context.Context, *DownloadAssignmentFileRequest) (*DownloadAssignmentFileResponse, error)
+	CreateWork(context.Context, *CreateWorkRequest) (*CreateWorkResponse, error)
+	CheckExistingWork(context.Context, *CheckExistingWorkRequest) (*CheckExistingWorkResponse, error)
 	mustEmbedUnimplementedWorkAssignmentServiceServer()
 }
 
@@ -80,6 +158,24 @@ func (UnimplementedWorkAssignmentServiceServer) GetWorksForAssistant(context.Con
 }
 func (UnimplementedWorkAssignmentServiceServer) GetWorkDetails(context.Context, *GetWorkDetailsRequest) (*GetWorkDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorkDetails not implemented")
+}
+func (UnimplementedWorkAssignmentServiceServer) UploadAssignmentFile(context.Context, *UploadAssignmentFileRequest) (*UploadAssignmentFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadAssignmentFile not implemented")
+}
+func (UnimplementedWorkAssignmentServiceServer) SubmitWork(context.Context, *SubmitWorkRequest) (*SubmitWorkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitWork not implemented")
+}
+func (UnimplementedWorkAssignmentServiceServer) GetTaskDetails(context.Context, *GetTaskDetailsRequest) (*GetTaskDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTaskDetails not implemented")
+}
+func (UnimplementedWorkAssignmentServiceServer) DownloadAssignmentFile(context.Context, *DownloadAssignmentFileRequest) (*DownloadAssignmentFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadAssignmentFile not implemented")
+}
+func (UnimplementedWorkAssignmentServiceServer) CreateWork(context.Context, *CreateWorkRequest) (*CreateWorkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWork not implemented")
+}
+func (UnimplementedWorkAssignmentServiceServer) CheckExistingWork(context.Context, *CheckExistingWorkRequest) (*CheckExistingWorkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckExistingWork not implemented")
 }
 func (UnimplementedWorkAssignmentServiceServer) mustEmbedUnimplementedWorkAssignmentServiceServer() {}
 func (UnimplementedWorkAssignmentServiceServer) testEmbeddedByValue()                               {}
@@ -138,6 +234,114 @@ func _WorkAssignmentService_GetWorkDetails_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkAssignmentService_UploadAssignmentFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadAssignmentFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkAssignmentServiceServer).UploadAssignmentFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkAssignmentService_UploadAssignmentFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkAssignmentServiceServer).UploadAssignmentFile(ctx, req.(*UploadAssignmentFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkAssignmentService_SubmitWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubmitWorkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkAssignmentServiceServer).SubmitWork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkAssignmentService_SubmitWork_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkAssignmentServiceServer).SubmitWork(ctx, req.(*SubmitWorkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkAssignmentService_GetTaskDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTaskDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkAssignmentServiceServer).GetTaskDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkAssignmentService_GetTaskDetails_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkAssignmentServiceServer).GetTaskDetails(ctx, req.(*GetTaskDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkAssignmentService_DownloadAssignmentFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadAssignmentFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkAssignmentServiceServer).DownloadAssignmentFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkAssignmentService_DownloadAssignmentFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkAssignmentServiceServer).DownloadAssignmentFile(ctx, req.(*DownloadAssignmentFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkAssignmentService_CreateWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateWorkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkAssignmentServiceServer).CreateWork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkAssignmentService_CreateWork_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkAssignmentServiceServer).CreateWork(ctx, req.(*CreateWorkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkAssignmentService_CheckExistingWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckExistingWorkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkAssignmentServiceServer).CheckExistingWork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkAssignmentService_CheckExistingWork_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkAssignmentServiceServer).CheckExistingWork(ctx, req.(*CheckExistingWorkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkAssignmentService_ServiceDesc is the grpc.ServiceDesc for WorkAssignmentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +356,30 @@ var WorkAssignmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetWorkDetails",
 			Handler:    _WorkAssignmentService_GetWorkDetails_Handler,
+		},
+		{
+			MethodName: "UploadAssignmentFile",
+			Handler:    _WorkAssignmentService_UploadAssignmentFile_Handler,
+		},
+		{
+			MethodName: "SubmitWork",
+			Handler:    _WorkAssignmentService_SubmitWork_Handler,
+		},
+		{
+			MethodName: "GetTaskDetails",
+			Handler:    _WorkAssignmentService_GetTaskDetails_Handler,
+		},
+		{
+			MethodName: "DownloadAssignmentFile",
+			Handler:    _WorkAssignmentService_DownloadAssignmentFile_Handler,
+		},
+		{
+			MethodName: "CreateWork",
+			Handler:    _WorkAssignmentService_CreateWork_Handler,
+		},
+		{
+			MethodName: "CheckExistingWork",
+			Handler:    _WorkAssignmentService_CheckExistingWork_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

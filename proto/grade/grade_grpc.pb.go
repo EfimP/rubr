@@ -23,6 +23,7 @@ const (
 	GradingService_SetMainCriteriaMark_FullMethodName     = "/grade.GradingService/SetMainCriteriaMark"
 	GradingService_GetCriteriaMarks_FullMethodName        = "/grade.GradingService/GetCriteriaMarks"
 	GradingService_UpdateWorkStatus_FullMethodName        = "/grade.GradingService/UpdateWorkStatus"
+	GradingService_ListSubjects_FullMethodName            = "/grade.GradingService/ListSubjects"
 )
 
 // GradingServiceClient is the client API for GradingService service.
@@ -33,6 +34,7 @@ type GradingServiceClient interface {
 	SetMainCriteriaMark(ctx context.Context, in *SetMainCriteriaMarkRequest, opts ...grpc.CallOption) (*SetMainCriteriaMarkResponse, error)
 	GetCriteriaMarks(ctx context.Context, in *GetCriteriaMarksRequest, opts ...grpc.CallOption) (*GetCriteriaMarksResponse, error)
 	UpdateWorkStatus(ctx context.Context, in *UpdateWorkStatusRequest, opts ...grpc.CallOption) (*UpdateWorkStatusResponse, error)
+	ListSubjects(ctx context.Context, in *ListSubjectsRequest, opts ...grpc.CallOption) (*ListSubjectsResponse, error)
 }
 
 type gradingServiceClient struct {
@@ -83,6 +85,16 @@ func (c *gradingServiceClient) UpdateWorkStatus(ctx context.Context, in *UpdateW
 	return out, nil
 }
 
+func (c *gradingServiceClient) ListSubjects(ctx context.Context, in *ListSubjectsRequest, opts ...grpc.CallOption) (*ListSubjectsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSubjectsResponse)
+	err := c.cc.Invoke(ctx, GradingService_ListSubjects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GradingServiceServer is the server API for GradingService service.
 // All implementations must embed UnimplementedGradingServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type GradingServiceServer interface {
 	SetMainCriteriaMark(context.Context, *SetMainCriteriaMarkRequest) (*SetMainCriteriaMarkResponse, error)
 	GetCriteriaMarks(context.Context, *GetCriteriaMarksRequest) (*GetCriteriaMarksResponse, error)
 	UpdateWorkStatus(context.Context, *UpdateWorkStatusRequest) (*UpdateWorkStatusResponse, error)
+	ListSubjects(context.Context, *ListSubjectsRequest) (*ListSubjectsResponse, error)
 	mustEmbedUnimplementedGradingServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedGradingServiceServer) GetCriteriaMarks(context.Context, *GetC
 }
 func (UnimplementedGradingServiceServer) UpdateWorkStatus(context.Context, *UpdateWorkStatusRequest) (*UpdateWorkStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkStatus not implemented")
+}
+func (UnimplementedGradingServiceServer) ListSubjects(context.Context, *ListSubjectsRequest) (*ListSubjectsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSubjects not implemented")
 }
 func (UnimplementedGradingServiceServer) mustEmbedUnimplementedGradingServiceServer() {}
 func (UnimplementedGradingServiceServer) testEmbeddedByValue()                        {}
@@ -206,6 +222,24 @@ func _GradingService_UpdateWorkStatus_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GradingService_ListSubjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSubjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GradingServiceServer).ListSubjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GradingService_ListSubjects_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GradingServiceServer).ListSubjects(ctx, req.(*ListSubjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GradingService_ServiceDesc is the grpc.ServiceDesc for GradingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var GradingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateWorkStatus",
 			Handler:    _GradingService_UpdateWorkStatus_Handler,
+		},
+		{
+			MethodName: "ListSubjects",
+			Handler:    _GradingService_ListSubjects_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

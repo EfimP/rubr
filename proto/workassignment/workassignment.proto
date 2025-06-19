@@ -6,6 +6,12 @@ option go_package = "./proto/workassignment;workassignment";
 service WorkAssignmentService {
   rpc GetWorksForAssistant (GetWorksForAssistantRequest) returns (GetWorksForAssistantResponse);
   rpc GetWorkDetails (GetWorkDetailsRequest) returns (GetWorkDetailsResponse);
+  rpc UploadAssignmentFile (UploadAssignmentFileRequest) returns (UploadAssignmentFileResponse);
+  rpc SubmitWork (SubmitWorkRequest) returns (SubmitWorkResponse);
+  rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse);
+  rpc DownloadAssignmentFile (DownloadAssignmentFileRequest) returns (DownloadAssignmentFileResponse);
+  rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
+  rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
 }
 
 message GetWorksForAssistantRequest {
@@ -41,4 +47,75 @@ message WorkAssignment {
   string student_name = 6;
   string student_surname = 7;
   string student_patronymic = 8;
+}
+message UploadAssignmentFileRequest {
+  int32 work_id = 1;
+  string file_path = 2;
+}
+
+message UploadAssignmentFileResponse {
+  bool success = 1;
+  string error = 2;
+}
+message SubmitWorkRequest {
+  int32 work_id = 1;
+  string file_path = 2;
+}
+message SubmitWorkResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message GetTaskDetailsRequest {
+  int32 task_id = 1;    // ID задания (tasks.id)
+  int32 student_id = 2; // ID студента (users.id)
+}
+
+message CriteriaGroup {
+  int32 id = 1;         // ID группы критериев (criteria_groups.id)
+  string name = 2;      // Название группы (criteria_groups.group_name)
+  bool is_blocking = 3; // Флаг блокировки (criteria_groups.block_flag)
+}
+
+message GetTaskDetailsResponse {
+  int32 task_id = 1;              // ID задания (tasks.id)
+  string task_title = 2;          // Название задания (tasks.title)
+  string task_description = 3;    // Описание задания (tasks.description)
+  string task_deadline = 4;       // Дедлайн задания (tasks.deadline)
+  string task_content_url = 5;    // Ссылка на материалы (tasks.content_url)
+  repeated CriteriaGroup main_criteria_groups = 6;    // Основные группы критериев
+  repeated CriteriaGroup blocking_criteria_groups = 7; // Блокирующие группы критериев
+  string error = 8;              // Сообщение об ошибке, если есть
+}
+
+message DownloadAssignmentFileRequest {
+  int32 work_id = 1;    // ID работы (student_works.id)
+  string file_name = 2; // Имя файла
+  bytes content = 3;    // Содержимое файла
+}
+
+message DownloadAssignmentFileResponse {
+  string error = 1; // Сообщение об ошибке, если есть
+}
+
+message CreateWorkRequest {
+  int32 student_id = 1; // ID студента (users.id)
+  int32 task_id = 2;    // ID задания (tasks.id)
+}
+
+message CreateWorkResponse {
+  int32 work_id = 1;    // ID созданной работы (student_works.id)
+  string error = 2;     // Сообщение об ошибке, если есть
+}
+
+message CheckExistingWorkRequest {
+  int32 student_id = 1; // ID студента (users.id)
+  int32 task_id = 2;   // ID задания (tasks.id)
+}
+
+message CheckExistingWorkResponse {
+  bool exists = 1;     // Существует ли работа
+  int32 work_id = 2;   // ID работы, если существует
+  int32 student_id = 3; // ID студента для проверки
+  string error = 4;    // Сообщение об ошибке, если есть
 }
