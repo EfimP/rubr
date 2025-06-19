@@ -30,7 +30,6 @@ service WorkService {
 message UpdateWorkRequest {
   int32 work_id = 1;
   string status = 2;
-  int32 assistant_id = 3; // 0 для очистки
 }
 message UpdateWorkResponse {
   string error = 1;
@@ -47,6 +46,11 @@ message GetStudentWorksByTaskResponse {
     string student_surname = 3;
     string student_patronymic = 4;
     string student_email = 5;
+    string status = 6;
+    int32 assistant_id = 7;
+    string assistant_name = 8; // Новое поле
+    string assistant_surname = 9; // Новое поле
+    string assistant_patronymic = 10; // Новое поле
   }
   repeated StudentWork works = 1;
   string error = 2;

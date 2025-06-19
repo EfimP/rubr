@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"image/color"
 	"log"
+	"net/url"
 	gradingpb "rubr/proto/grade"
 	rubricpb "rubr/proto/rubric"
 	workpb "rubr/proto/work"
@@ -310,8 +311,39 @@ func createTasksTable(tasks []Task, separatorColor color.Color, state *AppState)
 
 		detailsButton := widget.NewButton("Перейти", func(t Task) func() {
 			return func() {
-				log.Printf("Перейти к задаче ID: %d", t.ID)
-				state.window.SetContent(CreateTaskDetailsPage(state, t.ID))
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+
+				conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Не удалось подключиться к сервису: %v", err)
+					return
+				}
+				defer conn.Close()
+				client := workpb.NewWorkServiceClient(conn)
+
+				worksResp, err := client.GetStudentWorksByTask(ctx, &workpb.GetStudentWorksByTaskRequest{TaskId: t.ID})
+				if err != nil || worksResp.Error != "" {
+					log.Printf("Ошибка получения работ студентов для task_id %d: %v", t.ID, err)
+					state.window.SetContent(CreateTaskDetailsPage(state, t.ID))
+					return
+				}
+
+				allAssigned := true
+				for _, work := range worksResp.Works {
+					if work.AssistantId == 0 {
+						allAssigned = false
+						break
+					}
+				}
+
+				if allAssigned {
+					log.Printf("Все ассистенты назначены для задачи %d, открытие CreateTaskStudentWorksPage", t.ID)
+					state.window.SetContent(CreateTaskStudentWorksPage(state, t.ID))
+				} else {
+					log.Printf("Не все ассистенты назначены для задачи %d, открытие CreateTaskDetailsPage", t.ID)
+					state.window.SetContent(CreateTaskDetailsPage(state, t.ID))
+				}
 			}
 		}(task))
 
@@ -335,7 +367,6 @@ func createTasksTable(tasks []Task, separatorColor color.Color, state *AppState)
 
 	return container.NewVBox(tableContent...)
 }
-
 func CreateTaskDetailsPage(state *AppState, taskID int32) fyne.CanvasObject {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -1255,9 +1286,8 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 
 		start := time.Now()
 		_, err = workClient.UpdateWork(ctx, &workpb.UpdateWorkRequest{
-			WorkId:      workID,
-			Status:      "graded by seminarist",
-			AssistantId: 0, // Очистка assistant_id
+			WorkId: workID,
+			Status: "graded by seminarist",
 		})
 		if err != nil {
 			log.Printf("Не удалось обновить статус работы %d: %v (время выполнения: %v)", workID, err, time.Since(start))
@@ -1290,5 +1320,308 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 			nil,
 			split,
 		),
+	)
+}
+
+type StudentWorkDisplay struct {
+	WorkID        int32
+	StudentName   string
+	StudentEmail  string
+	Status        string
+	AssistantName string
+	Grade         string
+}
+
+// calculateGrade вычисляет оценку для работы (как в CreateSeminaristWorksPage)
+func calculateGrade(ctx context.Context, workID int32, taskID int32, gradingClient gradingpb.GradingServiceClient, rubricClient rubricpb.RubricServiceClient) string {
+	marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: workID})
+	if err != nil || marksResp.Error != "" {
+		log.Printf("Ошибка получения оценок для work_id %d: %v", workID, err)
+		return "-"
+	}
+
+	blockingResp, err := rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: taskID})
+	if err != nil || blockingResp.Error != "" {
+		log.Printf("Ошибка загрузки блокирующих критериев для task_id %d: %v", taskID, err)
+		return "-"
+	}
+
+	mainResp, err := rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: taskID})
+	if err != nil || mainResp.Error != "" {
+		log.Printf("Ошибка загрузки основных критериев для task_id %d: %v", taskID, err)
+		return "-"
+	}
+
+	// Проверка блокирующих критериев
+	minBlockingMark := float32(0)
+	hasBlockingMark := false
+	for _, mark := range marksResp.Marks {
+		for _, crit := range blockingResp.Criteria {
+			if mark.CriterionId == crit.Id && mark.Mark > 0 {
+				if !hasBlockingMark || mark.Mark < minBlockingMark {
+					minBlockingMark = mark.Mark
+					hasBlockingMark = true
+				}
+			}
+		}
+	}
+
+	if hasBlockingMark {
+		return fmt.Sprintf("%.2f", minBlockingMark)
+	}
+
+	// Вычисление оценки по основным критериям
+	totalMark := float32(0)
+	totalMaxMark := float32(0)
+	for _, mark := range marksResp.Marks {
+		for _, group := range mainResp.Groups {
+			for _, crit := range group.Criteria {
+				if mark.CriterionId == crit.Id {
+					totalMark += mark.Mark * float32(crit.Weight)
+				}
+			}
+		}
+	}
+	for _, group := range mainResp.Groups {
+		for _, crit := range group.Criteria {
+			totalMaxMark += float32(crit.Weight)
+		}
+	}
+	if totalMaxMark > 0 {
+		finalGrade := (totalMark / totalMaxMark) * 10
+		return fmt.Sprintf("%.2f", finalGrade)
+	}
+	return "0.00"
+}
+func CreateTaskStudentWorksPage(state *AppState, taskID int32) fyne.CanvasObject {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Подключение к сервисам
+	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к WorkService: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+	}
+	defer workConn.Close()
+	workClient := workpb.NewWorkServiceClient(workConn)
+
+	gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к GradingService: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+	}
+	defer gradingConn.Close()
+	gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
+
+	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к RubricService: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+	}
+	defer rubricConn.Close()
+	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
+
+	// Получение деталей задания
+	taskResp, err := workClient.GetTaskDetails(ctx, &workpb.GetTaskDetailsRequest{TaskId: taskID})
+	if err != nil || taskResp.Error != "" {
+		log.Printf("Ошибка получения деталей задания %d: %v", taskID, err)
+		return container.NewVBox(widget.NewLabel("Ошибка загрузки деталей задания"))
+	}
+
+	// Получение работ студентов
+	worksResp, err := workClient.GetStudentWorksByTask(ctx, &workpb.GetStudentWorksByTaskRequest{TaskId: taskID})
+	if err != nil || worksResp.Error != "" {
+		log.Printf("Ошибка получения работ студентов для task_id %d: %v", taskID, err)
+		return container.NewVBox(widget.NewLabel("Ошибка загрузки работ студентов"))
+	}
+
+	// Подготовка данных для отображения
+	studentWorksDisplay := make([]StudentWorkDisplay, 0, len(worksResp.Works))
+	for _, work := range worksResp.Works {
+		studentName := strings.TrimSpace(fmt.Sprintf("%s %s %s", work.StudentName, work.StudentPatronymic, work.StudentSurname))
+		assistantName := "-"
+		if work.AssistantId != 0 {
+			assistantName = strings.TrimSpace(fmt.Sprintf("%s %s %s", work.AssistantName, work.AssistantPatronymic, work.AssistantSurname))
+		}
+		grade := "-"
+		if work.Status == "graded by assistant" || work.Status == "graded by seminarist" {
+			grade = calculateGrade(ctx, work.Id, taskID, gradingClient, rubricClient)
+		}
+		studentWorksDisplay = append(studentWorksDisplay, StudentWorkDisplay{
+			WorkID:        work.Id,
+			StudentName:   studentName,
+			StudentEmail:  work.StudentEmail,
+			Status:        work.Status,
+			AssistantName: assistantName,
+			Grade:         grade,
+		})
+	}
+
+	// UI элементы
+	headerTextColor := color.White
+	darkBlue := color.NRGBA{R: 20, G: 40, B: 80, A: 255}
+	separatorColor := color.NRGBA{R: 200, G: 200, B: 200, A: 255}
+
+	logo := canvas.NewText("ВШЭ", headerTextColor)
+	logo.TextStyle.Bold = true
+	logo.TextSize = 24
+	logoContainer := container.New(layout.NewMaxLayout(), logo)
+
+	headerTitle := canvas.NewText("Задание", headerTextColor)
+	headerTitle.TextStyle.Bold = true
+	headerTitle.TextSize = 20
+	headerTitle.Alignment = fyne.TextAlignCenter
+
+	header := container.New(layout.NewBorderLayout(nil, nil, logoContainer, nil),
+		logoContainer,
+		container.NewCenter(headerTitle),
+	)
+	headerBackground := canvas.NewRectangle(darkBlue)
+	headerWithBackground := container.NewStack(headerBackground, header)
+
+	backButton := widget.NewButton("Назад", func() {
+		log.Println("Кнопка 'Назад' нажата. Возврат на панель семинариста.")
+		state.currentPage = "seminarist_works"
+		state.window.SetContent(CreateSeminaristWorksPage(state))
+	})
+
+	// Левая часть: детали задания
+	deadlineTime, err := time.Parse(time.RFC3339, taskResp.Deadline)
+	if err != nil {
+		log.Printf("Ошибка парсинга дедлайна: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка обработки дедлайна"))
+	}
+	lectorName := strings.TrimSpace(fmt.Sprintf("%s %s %s", taskResp.LectorName, taskResp.LectorPatronymic, taskResp.LectorSurname))
+
+	titleLabel := widget.NewLabel("Название: " + taskResp.Title)
+	titleLabel.TextStyle.Bold = true
+	descriptionEntry := widget.NewMultiLineEntry()
+	descriptionEntry.SetText(taskResp.Description)
+	descriptionEntry.Disable()
+	scrollableDescription := container.NewVScroll(descriptionEntry)
+	scrollableDescription.SetMinSize(fyne.NewSize(400, 200))
+	deadlineLabel := widget.NewLabel("Дедлайн: " + deadlineTime.Format("02.01.2006"))
+	lectorLabel := widget.NewLabel("Лектор: " + lectorName)
+
+	taskDetailsContainer := container.NewVBox(
+		titleLabel,
+		scrollableDescription,
+		deadlineLabel,
+		lectorLabel,
+	)
+	taskDetailsContainer = container.NewPadded(taskDetailsContainer)
+
+	// Правая часть: таблица работ студентов
+	var tableContent []fyne.CanvasObject
+	for i, work := range studentWorksDisplay {
+		nameLabel := widget.NewLabel(fmt.Sprintf("%s (%s)", work.StudentName, work.StudentEmail))
+		nameLabel.Wrapping = fyne.TextWrapWord
+		statusLabel := widget.NewLabel(work.Status)
+		assistantLabel := widget.NewLabel(work.AssistantName)
+		assistantLabel.Wrapping = fyne.TextWrapWord
+		gradeLabel := widget.NewLabel(work.Grade)
+		checkButton := widget.NewButton("Проверить", func(w StudentWorkDisplay) func() {
+			return func() {
+				log.Printf("Перейти к оцениванию работы ID: %d", w.WorkID)
+				state.window.SetContent(CreateSeminaristBlockingCriteriaGradingPage(state, w.WorkID, taskID))
+			}
+		}(work))
+		downloadButton := widget.NewButton("Загрузить работу", func(w StudentWorkDisplay) func() {
+			return func() {
+				// Создаем новый контекст для gRPC-запроса
+				downloadCtx, downloadCancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer downloadCancel()
+
+				// Создаем новое gRPC-соединение для WorkAssignmentService
+				workAssignmentConn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Не удалось подключиться к WorkAssignmentService: %v", err)
+					dialog.ShowInformation("Ошибка", "Не удалось подключиться к сервису", state.window)
+					return
+				}
+				defer workAssignmentConn.Close()
+				workAssignmentClient := workassignmentpb.NewWorkAssignmentServiceClient(workAssignmentConn)
+
+				workResp, err := workAssignmentClient.GetWorkDetails(downloadCtx, &workassignmentpb.GetWorkDetailsRequest{WorkId: w.WorkID})
+				if err != nil {
+					log.Printf("Не удалось получить детали работы %d: %v", w.WorkID, err)
+					dialog.ShowInformation("Ошибка", "Не удалось загрузить детали работы", state.window)
+					return
+				}
+				if workResp.Error != "" {
+					log.Printf("Ошибка от сервиса для работы %d: %s", w.WorkID, workResp.Error)
+					dialog.ShowInformation("Ошибка", workResp.Error, state.window)
+					return
+				}
+				if workResp.ContentUrl == "" {
+					dialog.ShowInformation("Ошибка", "Ссылка на работу отсутствует", state.window)
+					return
+				}
+
+				parsedURL, err := url.Parse(workResp.ContentUrl)
+				if err != nil {
+					log.Printf("Некорректная ссылка для работы %d: %v", w.WorkID, err)
+					dialog.ShowError(err, state.window)
+					return
+				}
+
+				linkEntry := widget.NewEntry()
+				linkEntry.SetText(parsedURL.String())
+				linkEntry.Disable()
+
+				copyButton := widget.NewButton("Копировать", func() {
+					state.window.Clipboard().SetContent(linkEntry.Text)
+					dialog.ShowInformation("Успех", "Ссылка скопирована в буфер обмена", state.window)
+				})
+
+				dialogContent := container.NewVBox(
+					widget.NewLabel("Ссылка на работу:"),
+					linkEntry,
+					container.NewHBox(copyButton),
+				)
+
+				dialog.ShowCustom("Ссылка на работу", "Закрыть", dialogContent, state.window)
+			}
+		}(work))
+
+		row := container.NewGridWithColumns(6,
+			nameLabel,
+			statusLabel,
+			assistantLabel,
+			gradeLabel,
+			checkButton,
+			downloadButton,
+		)
+
+		tableContent = append(tableContent, row)
+
+		if i < len(studentWorksDisplay)-1 {
+			separator := canvas.NewLine(separatorColor)
+			separator.StrokeWidth = 2
+			separator.Position1 = fyne.NewPos(0, 0)
+			separator.Position2 = fyne.NewPos(1920, 0)
+			separatorContainer := container.New(layout.NewMaxLayout(), separator)
+			tableContent = append(tableContent, separatorContainer)
+		}
+	}
+
+	studentTable := container.NewVBox(tableContent...)
+	tableScroll := container.NewVScroll(studentTable)
+	tableScroll.SetMinSize(fyne.NewSize(1200, 600))
+
+	// Сборка интерфейса
+	split := container.NewHSplit(taskDetailsContainer, tableScroll)
+	split.SetOffset(0.3)
+
+	contentBackground := canvas.NewRectangle(color.White)
+	centralContent := container.NewStack(contentBackground, split)
+
+	return container.NewBorder(
+		headerWithBackground,
+		container.NewHBox(backButton),
+		nil,
+		nil,
+		centralContent,
 	)
 }

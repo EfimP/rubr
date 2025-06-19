@@ -25,7 +25,6 @@ type UpdateWorkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	WorkId        int32                  `protobuf:"varint,1,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
-	AssistantId   int32                  `protobuf:"varint,3,opt,name=assistant_id,json=assistantId,proto3" json:"assistant_id,omitempty"` // 0 для очистки
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -72,13 +71,6 @@ func (x *UpdateWorkRequest) GetStatus() string {
 		return x.Status
 	}
 	return ""
-}
-
-func (x *UpdateWorkRequest) GetAssistantId() int32 {
-	if x != nil {
-		return x.AssistantId
-	}
-	return 0
 }
 
 type UpdateWorkResponse struct {
@@ -2066,14 +2058,19 @@ func (x *GetDisciplinesResponse) GetError() string {
 }
 
 type GetStudentWorksByTaskResponse_StudentWork struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	Id                int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StudentName       string                 `protobuf:"bytes,2,opt,name=student_name,json=studentName,proto3" json:"student_name,omitempty"`
-	StudentSurname    string                 `protobuf:"bytes,3,opt,name=student_surname,json=studentSurname,proto3" json:"student_surname,omitempty"`
-	StudentPatronymic string                 `protobuf:"bytes,4,opt,name=student_patronymic,json=studentPatronymic,proto3" json:"student_patronymic,omitempty"`
-	StudentEmail      string                 `protobuf:"bytes,5,opt,name=student_email,json=studentEmail,proto3" json:"student_email,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Id                  int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	StudentName         string                 `protobuf:"bytes,2,opt,name=student_name,json=studentName,proto3" json:"student_name,omitempty"`
+	StudentSurname      string                 `protobuf:"bytes,3,opt,name=student_surname,json=studentSurname,proto3" json:"student_surname,omitempty"`
+	StudentPatronymic   string                 `protobuf:"bytes,4,opt,name=student_patronymic,json=studentPatronymic,proto3" json:"student_patronymic,omitempty"`
+	StudentEmail        string                 `protobuf:"bytes,5,opt,name=student_email,json=studentEmail,proto3" json:"student_email,omitempty"`
+	Status              string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	AssistantId         int32                  `protobuf:"varint,7,opt,name=assistant_id,json=assistantId,proto3" json:"assistant_id,omitempty"`
+	AssistantName       string                 `protobuf:"bytes,8,opt,name=assistant_name,json=assistantName,proto3" json:"assistant_name,omitempty"`                    // Новое поле
+	AssistantSurname    string                 `protobuf:"bytes,9,opt,name=assistant_surname,json=assistantSurname,proto3" json:"assistant_surname,omitempty"`           // Новое поле
+	AssistantPatronymic string                 `protobuf:"bytes,10,opt,name=assistant_patronymic,json=assistantPatronymic,proto3" json:"assistant_patronymic,omitempty"` // Новое поле
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *GetStudentWorksByTaskResponse_StudentWork) Reset() {
@@ -2137,6 +2134,41 @@ func (x *GetStudentWorksByTaskResponse_StudentWork) GetStudentPatronymic() strin
 func (x *GetStudentWorksByTaskResponse_StudentWork) GetStudentEmail() string {
 	if x != nil {
 		return x.StudentEmail
+	}
+	return ""
+}
+
+func (x *GetStudentWorksByTaskResponse_StudentWork) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *GetStudentWorksByTaskResponse_StudentWork) GetAssistantId() int32 {
+	if x != nil {
+		return x.AssistantId
+	}
+	return 0
+}
+
+func (x *GetStudentWorksByTaskResponse_StudentWork) GetAssistantName() string {
+	if x != nil {
+		return x.AssistantName
+	}
+	return ""
+}
+
+func (x *GetStudentWorksByTaskResponse_StudentWork) GetAssistantSurname() string {
+	if x != nil {
+		return x.AssistantSurname
+	}
+	return ""
+}
+
+func (x *GetStudentWorksByTaskResponse_StudentWork) GetAssistantPatronymic() string {
+	if x != nil {
+		return x.AssistantPatronymic
 	}
 	return ""
 }
@@ -2505,24 +2537,29 @@ var File_proto_work_work_proto protoreflect.FileDescriptor
 
 const file_proto_work_work_proto_rawDesc = "" +
 	"\n" +
-	"\x15proto/work/work.proto\x12\x04work\"g\n" +
+	"\x15proto/work/work.proto\x12\x04work\"D\n" +
 	"\x11UpdateWorkRequest\x12\x17\n" +
 	"\awork_id\x18\x01 \x01(\x05R\x06workId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12!\n" +
-	"\fassistant_id\x18\x03 \x01(\x05R\vassistantId\"*\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"*\n" +
 	"\x12UpdateWorkResponse\x12\x14\n" +
 	"\x05error\x18\x01 \x01(\tR\x05error\"7\n" +
 	"\x1cGetStudentWorksByTaskRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x05R\x06taskId\"\xbc\x02\n" +
+	"\atask_id\x18\x01 \x01(\x05R\x06taskId\"\xfe\x03\n" +
 	"\x1dGetStudentWorksByTaskResponse\x12E\n" +
 	"\x05works\x18\x01 \x03(\v2/.work.GetStudentWorksByTaskResponse.StudentWorkR\x05works\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error\x1a\xbd\x01\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\x1a\xff\x02\n" +
 	"\vStudentWork\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12!\n" +
 	"\fstudent_name\x18\x02 \x01(\tR\vstudentName\x12'\n" +
 	"\x0fstudent_surname\x18\x03 \x01(\tR\x0estudentSurname\x12-\n" +
 	"\x12student_patronymic\x18\x04 \x01(\tR\x11studentPatronymic\x12#\n" +
-	"\rstudent_email\x18\x05 \x01(\tR\fstudentEmail\"G\n" +
+	"\rstudent_email\x18\x05 \x01(\tR\fstudentEmail\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12!\n" +
+	"\fassistant_id\x18\a \x01(\x05R\vassistantId\x12%\n" +
+	"\x0eassistant_name\x18\b \x01(\tR\rassistantName\x12+\n" +
+	"\x11assistant_surname\x18\t \x01(\tR\x10assistantSurname\x121\n" +
+	"\x14assistant_patronymic\x18\n" +
+	" \x01(\tR\x13assistantPatronymic\"G\n" +
 	" GetAssistantsByDisciplineRequest\x12#\n" +
 	"\rdiscipline_id\x18\x01 \x01(\x05R\fdisciplineId\"\xf7\x01\n" +
 	"!GetAssistantsByDisciplineResponse\x12Q\n" +

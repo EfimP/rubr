@@ -6,6 +6,8 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"os"
@@ -22,7 +24,7 @@ type server struct {
 func (s *server) UpdateWork(ctx context.Context, req *pb.UpdateWorkRequest) (*pb.UpdateWorkResponse, error) {
 	_, err := s.db.ExecContext(ctx, `
 		UPDATE student_works
-		SET status = $1, assistant_id = NULL
+		SET status = $1
 		WHERE id = $2
 	`, req.Status, req.WorkId)
 	if err != nil {
@@ -34,47 +36,42 @@ func (s *server) UpdateWork(ctx context.Context, req *pb.UpdateWorkRequest) (*pb
 
 func (s *server) GetStudentWorksByTask(ctx context.Context, req *pb.GetStudentWorksByTaskRequest) (*pb.GetStudentWorksByTaskResponse, error) {
 	query := `
-		SELECT sw.id, u.name, u.surname, COALESCE(u.patronymic, ''), u.email
+		SELECT sw.id, u.name, u.surname, u.patronymic, u.email, sw.status, sw.assistant_id,
+		       COALESCE(a.name, '') AS assistant_name, COALESCE(a.surname, '') AS assistant_surname, COALESCE(a.patronymic, '') AS assistant_patronymic
 		FROM student_works sw
 		JOIN users u ON sw.student_id = u.id
+		LEFT JOIN users a ON sw.assistant_id = a.id
 		WHERE sw.task_id = $1
 	`
 	rows, err := s.db.QueryContext(ctx, query, req.TaskId)
 	if err != nil {
-		log.Printf("Failed to query student works by task: %v", err)
-		return &pb.GetStudentWorksByTaskResponse{
-			Error: fmt.Sprintf("Failed to query student works: %v", err),
-		}, nil
+		log.Printf("Ошибка запроса работ студентов: %v", err)
+		return nil, status.Errorf(codes.Internal, "Ошибка сервера: %v", err)
 	}
 	defer rows.Close()
 
-	var works []*pb.GetStudentWorksByTaskResponse_StudentWork
+	resp := &pb.GetStudentWorksByTaskResponse{Works: []*pb.GetStudentWorksByTaskResponse_StudentWork{}}
 	for rows.Next() {
-		var id int32
-		var name, surname, patronymic, email string
-		if err := rows.Scan(&id, &name, &surname, &patronymic, &email); err != nil {
-			log.Printf("Failed to scan row: %v", err)
-			continue
+		var work pb.GetStudentWorksByTaskResponse_StudentWork
+		var assistantID sql.NullInt32
+		var assistantPatronymic sql.NullString
+		if err := rows.Scan(&work.Id, &work.StudentName, &work.StudentSurname, &work.StudentPatronymic, &work.StudentEmail, &work.Status, &assistantID, &work.AssistantName, &work.AssistantSurname, &assistantPatronymic); err != nil {
+			log.Printf("Ошибка сканирования строки: %v", err)
+			return nil, status.Errorf(codes.Internal, "Ошибка обработки данных: %v", err)
 		}
-		works = append(works, &pb.GetStudentWorksByTaskResponse_StudentWork{
-			Id:                id,
-			StudentName:       name,
-			StudentSurname:    surname,
-			StudentPatronymic: patronymic,
-			StudentEmail:      email,
-		})
+		if assistantID.Valid {
+			work.AssistantId = int32(assistantID.Int32)
+		}
+		if assistantPatronymic.Valid {
+			work.AssistantPatronymic = assistantPatronymic.String
+		}
+		resp.Works = append(resp.Works, &work)
 	}
-
 	if err := rows.Err(); err != nil {
-		log.Printf("Row iteration error: %v", err)
-		return &pb.GetStudentWorksByTaskResponse{
-			Error: fmt.Sprintf("Row iteration error: %v", err),
-		}, nil
+		log.Printf("Ошибка итерации строк: %v", err)
+		return nil, status.Errorf(codes.Internal, "Ошибка обработки данных: %v", err)
 	}
-
-	return &pb.GetStudentWorksByTaskResponse{
-		Works: works,
-	}, nil
+	return resp, nil
 }
 
 func (s *server) GetAssistantsByDiscipline(ctx context.Context, req *pb.GetAssistantsByDisciplineRequest) (*pb.GetAssistantsByDisciplineResponse, error) {
