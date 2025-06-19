@@ -732,7 +732,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 		}
 		defer conn.Close()
 		log.Printf("Connection established, creating client")
-		client := superaccpb.NewSuperAccServiceClient(conn)
+		client = superaccpb.NewSuperAccServiceClient(conn)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
