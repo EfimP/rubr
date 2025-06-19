@@ -146,10 +146,23 @@ func CreateLectorWorksPage(state *AppState) fyne.CanvasObject {
 
 	var data []MyListItem
 	for _, task := range resp.Tasks {
+		// Парсим дедлайн из RFC3339 и форматируем в читаемый вид
+		var dueDate string
+		if task.Deadline != "" {
+			deadlineTime, err := time.Parse(time.RFC3339, task.Deadline)
+			if err != nil {
+				log.Printf("Failed to parse deadline for task %d: %v", task.Id, err)
+				dueDate = "Неверный формат даты"
+			} else {
+				dueDate = deadlineTime.Format("02.01.2006 15:04")
+			}
+		} else {
+			dueDate = "Не указан"
+		}
 		data = append(data, MyListItem{
 			ID:      task.Id,
 			Name:    task.Title,
-			DueDate: task.Deadline,
+			DueDate: dueDate,
 		})
 	}
 
@@ -257,7 +270,6 @@ func CreateLectorWorksPage(state *AppState) fyne.CanvasObject {
 		),
 	)
 }
-
 func CreateWorkPage(state *AppState, taskID *int32) {
 	w := state.window
 	var isNewWork bool
@@ -1306,24 +1318,27 @@ func CreateMainCriteriaPage(state *AppState, taskID int32) {
 				}
 
 				for score, entry := range entries {
-					if entry.Text != "" {
-						respComment, err := rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
-							CriterionId: criterionId,
-							Mark:        score,
-							Comment:     entry.Text,
-						})
-						if err != nil {
-							log.Printf("Failed to update criterion comment: %v", err)
-							dialog.ShowError(err, w)
-							return
-						}
-						if respComment.Error != "" {
-							dialog.ShowInformation("Ошибка", respComment.Error, w)
-							return
-						}
+					comment := entry.Text
+					if comment == "" {
+						comment = "Не выставляется"
+					}
+					respComment, err := rubricClient.UpdateCriterionComment(ctx, &rubricpb.UpdateCriterionCommentRequest{
+						CriterionId: criterionId,
+						Mark:        score,
+						Comment:     comment,
+					})
+					if err != nil {
+						log.Printf("Failed to update criterion comment for score %s: %v", score, err)
+						dialog.ShowError(err, w)
+						return
+					}
+					if respComment.Error != "" {
+						dialog.ShowInformation("Ошибка", respComment.Error, w)
+						return
 					}
 				}
 				dialog.ShowInformation("Успех", "Данные сохранены", w)
+				CreateMainCriteriaPage(state, taskID) // Перезагрузка страницы
 			})
 
 			content := container.NewVBox(
