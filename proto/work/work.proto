@@ -17,7 +17,122 @@ service WorkService {
   rpc GetDisciplines(GetDisciplinesRequest) returns (GetDisciplinesResponse);
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse) {}
   rpc UpdateTaskGroupAndDiscipline (UpdateTaskGroupAndDisciplineRequest) returns (UpdateTaskGroupAndDisciplineResponse) {}
+
+  rpc GetStudentWorksForSeminarist (GetStudentWorksForSeminaristRequest) returns (GetStudentWorksForSeminaristResponse) {}
+  rpc GetTasksForSeminarist (GetTasksForSeminaristRequest) returns (GetTasksForSeminaristResponse) {}
+  rpc GetStudentWorksByTask (GetStudentWorksByTaskRequest) returns (GetStudentWorksByTaskResponse) {}
+  rpc GetAssistantsByDiscipline (GetAssistantsByDisciplineRequest) returns (GetAssistantsByDisciplineResponse) {}
+  rpc AssignAssistantsToWorks (AssignAssistantsToWorksRequest) returns (AssignAssistantsToWorksResponse) {}
+
+  rpc UpdateWork(UpdateWorkRequest) returns (UpdateWorkResponse);
+
+  rpc GetStudentsByGroupAndDiscipline (GetStudentsByGroupAndDisciplineRequest) returns (GetStudentsByGroupAndDisciplineResponse);
 }
+
+message GetStudentsByGroupAndDisciplineRequest {
+  int32 group_id = 1;
+  int32 discipline_id = 2;
+}
+
+message GetStudentsByGroupAndDisciplineResponse {
+  message Student {
+    int32 id = 1;
+    string name = 2;
+    string surname = 3;
+    string patronymic = 4;
+    string email = 5;
+  }
+  repeated Student students = 1;
+  string error = 2;
+}
+
+message UpdateWorkRequest {
+  int32 work_id = 1;
+  string status = 2;
+}
+message UpdateWorkResponse {
+  string error = 1;
+}
+message GetStudentWorksByTaskRequest {
+  int32 task_id = 1;
+}
+
+message GetStudentWorksByTaskResponse {
+  message StudentWork {
+    int32 id = 1;
+    string student_name = 2;
+    string student_surname = 3;
+    string student_patronymic = 4;
+    string student_email = 5;
+    string status = 6;
+    int32 assistant_id = 7;
+    string assistant_name = 8;
+    string assistant_surname = 9;
+    string assistant_patronymic = 10;
+    int32 student_id = 11; // Новое поле
+  }
+  repeated StudentWork works = 1;
+  string error = 2;
+}
+message GetAssistantsByDisciplineRequest {
+  int32 discipline_id = 1;
+}
+
+message GetAssistantsByDisciplineResponse {
+  message Assistant {
+    int32 id = 1;
+    string name = 2;
+    string surname = 3;
+    string patronymic = 4;
+  }
+  repeated Assistant assistants = 1;
+  string error = 2;
+}
+
+message AssignAssistantsToWorksRequest {
+  message Assignment {
+    int32 work_id = 1;
+    int32 assistant_id = 2;
+  }
+  repeated Assignment assignments = 1;
+}
+
+message AssignAssistantsToWorksResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message GetTasksForSeminaristRequest {
+  string seminarist_id = 1;
+}
+
+message GetTasksForSeminaristResponse {
+  message Task {
+    int32 id = 1;
+    string title = 2;
+    string deadline = 3;
+  }
+  repeated Task tasks = 1;
+  string error = 2;
+}
+
+message GetStudentWorksForSeminaristRequest {
+  string seminarist_id = 1;
+}
+
+message GetStudentWorksForSeminaristResponse {
+  message StudentWork {
+    int32 id = 1;
+    string title = 2;
+    string created_at = 3;
+    string student_name = 4;
+    int32 task_id = 5;
+  }
+  repeated StudentWork works = 1;
+  string error = 2;
+}
+
+
 
 message GetTaskDetailsRequest {
   int32 task_id = 1;
@@ -29,9 +144,13 @@ message GetTaskDetailsResponse {
   string deadline = 3;
   string group_name = 4;
   string discipline_name = 5;
-  string error = 6;
+  string lector_name = 6;
+  string lector_surname = 7;
+  string lector_patronymic = 8;
+  int32 discipline_id = 9;
+  string error = 10;
+  int32 group_id = 11;
 }
-
 message UpdateTaskGroupAndDisciplineRequest {
   int32 task_id = 1;
   int32 group_id = 2;

@@ -6,16 +6,301 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"os"
 	pb "rubr/proto/work"
 	"strconv"
+	"time"
 )
 
 type server struct {
 	pb.UnimplementedWorkServiceServer
 	db *sql.DB
+}
+
+func (s *server) GetStudentsByGroupAndDiscipline(ctx context.Context, req *pb.GetStudentsByGroupAndDisciplineRequest) (*pb.GetStudentsByGroupAndDisciplineResponse, error) {
+	resp := &pb.GetStudentsByGroupAndDisciplineResponse{
+		Students: make([]*pb.GetStudentsByGroupAndDisciplineResponse_Student, 0),
+	}
+
+	// Проверяем связь group_id и discipline_id в groups_in_disciplines
+	var exists bool
+	err := s.db.QueryRowContext(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM groups_in_disciplines 
+			WHERE group_id = $1 AND discipline_id = $2
+		)`, req.GroupId, req.DisciplineId).Scan(&exists)
+	if err != nil {
+		log.Printf("Ошибка проверки связи group_id и discipline_id: %v", err)
+		resp.Error = fmt.Sprintf("Ошибка сервера: %v", err)
+		return resp, nil
+	}
+	if !exists {
+		resp.Error = fmt.Sprintf("Группа %d не связана с дисциплиной %d", req.GroupId, req.DisciplineId)
+		return resp, nil
+	}
+
+	// Запрос для получения студентов
+	query := `
+		SELECT u.id, u.name, u.surname, u.patronymic, u.email
+		FROM users u
+		JOIN users_in_groups ug ON u.id = ug.user_id
+		WHERE ug.group_id = $1 AND u.role = 'student'
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.GroupId)
+	if err != nil {
+		log.Printf("Ошибка выполнения запроса: %v", err)
+		resp.Error = fmt.Sprintf("Ошибка сервера: %v", err)
+		return resp, nil
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var student pb.GetStudentsByGroupAndDisciplineResponse_Student
+		var patronymic sql.NullString
+		if err := rows.Scan(&student.Id, &student.Name, &student.Surname, &patronymic, &student.Email); err != nil {
+			log.Printf("Ошибка сканирования строки: %v", err)
+			resp.Error = fmt.Sprintf("Ошибка сервера: %v", err)
+			return resp, nil
+		}
+		student.Patronymic = patronymic.String
+		resp.Students = append(resp.Students, &student)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации по строкам: %v", err)
+		resp.Error = fmt.Sprintf("Ошибка сервера: %v", err)
+		return resp, nil
+	}
+
+	return resp, nil
+}
+
+func (s *server) UpdateWork(ctx context.Context, req *pb.UpdateWorkRequest) (*pb.UpdateWorkResponse, error) {
+	_, err := s.db.ExecContext(ctx, `
+		UPDATE student_works
+		SET status = $1
+		WHERE id = $2
+	`, req.Status, req.WorkId)
+	if err != nil {
+		log.Printf("Failed to update work %d: %v", req.WorkId, err)
+		return &pb.UpdateWorkResponse{Error: err.Error()}, err
+	}
+	return &pb.UpdateWorkResponse{}, nil
+}
+func (s *server) GetStudentWorksByTask(ctx context.Context, req *pb.GetStudentWorksByTaskRequest) (*pb.GetStudentWorksByTaskResponse, error) {
+	query := `
+		SELECT sw.id, u.name, u.surname, u.patronymic, u.email, sw.status, sw.assistant_id,
+		       COALESCE(a.name, '') AS assistant_name, COALESCE(a.surname, '') AS assistant_surname, COALESCE(a.patronymic, '') AS assistant_patronymic,
+		       sw.student_id
+		FROM student_works sw
+		JOIN users u ON sw.student_id = u.id
+		LEFT JOIN users a ON sw.assistant_id = a.id
+		WHERE sw.task_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.TaskId)
+	if err != nil {
+		log.Printf("Ошибка запроса работ студентов: %v", err)
+		return nil, status.Errorf(codes.Internal, "Ошибка сервера: %v", err)
+	}
+	defer rows.Close()
+
+	resp := &pb.GetStudentWorksByTaskResponse{Works: []*pb.GetStudentWorksByTaskResponse_StudentWork{}}
+	for rows.Next() {
+		var work pb.GetStudentWorksByTaskResponse_StudentWork
+		var assistantID sql.NullInt32
+		var assistantPatronymic sql.NullString
+		if err := rows.Scan(&work.Id, &work.StudentName, &work.StudentSurname, &work.StudentPatronymic, &work.StudentEmail, &work.Status,
+			&assistantID, &work.AssistantName, &work.AssistantSurname, &assistantPatronymic, &work.StudentId); err != nil {
+			log.Printf("Ошибка сканирования строки: %v", err)
+			return nil, status.Errorf(codes.Internal, "Ошибка обработки данных: %v", err)
+		}
+		if assistantID.Valid {
+			work.AssistantId = int32(assistantID.Int32)
+		}
+		if assistantPatronymic.Valid {
+			work.AssistantPatronymic = assistantPatronymic.String
+		}
+		resp.Works = append(resp.Works, &work)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации строк: %v", err)
+		return nil, status.Errorf(codes.Internal, "Ошибка обработки данных: %v", err)
+	}
+	return resp, nil
+}
+func (s *server) GetAssistantsByDiscipline(ctx context.Context, req *pb.GetAssistantsByDisciplineRequest) (*pb.GetAssistantsByDisciplineResponse, error) {
+	query := `
+		SELECT DISTINCT u.id, u.name, u.surname, COALESCE(u.patronymic, '')
+		FROM users u
+		JOIN users_in_groups ug ON u.id = ug.user_id
+		JOIN groups_in_disciplines gd ON ug.group_id = gd.group_id
+		WHERE gd.discipline_id = $1 AND u.role = 'assistant'
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.DisciplineId)
+	if err != nil {
+		log.Printf("Failed to query assistants: %v", err)
+		return &pb.GetAssistantsByDisciplineResponse{
+			Error: fmt.Sprintf("Failed to query assistants: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var assistants []*pb.GetAssistantsByDisciplineResponse_Assistant
+	for rows.Next() {
+		var id int32
+		var name, surname, patronymic string
+		if err := rows.Scan(&id, &name, &surname, &patronymic); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		assistants = append(assistants, &pb.GetAssistantsByDisciplineResponse_Assistant{
+			Id:         id,
+			Name:       name,
+			Surname:    surname,
+			Patronymic: patronymic,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetAssistantsByDisciplineResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetAssistantsByDisciplineResponse{
+		Assistants: assistants,
+	}, nil
+}
+
+func (s *server) AssignAssistantsToWorks(ctx context.Context, req *pb.AssignAssistantsToWorksRequest) (*pb.AssignAssistantsToWorksResponse, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Printf("Failed to begin transaction: %v", err)
+		return &pb.AssignAssistantsToWorksResponse{
+			Error: fmt.Sprintf("Failed to begin transaction: %v", err),
+		}, nil
+	}
+	defer tx.Rollback()
+
+	query := `UPDATE student_works SET assistant_id = $1 WHERE id = $2`
+	for _, assignment := range req.Assignments {
+		_, err := tx.ExecContext(ctx, query, assignment.AssistantId, assignment.WorkId)
+		if err != nil {
+			log.Printf("Failed to update assistant_id for work %d: %v", assignment.WorkId, err)
+			return &pb.AssignAssistantsToWorksResponse{
+				Error: fmt.Sprintf("Failed to update assistant_id for work %d: %v", assignment.WorkId, err),
+			}, nil
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Printf("Failed to commit transaction: %v", err)
+		return &pb.AssignAssistantsToWorksResponse{
+			Error: fmt.Sprintf("Failed to commit transaction: %v", err),
+		}, nil
+	}
+
+	return &pb.AssignAssistantsToWorksResponse{
+		Success: true,
+	}, nil
+}
+
+func (s *server) GetTasksForSeminarist(ctx context.Context, req *pb.GetTasksForSeminaristRequest) (*pb.GetTasksForSeminaristResponse, error) {
+	query := `
+		SELECT DISTINCT t.id, t.title, t.deadline
+		FROM tasks t
+		JOIN groups_in_disciplines gd ON t.discipline_id = gd.discipline_id
+		JOIN users_in_groups ug ON gd.group_id = ug.group_id
+		WHERE ug.user_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.SeminaristId)
+	if err != nil {
+		log.Printf("Failed to query tasks: %v", err)
+		return &pb.GetTasksForSeminaristResponse{
+			Error: fmt.Sprintf("Failed to query tasks: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var tasks []*pb.GetTasksForSeminaristResponse_Task
+	for rows.Next() {
+		var id int32
+		var title string
+		var deadline time.Time
+		if err := rows.Scan(&id, &title, &deadline); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		tasks = append(tasks, &pb.GetTasksForSeminaristResponse_Task{
+			Id:       id,
+			Title:    title,
+			Deadline: deadline.Format(time.RFC3339),
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetTasksForSeminaristResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetTasksForSeminaristResponse{
+		Tasks: tasks,
+	}, nil
+}
+
+func (s *server) GetStudentWorksForSeminarist(ctx context.Context, req *pb.GetStudentWorksForSeminaristRequest) (*pb.GetStudentWorksForSeminaristResponse, error) {
+	query := `
+		SELECT sw.id, t.title, sw.created_at, CONCAT(u.name, ' ', u.surname) AS student_name, sw.task_id
+		FROM student_works sw
+		JOIN tasks t ON sw.task_id = t.id
+		JOIN users u ON sw.student_id = u.id
+		WHERE sw.seminarist_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.SeminaristId)
+	if err != nil {
+		log.Printf("Failed to query student works: %v", err)
+		return &pb.GetStudentWorksForSeminaristResponse{
+			Error: fmt.Sprintf("Failed to query student works: %v", err),
+		}, nil
+	}
+	defer rows.Close()
+
+	var works []*pb.GetStudentWorksForSeminaristResponse_StudentWork
+	for rows.Next() {
+		var id int32
+		var title, studentName string
+		var createdAt time.Time
+		var task_id int32
+		if err := rows.Scan(&id, &title, &createdAt, &studentName, &task_id); err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue
+		}
+		works = append(works, &pb.GetStudentWorksForSeminaristResponse_StudentWork{
+			Id:          id,
+			Title:       title,
+			CreatedAt:   createdAt.Format(time.RFC3339),
+			StudentName: studentName,
+			TaskId:      task_id,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Row iteration error: %v", err)
+		return &pb.GetStudentWorksForSeminaristResponse{
+			Error: fmt.Sprintf("Row iteration error: %v", err),
+		}, nil
+	}
+
+	return &pb.GetStudentWorksForSeminaristResponse{
+		Works: works,
+	}, nil
 }
 
 // возвращает слайс работ из массивов состоящих из id работы, name, deadline
@@ -171,24 +456,32 @@ func (s *server) GetDisciplines(ctx context.Context, req *pb.GetDisciplinesReque
 
 func (s *server) GetTaskDetails(ctx context.Context, req *pb.GetTaskDetailsRequest) (*pb.GetTaskDetailsResponse, error) {
 	query := `
-        SELECT t.title, t.description, t.deadline, sg.name AS group_name, d.name AS discipline_name
-        FROM tasks t
-        JOIN student_groups sg ON t.group_id = sg.id
-        JOIN disciplines d ON t.discipline_id = d.id
-        WHERE t.id = $1
-    `
-	var title, description, deadline, groupName, disciplineName string
-	err := s.db.QueryRowContext(ctx, query, req.TaskId).Scan(&title, &description, &deadline, &groupName, &disciplineName)
-	if err != nil {
-		return &pb.GetTaskDetailsResponse{Error: err.Error()}, nil
+		SELECT t.title, t.description, t.deadline, g.name AS group_name, d.name AS discipline_name,
+		       u.name AS lector_name, u.surname AS lector_surname, u.patronymic AS lector_patronymic,
+		       t.discipline_id, t.group_id
+		FROM tasks t
+		JOIN student_groups g ON t.group_id = g.id
+		JOIN disciplines d ON t.discipline_id = d.id
+		JOIN users u ON t.lector_id = u.id
+		WHERE t.id = $1
+	`
+	var resp pb.GetTaskDetailsResponse
+	var patronymic sql.NullString
+	err := s.db.QueryRowContext(ctx, query, req.TaskId).Scan(
+		&resp.Title, &resp.Description, &resp.Deadline, &resp.GroupName, &resp.DisciplineName,
+		&resp.LectorName, &resp.LectorSurname, &patronymic, &resp.DisciplineId, &resp.GroupId,
+	)
+	if err == sql.ErrNoRows {
+		resp.Error = fmt.Sprintf("Задание с ID %d не найдено", req.TaskId)
+		return &resp, nil
 	}
-	return &pb.GetTaskDetailsResponse{
-		Title:          title,
-		Description:    description,
-		Deadline:       deadline,
-		GroupName:      groupName,
-		DisciplineName: disciplineName,
-	}, nil
+	if err != nil {
+		log.Printf("Ошибка получения деталей задания %d: %v", req.TaskId, err)
+		resp.Error = fmt.Sprintf("Ошибка сервера: %v", err)
+		return &resp, nil
+	}
+	resp.LectorPatronymic = patronymic.String
+	return &resp, nil
 }
 
 func (s *server) UpdateTaskGroupAndDiscipline(ctx context.Context, req *pb.UpdateTaskGroupAndDisciplineRequest) (*pb.UpdateTaskGroupAndDisciplineResponse, error) {

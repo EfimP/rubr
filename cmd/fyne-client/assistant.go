@@ -225,7 +225,6 @@ func CreateAssistantWorksPage(state *AppState) fyne.CanvasObject {
 		taskTitleLabel := vbox.Objects[0].(*widget.Label)
 		studentEmailLabel := vbox.Objects[1].(*widget.Label)
 		studentNameLabel := vbox.Objects[2].(*widget.Label)
-		// Исправляем индексы для statusLabel и gradeLabel
 		statusLabel := vbox.Objects[3].(*widget.Label)
 		gradeLabel := vbox.Objects[4].(*widget.Label)
 
@@ -238,6 +237,26 @@ func CreateAssistantWorksPage(state *AppState) fyne.CanvasObject {
 		} else {
 			gradeLabel.SetText("Оценка: -")
 		}
+
+		// Визуальная индикация для работ со статусом "graded by seminarist"
+		if data[id].Status == "graded by seminarist" {
+			taskTitleLabel.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
+			studentEmailLabel.TextStyle = fyne.TextStyle{Italic: true}
+			studentNameLabel.TextStyle = fyne.TextStyle{Italic: true}
+			statusLabel.TextStyle = fyne.TextStyle{Italic: true}
+			gradeLabel.TextStyle = fyne.TextStyle{Italic: true}
+		} else {
+			taskTitleLabel.TextStyle = fyne.TextStyle{Bold: true}
+			studentEmailLabel.TextStyle = fyne.TextStyle{}
+			studentNameLabel.TextStyle = fyne.TextStyle{}
+			statusLabel.TextStyle = fyne.TextStyle{}
+			gradeLabel.TextStyle = fyne.TextStyle{}
+		}
+		taskTitleLabel.Refresh()
+		studentEmailLabel.Refresh()
+		studentNameLabel.Refresh()
+		statusLabel.Refresh()
+		gradeLabel.Refresh()
 	}
 
 	myListWidget = widget.NewList(
@@ -248,6 +267,10 @@ func CreateAssistantWorksPage(state *AppState) fyne.CanvasObject {
 
 	// Обработчик выбора элемента списка
 	myListWidget.OnSelected = func(id widget.ListItemID) {
+		if data[id].Status == "graded by seminarist" {
+			myListWidget.Unselect(id)
+			return
+		}
 		workID := data[id].WorkID
 		taskID := data[id].TaskID
 		state.currentPage = "assistant_work_details"

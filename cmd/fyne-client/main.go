@@ -53,6 +53,8 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return CreateLectorWorksPage(state)
 	case "assistant_works":
 		return CreateAssistantWorksPage(state)
+	case "seminarist_works":
+		return CreateSeminaristWorksPage(state)
 	default:
 		return container.NewVBox(widget.NewLabel("Unknown page"))
 	}
