@@ -19,25 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkService_GetTasksForLector_FullMethodName            = "/work.WorkService/GetTasksForLector"
-	WorkService_DeleteTask_FullMethodName                   = "/work.WorkService/DeleteTask"
-	WorkService_SetTaskTitle_FullMethodName                 = "/work.WorkService/SetTaskTitle"
-	WorkService_SetTaskDescription_FullMethodName           = "/work.WorkService/SetTaskDescription"
-	WorkService_SetTaskDeadline_FullMethodName              = "/work.WorkService/SetTaskDeadline"
-	WorkService_CreateWork_FullMethodName                   = "/work.WorkService/CreateWork"
-	WorkService_LoadTaskName_FullMethodName                 = "/work.WorkService/LoadTaskName"
-	WorkService_LoadTaskDescription_FullMethodName          = "/work.WorkService/LoadTaskDescription"
-	WorkService_LoadTaskDeadline_FullMethodName             = "/work.WorkService/LoadTaskDeadline"
-	WorkService_GetGroups_FullMethodName                    = "/work.WorkService/GetGroups"
-	WorkService_GetDisciplines_FullMethodName               = "/work.WorkService/GetDisciplines"
-	WorkService_GetTaskDetails_FullMethodName               = "/work.WorkService/GetTaskDetails"
-	WorkService_UpdateTaskGroupAndDiscipline_FullMethodName = "/work.WorkService/UpdateTaskGroupAndDiscipline"
-	WorkService_GetStudentWorksForSeminarist_FullMethodName = "/work.WorkService/GetStudentWorksForSeminarist"
-	WorkService_GetTasksForSeminarist_FullMethodName        = "/work.WorkService/GetTasksForSeminarist"
-	WorkService_GetStudentWorksByTask_FullMethodName        = "/work.WorkService/GetStudentWorksByTask"
-	WorkService_GetAssistantsByDiscipline_FullMethodName    = "/work.WorkService/GetAssistantsByDiscipline"
-	WorkService_AssignAssistantsToWorks_FullMethodName      = "/work.WorkService/AssignAssistantsToWorks"
-	WorkService_UpdateWork_FullMethodName                   = "/work.WorkService/UpdateWork"
+	WorkService_GetTasksForLector_FullMethodName               = "/work.WorkService/GetTasksForLector"
+	WorkService_DeleteTask_FullMethodName                      = "/work.WorkService/DeleteTask"
+	WorkService_SetTaskTitle_FullMethodName                    = "/work.WorkService/SetTaskTitle"
+	WorkService_SetTaskDescription_FullMethodName              = "/work.WorkService/SetTaskDescription"
+	WorkService_SetTaskDeadline_FullMethodName                 = "/work.WorkService/SetTaskDeadline"
+	WorkService_CreateWork_FullMethodName                      = "/work.WorkService/CreateWork"
+	WorkService_LoadTaskName_FullMethodName                    = "/work.WorkService/LoadTaskName"
+	WorkService_LoadTaskDescription_FullMethodName             = "/work.WorkService/LoadTaskDescription"
+	WorkService_LoadTaskDeadline_FullMethodName                = "/work.WorkService/LoadTaskDeadline"
+	WorkService_GetGroups_FullMethodName                       = "/work.WorkService/GetGroups"
+	WorkService_GetDisciplines_FullMethodName                  = "/work.WorkService/GetDisciplines"
+	WorkService_GetTaskDetails_FullMethodName                  = "/work.WorkService/GetTaskDetails"
+	WorkService_UpdateTaskGroupAndDiscipline_FullMethodName    = "/work.WorkService/UpdateTaskGroupAndDiscipline"
+	WorkService_GetStudentWorksForSeminarist_FullMethodName    = "/work.WorkService/GetStudentWorksForSeminarist"
+	WorkService_GetTasksForSeminarist_FullMethodName           = "/work.WorkService/GetTasksForSeminarist"
+	WorkService_GetStudentWorksByTask_FullMethodName           = "/work.WorkService/GetStudentWorksByTask"
+	WorkService_GetAssistantsByDiscipline_FullMethodName       = "/work.WorkService/GetAssistantsByDiscipline"
+	WorkService_AssignAssistantsToWorks_FullMethodName         = "/work.WorkService/AssignAssistantsToWorks"
+	WorkService_UpdateWork_FullMethodName                      = "/work.WorkService/UpdateWork"
+	WorkService_GetStudentsByGroupAndDiscipline_FullMethodName = "/work.WorkService/GetStudentsByGroupAndDiscipline"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -63,6 +64,7 @@ type WorkServiceClient interface {
 	GetAssistantsByDiscipline(ctx context.Context, in *GetAssistantsByDisciplineRequest, opts ...grpc.CallOption) (*GetAssistantsByDisciplineResponse, error)
 	AssignAssistantsToWorks(ctx context.Context, in *AssignAssistantsToWorksRequest, opts ...grpc.CallOption) (*AssignAssistantsToWorksResponse, error)
 	UpdateWork(ctx context.Context, in *UpdateWorkRequest, opts ...grpc.CallOption) (*UpdateWorkResponse, error)
+	GetStudentsByGroupAndDiscipline(ctx context.Context, in *GetStudentsByGroupAndDisciplineRequest, opts ...grpc.CallOption) (*GetStudentsByGroupAndDisciplineResponse, error)
 }
 
 type workServiceClient struct {
@@ -263,6 +265,16 @@ func (c *workServiceClient) UpdateWork(ctx context.Context, in *UpdateWorkReques
 	return out, nil
 }
 
+func (c *workServiceClient) GetStudentsByGroupAndDiscipline(ctx context.Context, in *GetStudentsByGroupAndDisciplineRequest, opts ...grpc.CallOption) (*GetStudentsByGroupAndDisciplineResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStudentsByGroupAndDisciplineResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetStudentsByGroupAndDiscipline_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -286,6 +298,7 @@ type WorkServiceServer interface {
 	GetAssistantsByDiscipline(context.Context, *GetAssistantsByDisciplineRequest) (*GetAssistantsByDisciplineResponse, error)
 	AssignAssistantsToWorks(context.Context, *AssignAssistantsToWorksRequest) (*AssignAssistantsToWorksResponse, error)
 	UpdateWork(context.Context, *UpdateWorkRequest) (*UpdateWorkResponse, error)
+	GetStudentsByGroupAndDiscipline(context.Context, *GetStudentsByGroupAndDisciplineRequest) (*GetStudentsByGroupAndDisciplineResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -352,6 +365,9 @@ func (UnimplementedWorkServiceServer) AssignAssistantsToWorks(context.Context, *
 }
 func (UnimplementedWorkServiceServer) UpdateWork(context.Context, *UpdateWorkRequest) (*UpdateWorkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWork not implemented")
+}
+func (UnimplementedWorkServiceServer) GetStudentsByGroupAndDiscipline(context.Context, *GetStudentsByGroupAndDisciplineRequest) (*GetStudentsByGroupAndDisciplineResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudentsByGroupAndDiscipline not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -716,6 +732,24 @@ func _WorkService_UpdateWork_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_GetStudentsByGroupAndDiscipline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentsByGroupAndDisciplineRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetStudentsByGroupAndDiscipline(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetStudentsByGroupAndDiscipline_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetStudentsByGroupAndDiscipline(ctx, req.(*GetStudentsByGroupAndDisciplineRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -798,6 +832,10 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateWork",
 			Handler:    _WorkService_UpdateWork_Handler,
+		},
+		{
+			MethodName: "GetStudentsByGroupAndDiscipline",
+			Handler:    _WorkService_GetStudentsByGroupAndDiscipline_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
