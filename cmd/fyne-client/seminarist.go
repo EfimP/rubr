@@ -31,6 +31,7 @@ type Work struct {
 	TaskID      int32
 	Status      string // Добавляем статус
 	Grade       string // Добавляем оценку
+	Deadline    time.Time
 }
 
 type Task struct {
@@ -45,7 +46,7 @@ func CreateSeminaristWorksPage(state *AppState) fyne.CanvasObject {
 	separatorColor := color.NRGBA{R: 200, G: 200, B: 200, A: 255}
 
 	// Подключение к сервисам
-	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to workservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к серверу"))
@@ -53,7 +54,7 @@ func CreateSeminaristWorksPage(state *AppState) fyne.CanvasObject {
 	defer workConn.Close()
 	workClient := workpb.NewWorkServiceClient(workConn)
 
-	workAssignmentConn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+	workAssignmentConn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to workassignmentservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису назначений"))
@@ -61,7 +62,7 @@ func CreateSeminaristWorksPage(state *AppState) fyne.CanvasObject {
 	defer workAssignmentConn.Close()
 	workAssignmentClient := workassignmentpb.NewWorkAssignmentServiceClient(workAssignmentConn)
 
-	gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+	gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to gradingservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису оценок"))
@@ -69,7 +70,7 @@ func CreateSeminaristWorksPage(state *AppState) fyne.CanvasObject {
 	defer gradingConn.Close()
 	gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to rubricservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису рубрик"))
@@ -315,7 +316,7 @@ func createTasksTable(tasks []Task, separatorColor color.Color, state *AppState)
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
 
-				conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+				conn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Не удалось подключиться к сервису: %v", err)
 					return
@@ -372,7 +373,7 @@ func CreateTaskDetailsPage(state *AppState, taskID int32) fyne.CanvasObject {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	conn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к сервису: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -469,7 +470,7 @@ func CreateAssistantAssignmentPage(state *AppState, taskID int32) fyne.CanvasObj
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	conn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	conn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к сервису: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -659,7 +660,7 @@ func CreateAssistantAssignmentPage(state *AppState, taskID int32) fyne.CanvasObj
 			defer assignCancel()
 
 			// Создаём новое gRPC-соединение для AssignAssistantsToWorks
-			assignConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+			assignConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 			if err != nil {
 				log.Printf("Не удалось подключиться к сервису для назначения ассистентов: %v", err)
 				popupContent := container.NewVBox(
@@ -722,7 +723,7 @@ func CreateSeminaristBlockingCriteriaGradingPage(state *AppState, workID int32, 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to rubricservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -730,7 +731,7 @@ func CreateSeminaristBlockingCriteriaGradingPage(state *AppState, workID int32, 
 	defer rubricConn.Close()
 	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
 
-	gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+	gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to connect to gradingservice: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -859,7 +860,7 @@ func CreateSeminaristBlockingCriteriaGradingPage(state *AppState, workID int32, 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+		gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to gradingservice: %v", err)
 			dialog.ShowError(err, w)
@@ -941,7 +942,7 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к RubricService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -949,7 +950,7 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 	defer rubricConn.Close()
 	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
 
-	gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+	gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к GradingService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -957,7 +958,7 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 	defer gradingConn.Close()
 	gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
-	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к WorkService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -1214,7 +1215,7 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+		gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Не удалось подключиться к GradingService: %v", err)
 			dialog.ShowError(err, w)
@@ -1276,7 +1277,7 @@ func CreateSeminaristMainCriteriaGradingPage(state *AppState, workID int32, task
 		}
 
 		// Обновление статуса работы и очистка assistant_id
-		workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+		workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Не удалось подключиться к WorkService: %v", err)
 			dialog.ShowError(err, w)
@@ -1399,7 +1400,7 @@ func CreateTaskStudentWorksPage(state *AppState, taskID int32) fyne.CanvasObject
 	defer cancel()
 
 	// Подключение к сервисам
-	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к WorkService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -1407,7 +1408,7 @@ func CreateTaskStudentWorksPage(state *AppState, taskID int32) fyne.CanvasObject
 	defer workConn.Close()
 	workClient := workpb.NewWorkServiceClient(workConn)
 
-	gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+	gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к GradingService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -1415,7 +1416,7 @@ func CreateTaskStudentWorksPage(state *AppState, taskID int32) fyne.CanvasObject
 	defer gradingConn.Close()
 	gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к RubricService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -1538,7 +1539,7 @@ func CreateTaskStudentWorksPage(state *AppState, taskID int32) fyne.CanvasObject
 				downloadCtx, downloadCancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer downloadCancel()
 
-				workAssignmentConn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+				workAssignmentConn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
 				if err != nil {
 					log.Printf("Не удалось подключиться к WorkAssignmentService: %v", err)
 					dialog.ShowInformation("Ошибка", "Не удалось подключиться к сервису", state.window)
@@ -1637,7 +1638,7 @@ func CreateTaskReportPage(state *AppState, taskID int32) fyne.CanvasObject {
 	defer cancel()
 
 	// Подключение к сервисам
-	workConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure())
+	workConn, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к WorkService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -1645,7 +1646,7 @@ func CreateTaskReportPage(state *AppState, taskID int32) fyne.CanvasObject {
 	defer workConn.Close()
 	workClient := workpb.NewWorkServiceClient(workConn)
 
-	gradingConn, err := grpc.Dial("localhost:50057", grpc.WithInsecure())
+	gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к GradingService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
@@ -1653,7 +1654,7 @@ func CreateTaskReportPage(state *AppState, taskID int32) fyne.CanvasObject {
 	defer gradingConn.Close()
 	gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
-	rubricConn, err := grpc.Dial("localhost:50055", grpc.WithInsecure())
+	rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к RubricService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))

@@ -683,7 +683,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 						return
 					}
 
-					conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(15*time.Second))
+					conn, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(15*time.Second))
 					if err != nil {
 						log.Printf("Failed to connect to superaccservice: %v", err)
 						dialog.ShowInformation("Ошибка", "Не удалось подключиться к серверу", w)
@@ -789,7 +789,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 						defer conn.Close()
 						log.Printf("Connection established, creating client")
 						client := superaccpb.NewSuperAccServiceClient(conn)
-						
+
 						ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 						defer cancel()
 						log.Printf("Sending DeleteDiscipline request for IDs %v", selectedIDs)
