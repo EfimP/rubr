@@ -96,18 +96,25 @@ func СreateStudentGradesPage(state *AppState) fyne.CanvasObject {
 	})
 	backButtonRow := container.New(layout.NewMaxLayout(), backButton)
 
-	// Контейнер для таблицы
-	var tableContent []fyne.CanvasObject
-	// Подключение к GradingService (порт 50057) для получения оценок
+	// Подключение к WorkService
+	connWork, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к WorkService: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к серверу работ"))
+	}
+	defer connWork.Close()
+	workClient := pbWork.NewWorkServiceClient(connWork)
+
+	// Подключение к GradingService
 	connGrade, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Не удалось подключиться к GradingService: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка подключения к серверу оценок"))
 	}
 	defer connGrade.Close()
+	gradingClient := pbGrade.NewGradingServiceClient(connGrade)
 
-	gradeClient := pbGrade.NewGradingServiceClient(connGrade)
-	// Предполагаем, что оценки привязаны к работам студента
+	// Получение ID студента
 	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 	if err != nil {
 		log.Printf("Некорректный ID пользователя: %v", err)
@@ -115,45 +122,128 @@ func СreateStudentGradesPage(state *AppState) fyne.CanvasObject {
 	}
 	userID := int32(userIDint64)
 
-	worksResp, err := getStudentWorks(userID) // Вспомогательная функция
-	if err != nil {
-		log.Printf("Не удалось получить работы студента: %v", err)
-		return container.NewVBox(widget.NewLabel("Ошибка загрузки работ"))
+	// Получение дисциплин студента
+	discResp, err := workClient.GetStudentDisciplines(context.Background(), &pbWork.GetStudentDisciplinesRequest{StudentId: userID})
+	if err != nil || discResp.Error != "" {
+		log.Printf("Ошибка получения дисциплин для student_id %d: %v", userID, err)
+		return container.NewVBox(widget.NewLabel("Ошибка загрузки дисциплин"))
 	}
 
-	for _, work := range worksResp.Works {
-		respGrade, err := gradeClient.GetCriteriaMarks(context.Background(), &pbGrade.GetCriteriaMarksRequest{WorkId: work.Id})
+	var tableContent []fyne.CanvasObject
+	for _, discipline := range discResp.Disciplines {
+		// Получение работ по дисциплине
+		worksResp, err := workClient.GetStudentWorksByDiscipline(context.Background(), &pbWork.GetStudentWorksByDisciplineRequest{
+			StudentId:    userID,
+			DisciplineId: discipline.Id,
+		})
+		if err != nil || worksResp.Error != "" {
+			log.Printf("Ошибка получения работ для discipline_id %d: %v", discipline.Id, err)
+			continue
+		}
+
+		rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 		if err != nil {
-			log.Printf("Не удалось получить оценки для работы %d: %v", work.Id, err)
-			continue
+			log.Printf("Не удалось подключиться к сервису рубрик: %v", err)
+			return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису рубрик"))
 		}
-		if respGrade.Error != "" {
-			log.Printf("Ошибка от сервера для работы %d: %s", work.Id, respGrade.Error)
-			continue
-		}
+		defer rubricConn.Close()
+		rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
 
-		for i, mark := range respGrade.Marks {
-			nameLabel := widget.NewLabel(fmt.Sprintf("Критерий %d (Работа: %s)", mark.CriterionId, work.Title))
-			gradesButton := widget.NewButton(fmt.Sprintf("%.2f", mark.Mark), func(m *pbGrade.CriterionMark, w *pbWork.Work) func() {
-				return func() {
-					log.Printf("Нажата оценка для критерия %d (работа: %s): %.2f", m.CriterionId, w.Title, m.Mark)
-					details := fmt.Sprintf("Оценка: %.2f, Комментарий: %s, Работа: %s", m.Mark, m.Comment, w.Title)
-					dialog.ShowInformation("Детали оценки", details, myWindow)
+		// Контейнер для оценок
+		var gradeRows []fyne.CanvasObject
+		var grades []float32
+		for _, work := range worksResp.Works {
+			if work.Status == "graded by assistant" || work.Status == "graded by seminarist" {
+				// Получение оценок
+				marksResp, err := gradingClient.GetCriteriaMarks(context.Background(), &gradingpb.GetCriteriaMarksRequest{WorkId: work.Id})
+				if err != nil || marksResp.Error != "" {
+					log.Printf("Ошибка получения оценок для работы %d: %v", work.Id, err)
+					continue
 				}
-			}(mark, work))
-			averageLabel := widget.NewLabel(fmt.Sprintf("%.2f", mark.Mark))
 
-			row := container.NewHBox(nameLabel, gradesButton, averageLabel)
-			tableContent = append(tableContent, row)
+				// Вычисление итоговой оценки
+				blockingResp, err := rubricClient.LoadTaskBlockingCriterias(context.Background(), &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: work.Id})
+				if err != nil || blockingResp.Error != "" {
+					log.Printf("Ошибка загрузки блокирующих критериев для работы %d: %v", work.Id, err)
+					continue
+				}
 
-			if i < len(respGrade.Marks)-1 {
-				separator := canvas.NewLine(color.Black)
-				separator.StrokeWidth = 2
-				separator.Position1 = fyne.NewPos(0, 0)
-				separator.Position2 = fyne.NewPos(1600, 0)
-				separatorContainer := container.New(layout.NewMaxLayout(), separator)
-				tableContent = append(tableContent, separatorContainer)
+				mainResp, err := rubricClient.LoadTaskMainCriterias(context.Background(), &rubricpb.LoadTaskMainCriteriasRequest{TaskId: work.Id})
+				if err != nil || mainResp.Error != "" {
+					log.Printf("Ошибка загрузки основных критериев для работы %d: %v", work.Id, err)
+					continue
+				}
+
+				minBlockingMark := float32(0)
+				hasBlockingMark := false
+				for _, mark := range marksResp.Marks {
+					for _, crit := range blockingResp.Criteria {
+						if mark.CriterionId == crit.Id && mark.Mark > 0 {
+							if !hasBlockingMark || mark.Mark < minBlockingMark {
+								minBlockingMark = mark.Mark
+								hasBlockingMark = true
+							}
+						}
+					}
+				}
+
+				var finalGrade float32
+				if hasBlockingMark {
+					finalGrade = minBlockingMark
+				} else {
+					totalMark := float32(0)
+					totalMaxMark := float32(0)
+					for _, mark := range marksResp.Marks {
+						for _, group := range mainResp.Groups {
+							for _, crit := range group.Criteria {
+								if mark.CriterionId == crit.Id {
+									totalMark += mark.Mark
+								}
+							}
+						}
+					}
+					for _, group := range mainResp.Groups {
+						totalMaxMark += float32(len(group.Criteria))
+					}
+					if totalMaxMark > 0 {
+						finalGrade = (totalMark / totalMaxMark) * 10
+					} else {
+						finalGrade = 0
+					}
+				}
+
+				gradeLabel := widget.NewLabel(fmt.Sprintf("%.2f", finalGrade))
+				gradeRows = append(gradeRows, gradeLabel)
+				grades = append(grades, finalGrade)
 			}
+		}
+
+		// Вычисление средней оценки
+		var averageGrade float32
+		if len(grades) > 0 {
+			sum := float32(0)
+			for _, grade := range grades {
+				sum += grade
+			}
+			averageGrade = sum / float32(len(grades))
+		}
+
+		// Создание строки таблицы
+		discLabel := widget.NewLabel(discipline.Name)
+		gradesContainer := container.NewHBox(gradeRows...)
+		avgLabel := widget.NewLabel(fmt.Sprintf("%.2f", averageGrade))
+
+		row := container.NewHBox(discLabel, gradesContainer, avgLabel)
+		tableContent = append(tableContent, row)
+
+		// Добавление разделителя
+		if len(discResp.Disciplines) > 1 && &discipline != &discResp.Disciplines[len(discResp.Disciplines)-1] {
+			separator := canvas.NewLine(color.Black)
+			separator.StrokeWidth = 2
+			separator.Position1 = fyne.NewPos(0, 0)
+			separator.Position2 = fyne.NewPos(1600, 0)
+			separatorContainer := container.New(layout.NewMaxLayout(), separator)
+			tableContent = append(tableContent, separatorContainer)
 		}
 	}
 

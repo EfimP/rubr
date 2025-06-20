@@ -24,6 +24,8 @@ service WorkService {
   rpc GetStudentWorksByTask (GetStudentWorksByTaskRequest) returns (GetStudentWorksByTaskResponse) {}
   rpc GetAssistantsByDiscipline (GetAssistantsByDisciplineRequest) returns (GetAssistantsByDisciplineResponse) {}
   rpc AssignAssistantsToWorks (AssignAssistantsToWorksRequest) returns (AssignAssistantsToWorksResponse) {}
+  rpc GetStudentDisciplines (GetStudentDisciplinesRequest) returns (GetStudentDisciplinesResponse);
+  rpc GetStudentWorksByDiscipline(GetStudentWorksByDisciplineRequest) returns (GetStudentWorksByDisciplineResponse);
 
   rpc UpdateWork(UpdateWorkRequest) returns (UpdateWorkResponse);
 
@@ -310,6 +312,29 @@ message Work {
   string status = 4;  // Из student_works.status
 }
 message ListWorksForStudentResponse {
+  repeated Work works = 1;
+  string error = 2;
+}
+
+message GetStudentDisciplinesRequest {
+  int32 student_id = 1;
+}
+
+message GetStudentDisciplinesResponse {
+  message Discipline {
+    int32 id = 1;
+    string name = 2;
+  }
+  repeated Discipline disciplines = 1;
+  string error = 2;
+}
+
+message GetStudentWorksByDisciplineRequest {
+  int32 student_id = 1;
+  int32 discipline_id = 2;
+}
+
+message GetStudentWorksByDisciplineResponse {
   repeated Work works = 1;
   string error = 2;
 }

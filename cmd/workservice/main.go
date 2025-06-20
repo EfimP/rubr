@@ -454,6 +454,81 @@ func (s *server) GetDisciplines(ctx context.Context, req *pb.GetDisciplinesReque
 	return &pb.GetDisciplinesResponse{Disciplines: disciplines}, nil
 }
 
+func (s *server) GetStudentDisciplines(ctx context.Context, req *pb.GetStudentDisciplinesRequest) (*pb.GetStudentDisciplinesResponse, error) {
+	if ctx.Err() != nil {
+		return &pb.GetStudentDisciplinesResponse{Error: "Request canceled"}, nil
+	}
+
+	query := `
+		SELECT DISTINCT d.id, d.name
+		FROM disciplines d
+		JOIN groups_in_disciplines gd ON d.id = gd.discipline_id
+		JOIN users_in_groups ug ON gd.group_id = ug.group_id
+		WHERE ug.user_id = $1
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.StudentId)
+	if err != nil {
+		log.Printf("Ошибка получения дисциплин для student_id %d: %v", req.StudentId, err)
+		return &pb.GetStudentDisciplinesResponse{Error: "Ошибка сервера"}, nil
+	}
+	defer rows.Close()
+
+	var disciplines []*pb.GetStudentDisciplinesResponse_Discipline
+	for rows.Next() {
+		var discipline pb.GetStudentDisciplinesResponse_Discipline
+		if err := rows.Scan(&discipline.Id, &discipline.Name); err != nil {
+			log.Printf("Ошибка сканирования строки для student_id %d: %v", req.StudentId, err)
+			return &pb.GetStudentDisciplinesResponse{Error: "Ошибка обработки данных"}, nil
+		}
+		disciplines = append(disciplines, &discipline)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации строк для student_id %d: %v", req.StudentId, err)
+		return &pb.GetStudentDisciplinesResponse{Error: "Ошибка обработки данных"}, nil
+	}
+
+	return &pb.GetStudentDisciplinesResponse{Disciplines: disciplines}, nil
+}
+
+func (s *server) GetStudentWorksByDiscipline(ctx context.Context, req *pb.GetStudentWorksByDisciplineRequest) (*pb.GetStudentWorksByDisciplineResponse, error) {
+	if ctx.Err() != nil {
+		return &pb.GetStudentWorksByDisciplineResponse{Error: "Request canceled"}, nil
+	}
+
+	query := `
+		SELECT sw.id, t.title, t.deadline, sw.status
+		FROM student_works sw
+		JOIN tasks t ON sw.task_id = t.id
+		JOIN groups_in_disciplines gd ON t.group_id = gd.group_id AND t.discipline_id = gd.discipline_id
+		JOIN users_in_groups ug ON gd.group_id = ug.group_id
+		WHERE sw.student_id = $1 AND t.discipline_id = $2
+	`
+	rows, err := s.db.QueryContext(ctx, query, req.StudentId, req.DisciplineId)
+	if err != nil {
+		log.Printf("Ошибка получения работ для student_id %d и discipline_id %d: %v", req.StudentId, req.DisciplineId, err)
+		return &pb.GetStudentWorksByDisciplineResponse{Error: "Ошибка сервера"}, nil
+	}
+	defer rows.Close()
+
+	var works []*pb.Work
+	for rows.Next() {
+		var work pb.Work
+		var deadline time.Time
+		if err := rows.Scan(&work.Id, &work.Title, &deadline, &work.Status); err != nil {
+			log.Printf("Ошибка сканирования строки для student_id %d: %v", req.StudentId, err)
+			return &pb.GetStudentWorksByDisciplineResponse{Error: "Ошибка обработки данных"}, nil
+		}
+		work.Deadline = deadline.Format(time.RFC3339)
+		works = append(works, &work)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Ошибка итерации строк для student_id %d: %v", req.StudentId, err)
+		return &pb.GetStudentWorksByDisciplineResponse{Error: "Ошибка обработки данных"}, nil
+	}
+
+	return &pb.GetStudentWorksByDisciplineResponse{Works: works}, nil
+}
+
 func (s *server) GetTaskDetails(ctx context.Context, req *pb.GetTaskDetailsRequest) (*pb.GetTaskDetailsResponse, error) {
 	query := `
 		SELECT t.title, t.description, t.deadline, g.name AS group_name, d.name AS discipline_name,

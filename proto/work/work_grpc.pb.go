@@ -39,6 +39,8 @@ const (
 	WorkService_GetStudentWorksByTask_FullMethodName           = "/work.WorkService/GetStudentWorksByTask"
 	WorkService_GetAssistantsByDiscipline_FullMethodName       = "/work.WorkService/GetAssistantsByDiscipline"
 	WorkService_AssignAssistantsToWorks_FullMethodName         = "/work.WorkService/AssignAssistantsToWorks"
+	WorkService_GetStudentDisciplines_FullMethodName           = "/work.WorkService/GetStudentDisciplines"
+	WorkService_GetStudentWorksByDiscipline_FullMethodName     = "/work.WorkService/GetStudentWorksByDiscipline"
 	WorkService_UpdateWork_FullMethodName                      = "/work.WorkService/UpdateWork"
 	WorkService_GetStudentsByGroupAndDiscipline_FullMethodName = "/work.WorkService/GetStudentsByGroupAndDiscipline"
 )
@@ -67,6 +69,8 @@ type WorkServiceClient interface {
 	GetStudentWorksByTask(ctx context.Context, in *GetStudentWorksByTaskRequest, opts ...grpc.CallOption) (*GetStudentWorksByTaskResponse, error)
 	GetAssistantsByDiscipline(ctx context.Context, in *GetAssistantsByDisciplineRequest, opts ...grpc.CallOption) (*GetAssistantsByDisciplineResponse, error)
 	AssignAssistantsToWorks(ctx context.Context, in *AssignAssistantsToWorksRequest, opts ...grpc.CallOption) (*AssignAssistantsToWorksResponse, error)
+	GetStudentDisciplines(ctx context.Context, in *GetStudentDisciplinesRequest, opts ...grpc.CallOption) (*GetStudentDisciplinesResponse, error)
+	GetStudentWorksByDiscipline(ctx context.Context, in *GetStudentWorksByDisciplineRequest, opts ...grpc.CallOption) (*GetStudentWorksByDisciplineResponse, error)
 	UpdateWork(ctx context.Context, in *UpdateWorkRequest, opts ...grpc.CallOption) (*UpdateWorkResponse, error)
 	GetStudentsByGroupAndDiscipline(ctx context.Context, in *GetStudentsByGroupAndDisciplineRequest, opts ...grpc.CallOption) (*GetStudentsByGroupAndDisciplineResponse, error)
 }
@@ -279,6 +283,26 @@ func (c *workServiceClient) AssignAssistantsToWorks(ctx context.Context, in *Ass
 	return out, nil
 }
 
+func (c *workServiceClient) GetStudentDisciplines(ctx context.Context, in *GetStudentDisciplinesRequest, opts ...grpc.CallOption) (*GetStudentDisciplinesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStudentDisciplinesResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetStudentDisciplines_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workServiceClient) GetStudentWorksByDiscipline(ctx context.Context, in *GetStudentWorksByDisciplineRequest, opts ...grpc.CallOption) (*GetStudentWorksByDisciplineResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStudentWorksByDisciplineResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetStudentWorksByDiscipline_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *workServiceClient) UpdateWork(ctx context.Context, in *UpdateWorkRequest, opts ...grpc.CallOption) (*UpdateWorkResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateWorkResponse)
@@ -323,6 +347,8 @@ type WorkServiceServer interface {
 	GetStudentWorksByTask(context.Context, *GetStudentWorksByTaskRequest) (*GetStudentWorksByTaskResponse, error)
 	GetAssistantsByDiscipline(context.Context, *GetAssistantsByDisciplineRequest) (*GetAssistantsByDisciplineResponse, error)
 	AssignAssistantsToWorks(context.Context, *AssignAssistantsToWorksRequest) (*AssignAssistantsToWorksResponse, error)
+	GetStudentDisciplines(context.Context, *GetStudentDisciplinesRequest) (*GetStudentDisciplinesResponse, error)
+	GetStudentWorksByDiscipline(context.Context, *GetStudentWorksByDisciplineRequest) (*GetStudentWorksByDisciplineResponse, error)
 	UpdateWork(context.Context, *UpdateWorkRequest) (*UpdateWorkResponse, error)
 	GetStudentsByGroupAndDiscipline(context.Context, *GetStudentsByGroupAndDisciplineRequest) (*GetStudentsByGroupAndDisciplineResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
@@ -394,6 +420,12 @@ func (UnimplementedWorkServiceServer) GetAssistantsByDiscipline(context.Context,
 }
 func (UnimplementedWorkServiceServer) AssignAssistantsToWorks(context.Context, *AssignAssistantsToWorksRequest) (*AssignAssistantsToWorksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AssignAssistantsToWorks not implemented")
+}
+func (UnimplementedWorkServiceServer) GetStudentDisciplines(context.Context, *GetStudentDisciplinesRequest) (*GetStudentDisciplinesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudentDisciplines not implemented")
+}
+func (UnimplementedWorkServiceServer) GetStudentWorksByDiscipline(context.Context, *GetStudentWorksByDisciplineRequest) (*GetStudentWorksByDisciplineResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudentWorksByDiscipline not implemented")
 }
 func (UnimplementedWorkServiceServer) UpdateWork(context.Context, *UpdateWorkRequest) (*UpdateWorkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWork not implemented")
@@ -782,6 +814,42 @@ func _WorkService_AssignAssistantsToWorks_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_GetStudentDisciplines_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentDisciplinesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetStudentDisciplines(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetStudentDisciplines_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetStudentDisciplines(ctx, req.(*GetStudentDisciplinesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkService_GetStudentWorksByDiscipline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentWorksByDisciplineRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetStudentWorksByDiscipline(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetStudentWorksByDiscipline_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetStudentWorksByDiscipline(ctx, req.(*GetStudentWorksByDisciplineRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _WorkService_UpdateWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateWorkRequest)
 	if err := dec(in); err != nil {
@@ -904,6 +972,14 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AssignAssistantsToWorks",
 			Handler:    _WorkService_AssignAssistantsToWorks_Handler,
+		},
+		{
+			MethodName: "GetStudentDisciplines",
+			Handler:    _WorkService_GetStudentDisciplines_Handler,
+		},
+		{
+			MethodName: "GetStudentWorksByDiscipline",
+			Handler:    _WorkService_GetStudentWorksByDiscipline_Handler,
 		},
 		{
 			MethodName: "UpdateWork",
