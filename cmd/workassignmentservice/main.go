@@ -40,8 +40,8 @@ func initS3Client() {
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
 			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 				return aws.Endpoint{
-					URL:           "https://storage.beget.com", // Единый endpoint Beget
-					SigningRegion: "ru1",                       // Можно оставить по умолчанию
+					URL:           "https://s3.ru1.storage.beget.cloud", // Единый endpoint Beget
+					SigningRegion: "ru1",                                // Можно оставить по умолчанию
 				}, nil
 			},
 		)),
@@ -54,7 +54,7 @@ func initS3Client() {
 	S3Client = s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = true // Использовать стиль пути (bucket в запросе, а не в домене)
 	})
-	log.Printf("S3 клиент инициализирован с регионом: %s и endpoint: %s", cfg.Region, "https://storage.beget.com")
+	log.Printf("S3 клиент инициализирован с регионом: %s и endpoint: %s", cfg.Region, "https://s3.ru1.storage.beget.cloud")
 }
 
 func (s *server) GetWorksForAssistant(ctx context.Context, req *pb.GetWorksForAssistantRequest) (*pb.GetWorksForAssistantResponse, error) {
