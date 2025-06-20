@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -17,8 +21,18 @@ import (
 )
 
 type server struct {
-	db *sql.DB
 	pb.UnimplementedWorkAssignmentServiceServer
+	db *sql.DB
+}
+
+var S3Client *s3.Client
+
+func initS3Client() {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("Ошибка инициализации S3 клиента: %v", err)
+	}
+	S3Client = s3.NewFromConfig(cfg)
 }
 
 func (s *server) GetWorksForAssistant(ctx context.Context, req *pb.GetWorksForAssistantRequest) (*pb.GetWorksForAssistantResponse, error) {
@@ -334,56 +348,98 @@ func (s *server) CreateWork(ctx context.Context, req *pb.CreateWorkRequest) (*pb
 }
 
 func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAssignmentFileRequest) (*pb.DownloadAssignmentFileResponse, error) {
-	// Проверка контекста
 	if ctx.Err() != nil {
 		return &pb.DownloadAssignmentFileResponse{Error: "Request canceled"}, nil
 	}
 
-	// Проверка существования работы
-	var exists bool
-	err := s.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM student_works WHERE id = $1)", req.WorkId).Scan(&exists)
-	if err != nil {
-		log.Printf("Ошибка проверки работы %d: %v", req.WorkId, err)
-		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка сервера"}, nil
-	}
-	if !exists {
-		return &pb.DownloadAssignmentFileResponse{Error: "Работа не найдена"}, nil
-	}
+	// Генерация уникального ключа (например, с текущей датой и временем)
+	bucket := "your-bucket-name" // Замените на имя вашего бакета
+	key := fmt.Sprintf("works/%d/%s-%s", req.WorkId, time.Now().Format("20060102-150405"), req.FileName)
 
-	// Настройка клиента S3 (предполагается, что AWS SDK инициализирован)
-	//s3Client := s3.NewFromConfig(s.awsConfig) // awsConfig должен быть настроен в структуре server
-	//bucketName := "your-s3-bucket"            // Замените на имя вашего бакета
-	//objectKey := fmt.Sprintf("assignments/%d/%s", req.WorkId, req.FileName)
-	//
-	//// Загрузка файла на S3
-	//_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
-	//	Bucket: aws.String(bucketName),
-	//	Key:    aws.String(objectKey),
-	//	Body:   bytes.NewReader(req.Content),
-	//})
+	// Загрузка файла в S3
+	uploader := manager.NewUploader(S3Client)
+	_, err := uploader.Upload(ctx, &s3.PutObjectInput{
+		Bucket: &bucket,
+		Key:    &key,
+		Body:   bytes.NewReader(req.Content),
+	})
 	if err != nil {
-		log.Printf("Ошибка загрузки файла на S3 для работы %d: %v", req.WorkId, err)
-		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка загрузки файла на S3"}, nil
+		log.Printf("Ошибка загрузки файла для work_id %d: %v", req.WorkId, err)
+		return &pb.DownloadAssignmentFileResponse{Error: fmt.Sprintf("Ошибка загрузки: %v", err)}, nil
 	}
-
-	// Генерация URL-адреса объекта S3 (например, префикс + ключ)
-	//s3URL := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", bucketName, objectKey)
 
 	// Обновление content_url в базе данных
-	//_, err = s.db.ExecContext(ctx, `
-	//    UPDATE student_works
-	//    SET content_url = $2, updated_at = NOW()
-	//    WHERE id = $1`, req.WorkId, s3URL)
-	//if err != nil {
-	//	log.Printf("Ошибка обновления content_url для работы %d: %v", req.WorkId, err)
-	//	return &pb.DownloadAssignmentFileResponse{Error: "Ошибка сохранения URL файла"}, nil
-	//}
-	//
-	//log.Printf("Файл %s успешно загружен на S3 для работы %d с URL %s", req.FileName, req.WorkId, s3URL)
-	return &pb.DownloadAssignmentFileResponse{}, nil
+	_, err = s.db.ExecContext(ctx, `
+		UPDATE student_works 
+		SET content_url = $1 
+		WHERE id = $2`,
+		key, req.WorkId)
+	if err != nil {
+		log.Printf("Ошибка обновления content_url для work_id %d: %v", req.WorkId, err)
+		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка обновления базы данных"}, nil
+	}
+
+	// Генерация временной ссылки (presigned URL)
+	presigner := s3.NewPresignClient(S3Client)
+	presignResult, err := presigner.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: &bucket,
+		Key:    &key,
+	}, func(opts *s3.PresignOptions) {
+		opts.Expires = 24 * time.Hour // Ссылка действительна 24 часа
+	})
+	if err != nil {
+		log.Printf("Ошибка генерации presigned URL для work_id %d: %v", req.WorkId, err)
+		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка генерации ссылки"}, nil
+	}
+
+	log.Printf("Файл для work_id %d загружен в S3: %s", req.WorkId, key)
+	return &pb.DownloadAssignmentFileResponse{ContentUrl: presignResult.URL}, nil
+}
+
+func (s *server) GetAssignmentFileURL(ctx context.Context, req *pb.GetAssignmentFileURLRequest) (*pb.GetAssignmentFileURLResponse, error) {
+	if ctx.Err() != nil {
+		return &pb.GetAssignmentFileURLResponse{Error: "Request canceled"}, nil
+	}
+
+	var contentURL string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT content_url 
+		FROM student_works 
+		WHERE id = $1`,
+		req.WorkId).Scan(&contentURL)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &pb.GetAssignmentFileURLResponse{Error: "Работа не найдена"}, nil
+		}
+		log.Printf("Ошибка получения content_url для work_id %d: %v", req.WorkId, err)
+		return &pb.GetAssignmentFileURLResponse{Error: "Ошибка сервера"}, nil
+	}
+
+	if contentURL == "" {
+		return &pb.GetAssignmentFileURLResponse{Error: "Файл не загружен"}, nil
+	}
+
+	// Генерация presigned URL
+	bucket := "your-bucket-name" // Замените на имя вашего бакета
+	presigner := s3.NewPresignClient(S3Client)
+	presignResult, err := presigner.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: &bucket,
+		Key:    &contentURL,
+	}, func(opts *s3.PresignOptions) {
+		opts.Expires = 24 * time.Hour
+	})
+	if err != nil {
+		log.Printf("Ошибка генерации presigned URL для work_id %d: %v", req.WorkId, err)
+		return &pb.GetAssignmentFileURLResponse{Error: "Ошибка генерации ссылки"}, nil
+	}
+
+	log.Printf("Сгенерирована ссылка для work_id %d: %s", req.WorkId, presignResult.URL)
+	return &pb.GetAssignmentFileURLResponse{Url: presignResult.URL}, nil
 }
 
 func main() {
+
+	initS3Client()
 
 	dbHost := os.Getenv("DB_HOST")
 	dbPortStr := os.Getenv("DB_PORT")

@@ -10,6 +10,7 @@ service WorkAssignmentService {
   rpc SubmitWork (SubmitWorkRequest) returns (SubmitWorkResponse);
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse);
   rpc DownloadAssignmentFile (DownloadAssignmentFileRequest) returns (DownloadAssignmentFileResponse);
+  rpc GetAssignmentFileURL (GetAssignmentFileURLRequest) returns (GetAssignmentFileURLResponse);
   rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
   rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
 }
@@ -89,13 +90,24 @@ message GetTaskDetailsResponse {
 }
 
 message DownloadAssignmentFileRequest {
-  int32 work_id = 1;    // ID работы (student_works.id)
-  string file_name = 2; // Имя файла
-  bytes content = 3;    // Содержимое файла
+  int32 work_id = 1;      // ID работы (student_works.id)
+  string file_name = 2;   // Имя файла
+  bytes content = 3;      // Содержимое файла
 }
 
 message DownloadAssignmentFileResponse {
-  string error = 1; // Сообщение об ошибке, если есть
+  string content_url = 1; // URL файла в S3
+  string error = 2;       // Сообщение об ошибке, если есть
+}
+
+message GetAssignmentFileURLRequest {
+  int32 work_id = 1;      // ID работы
+  string file_name = 2;   // Имя файла
+}
+
+message GetAssignmentFileURLResponse {
+  string url = 1;         // Временная ссылка на файл
+  string error = 2;       // Сообщение об ошибке, если есть
 }
 
 message CreateWorkRequest {

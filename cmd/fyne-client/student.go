@@ -13,6 +13,7 @@ import (
 	"image/color"
 	"io"
 	"log"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -390,34 +391,6 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 		return container.NewVBox(widget.NewLabel(resp.Error))
 	}
 
-	connCheck, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
-	if err != nil {
-		log.Printf("Не удалось подключиться к сервису для проверки работы: %v", err)
-		// Продолжаем выполнение, так как это не критично
-	}
-	defer connCheck.Close()
-
-	clientCheck := workassignmentpb.NewWorkAssignmentServiceClient(connCheck)
-	checkResp, err := clientCheck.CheckExistingWork(ctx, &workassignmentpb.CheckExistingWorkRequest{
-		StudentId: func() int32 {
-			userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
-			if err != nil {
-				log.Printf("Invalid user ID: %v", err)
-				return 0
-			}
-			return int32(userIDint64)
-		}(),
-		TaskId: TaskID,
-	})
-	if err != nil {
-		log.Printf("Ошибка проверки существующей работы для task_id %d: %v", TaskID, err)
-	} else if checkResp.Exists && checkResp.WorkId != 0 {
-		WorkID = checkResp.WorkId // Сохранение WorkId в глобальную переменную
-		log.Printf("Найдена существующая работа с ID %d для student_id %d и task_id %d", WorkID, checkResp.StudentId, TaskID)
-	} else {
-		WorkID = 0
-	}
-
 	// Настройка заголовка
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
@@ -462,7 +435,6 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			}
 			defer reader.Close()
 
-			// Читаем содержимое файла
 			fileData, err := io.ReadAll(reader)
 			if err != nil {
 				log.Printf("Ошибка чтения файла: %v", err)
@@ -470,10 +442,8 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 				return
 			}
 
-			// Сохраняем файл во временную память
 			fileName := reader.URI().Name()
 
-			// Подключение к сервису
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			conn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
@@ -491,9 +461,8 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 				log.Printf("Invalid user ID: %v", err)
 			}
 			studentID32 := int32(userIDint64)
-			// Создание новой работы, если она еще не существует
 			createResp, err := client.CreateWork(ctx, &workassignmentpb.CreateWorkRequest{
-				StudentId: studentID32, // Предполагается, что StudentId доступен в state
+				StudentId: studentID32,
 				TaskId:    TaskID,
 			})
 			if err != nil {
@@ -509,7 +478,6 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			workID := createResp.WorkId
 			WorkID = workID
 
-			// Отправка файла на S3 и обновление записи
 			uploadResp, err := client.DownloadAssignmentFile(ctx, &workassignmentpb.DownloadAssignmentFileRequest{
 				WorkId:   workID,
 				FileName: fileName,
@@ -526,10 +494,48 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 				return
 			}
 
-			log.Printf("Файл %s успешно загружен для работы %d", fileName, workID)
+			log.Printf("Файл %s успешно загружен для работы %d в %s", fileName, workID, time.Now().Format("15:04:05 02-01-2006"))
 			dialog.ShowInformation("Успех", fmt.Sprintf("Файл %s успешно загружен", fileName), w)
 		}, w)
 		fileDialog.Show()
+	})
+
+	// Кнопка для просмотра файла
+	viewButton := widget.NewButton("Просмотреть работу", func() {
+		w := state.window
+		if WorkID == 0 {
+			dialog.ShowError(fmt.Errorf("Работа не создана"), w)
+			return
+		}
+
+		urlResp, err := client.GetAssignmentFileURL(ctx, &workassignmentpb.GetAssignmentFileURLRequest{
+			WorkId:   WorkID,
+			FileName: "work_file", // Замените на динамическое имя файла, если нужно
+		})
+		if err != nil {
+			log.Printf("Ошибка получения URL для work_id %d: %v", WorkID, err)
+			dialog.ShowError(fmt.Errorf("Ошибка получения ссылки: %v", err), w)
+			return
+		}
+		if urlResp.Error != "" {
+			log.Printf("Ошибка от сервера при получении URL: %s", urlResp.Error)
+			dialog.ShowError(fmt.Errorf("Ошибка сервера: %s", urlResp.Error), w)
+			return
+		}
+
+		// Открытие ссылки в браузере
+		parsedURL, err := url.Parse(urlResp.Url)
+		if err != nil {
+			log.Printf("Ошибка парсинга URL для work_id %d: %v", WorkID, err)
+			dialog.ShowError(fmt.Errorf("Неверный формат ссылки: %v", err), w)
+			return
+		}
+
+		// Открытие ссылки в браузере
+		if err := fyne.CurrentApp().OpenURL(parsedURL); err != nil {
+			log.Printf("Ошибка открытия URL для work_id %d: %v", WorkID, err)
+			dialog.ShowError(fmt.Errorf("Не удалось открыть файл: %v", err), w)
+		}
 	})
 
 	backButton := widget.NewButton("Назад", func() {
@@ -542,15 +548,12 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 		state.window.SetContent(createContent(state))
 	})
 
-	buttonsContainer := container.NewHBox(backButton, layout.NewSpacer(), downloadButton, nextButton)
-
-	//statusLabel := widget.NewLabel(resp.Status)
+	buttonsContainer := container.NewHBox(backButton, layout.NewSpacer(), downloadButton, viewButton, nextButton)
 
 	inputGrid := container.NewVBox(
 		titleLabel,
 		scrollableDescription,
 		deadlineLabel,
-		//statusLabel,
 	)
 
 	contentBackground := canvas.NewRectangle(color.White)
