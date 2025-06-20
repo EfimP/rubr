@@ -379,13 +379,23 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 	bucket := "fa9d45a5ad42-flexible-kenji"
 	key := fmt.Sprintf("works/%d/%s-%s", req.WorkId, time.Now().Format("20060102-150405"), req.FileName)
 
-	// Загрузка файла в S3
-	uploader := manager.NewUploader(S3Client)
+	// Загрузка файла в S3 с отключением проверки SHA-256 (для совместимости с Beget)
+	uploader := manager.NewUploader(S3Client, func(u *manager.Uploader) {
+		u.PartSize = 5 * 1024 * 1024 // 5MB части, можно настроить
+		u.LeavePartsOnError = false  // Очистка при ошибке
+	})
+
+	// Используем поток для передачи данных
 	_, err := uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket: &bucket,
 		Key:    &key,
 		Body:   bytes.NewReader(req.Content),
-	})
+	}, s3.WithAPIOptions(func(v *s3.Options) {
+		// Отключение проверки SHA-256 (если поддерживается Beget)
+		v.APIOptions = append(v.APIOptions, func(r *s3.PutObjectRequest, i *s3.PutObjectInput) {
+			r.ContentSha256 = aws.ToString("UNSIGNED-PAYLOAD") // Игнорировать хеш для совместимости
+		})
+	}))
 	if err != nil {
 		log.Printf("Ошибка загрузки файла для work_id %d: %v", req.WorkId, err)
 		return &pb.DownloadAssignmentFileResponse{Error: fmt.Sprintf("Ошибка загрузки: %v", err)}, nil
