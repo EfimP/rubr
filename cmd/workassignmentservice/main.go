@@ -5,7 +5,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	_ "github.com/lib/pq"
@@ -29,12 +31,26 @@ var S3Client *s3.Client
 
 func initS3Client() {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("ru1"),
+		config.WithRegion("ru1"), // Beget может не требовать региона, уточните у поддержки
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			"UNQCCBCI5X4I8IHAI9XF",                     // Ваш ключ доступа от Beget
+			"KddoCXMG5LHQvrO6GSB5UXFRrxP7rqtbuA1JyMm1", // Ваш секретный ключ от Beget
+			"",
+		)),
+		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
+			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				return aws.Endpoint{
+					URL:           "https://storage.beget.com", // Endpoint Beget
+					SigningRegion: "ru1",                       // Можно оставить по умолчанию
+				}, nil
+			},
+		)),
 	)
 	if err != nil {
-		log.Fatalf("Ошибка инициализации S3 клиента: %v", err)
+		log.Fatalf("Ошибка инициализации S3 клиента: %v, Config: %+v", err, cfg)
 	}
 	S3Client = s3.NewFromConfig(cfg)
+	log.Printf("S3 клиент инициализирован с регионом: %s и endpoint: %s", cfg.Region, "https://storage.beget.com")
 }
 
 func (s *server) GetWorksForAssistant(ctx context.Context, req *pb.GetWorksForAssistantRequest) (*pb.GetWorksForAssistantResponse, error) {
@@ -198,6 +214,7 @@ func (s *server) GetTaskDetails(ctx context.Context, req *pb.GetTaskDetailsReque
 	}
 	return &response, nil
 }
+
 func (s *server) UploadAssignmentFile(ctx context.Context, req *pb.UploadAssignmentFileRequest) (*pb.UploadAssignmentFileResponse, error) {
 	query := `UPDATE student_works SET content_url = $1 WHERE id = $2`
 	_, err := s.db.ExecContext(ctx, query, req.FilePath, req.WorkId)
