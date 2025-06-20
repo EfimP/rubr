@@ -28,7 +28,9 @@ type server struct {
 var S3Client *s3.Client
 
 func initS3Client() {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion("ru1"),
+	)
 	if err != nil {
 		log.Fatalf("Ошибка инициализации S3 клиента: %v", err)
 	}
