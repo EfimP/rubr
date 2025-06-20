@@ -353,7 +353,7 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 	}
 
 	// Генерация уникального ключа (например, с текущей датой и временем)
-	bucket := "your-bucket-name" // Замените на имя вашего бакета
+	bucket := "fa9d45a5ad42-flexible-kenji"
 	key := fmt.Sprintf("works/%d/%s-%s", req.WorkId, time.Now().Format("20060102-150405"), req.FileName)
 
 	// Загрузка файла в S3
@@ -420,7 +420,7 @@ func (s *server) GetAssignmentFileURL(ctx context.Context, req *pb.GetAssignment
 	}
 
 	// Генерация presigned URL
-	bucket := "your-bucket-name" // Замените на имя вашего бакета
+	bucket := "fa9d45a5ad42-flexible-kenji" // Замените на имя вашего бакета
 	presigner := s3.NewPresignClient(S3Client)
 	presignResult, err := presigner.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket: &bucket,
