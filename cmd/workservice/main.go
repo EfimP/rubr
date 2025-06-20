@@ -495,37 +495,48 @@ func (s *server) GetStudentWorksByDiscipline(ctx context.Context, req *pb.GetStu
 		return &pb.GetStudentWorksByDisciplineResponse{Error: "Request canceled"}, nil
 	}
 
+	// Отладочный лог для входных данных
+	log.Printf("Запрос работ для student_id=%d, discipline_id=%d в %s", req.StudentId, req.DisciplineId, time.Now().Format("15:04:05 02-01-2006"))
+
+	// Запрос для получения уникальных работ по дисциплине
 	query := `
-		SELECT sw.id, t.title, t.deadline, sw.status
+		SELECT DISTINCT sw.id, t.title, t.deadline, sw.status
 		FROM student_works sw
 		JOIN tasks t ON sw.task_id = t.id
 		JOIN groups_in_disciplines gd ON t.group_id = gd.group_id AND t.discipline_id = gd.discipline_id
-		JOIN users_in_groups ug ON gd.group_id = ug.group_id
+		JOIN users_in_groups ug ON gd.group_id = ug.group_id AND ug.user_id = sw.student_id
 		WHERE sw.student_id = $1 AND t.discipline_id = $2
 	`
 	rows, err := s.db.QueryContext(ctx, query, req.StudentId, req.DisciplineId)
 	if err != nil {
-		log.Printf("Ошибка получения работ для student_id %d и discipline_id %d: %v", req.StudentId, req.DisciplineId, err)
+		log.Printf("Ошибка выполнения запроса для student_id=%d, discipline_id=%d: %v", req.StudentId, req.DisciplineId, err)
 		return &pb.GetStudentWorksByDisciplineResponse{Error: "Ошибка сервера"}, nil
 	}
 	defer rows.Close()
 
 	var works []*pb.Work
+	workIDs := make(map[int32]bool) // Для дополнительной проверки уникальности
 	for rows.Next() {
 		var work pb.Work
 		var deadline time.Time
 		if err := rows.Scan(&work.Id, &work.Title, &deadline, &work.Status); err != nil {
-			log.Printf("Ошибка сканирования строки для student_id %d: %v", req.StudentId, err)
+			log.Printf("Ошибка сканирования строки для student_id=%d: %v", req.StudentId, err)
 			return &pb.GetStudentWorksByDisciplineResponse{Error: "Ошибка обработки данных"}, nil
 		}
 		work.Deadline = deadline.Format(time.RFC3339)
-		works = append(works, &work)
+
+		// Проверка на дубликат
+		if !workIDs[work.Id] {
+			works = append(works, &work)
+			workIDs[work.Id] = true
+		}
 	}
 	if err := rows.Err(); err != nil {
-		log.Printf("Ошибка итерации строк для student_id %d: %v", req.StudentId, err)
+		log.Printf("Ошибка итерации строк для student_id=%d: %v", req.StudentId, err)
 		return &pb.GetStudentWorksByDisciplineResponse{Error: "Ошибка обработки данных"}, nil
 	}
 
+	log.Printf("Найдено %d уникальных работ для student_id=%d, discipline_id=%d: %v", len(works), req.StudentId, req.DisciplineId, works)
 	return &pb.GetStudentWorksByDisciplineResponse{Works: works}, nil
 }
 

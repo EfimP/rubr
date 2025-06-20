@@ -140,6 +140,7 @@ func СreateStudentGradesPage(state *AppState) fyne.CanvasObject {
 			log.Printf("Ошибка получения работ для discipline_id %d: %v", discipline.Id, err)
 			continue
 		}
+		log.Printf("%s: %v", discipline.Name, worksResp.Works)
 
 		rubricConn, err := grpc.Dial("89.169.39.161:50055", grpc.WithInsecure())
 		if err != nil {
