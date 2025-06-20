@@ -31,7 +31,7 @@ var S3Client *s3.Client
 
 func initS3Client() {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("ru1"), // Beget может не требовать региона, уточните у поддержки
+		config.WithRegion("ru1"), // Уточните у Beget, если регион требуется
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 			"UNQCCBCI5X4I8IHAI9XF",                     // Ваш ключ доступа от Beget
 			"KddoCXMG5LHQvrO6GSB5UXFRrxP7rqtbuA1JyMm1", // Ваш секретный ключ от Beget
@@ -40,7 +40,7 @@ func initS3Client() {
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
 			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 				return aws.Endpoint{
-					URL:           "https://storage.beget.com", // Endpoint Beget
+					URL:           "https://storage.beget.com", // Единый endpoint Beget
 					SigningRegion: "ru1",                       // Можно оставить по умолчанию
 				}, nil
 			},
@@ -49,7 +49,11 @@ func initS3Client() {
 	if err != nil {
 		log.Fatalf("Ошибка инициализации S3 клиента: %v, Config: %+v", err, cfg)
 	}
-	S3Client = s3.NewFromConfig(cfg)
+
+	// Создание клиента с принудительным стилем пути
+	S3Client = s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.UsePathStyle = true // Использовать стиль пути (bucket в запросе, а не в домене)
+	})
 	log.Printf("S3 клиент инициализирован с регионом: %s и endpoint: %s", cfg.Region, "https://storage.beget.com")
 }
 
