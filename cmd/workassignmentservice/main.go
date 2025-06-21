@@ -19,6 +19,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	pb "rubr/proto/workassignment"
 	"strconv"
 	"time"
@@ -377,7 +378,9 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 	}
 
 	// Открытие файла
-	f, err := os.Open(req.FileName)
+	baseDir := "C:\\Users\\User\\Documents\\"
+	fullPath := filepath.Join(baseDir, req.FileName)
+	f, err := os.Open(fullPath)
 	if err != nil {
 		log.Printf("Ошибка открытия файла %q для work_id %d: %v", req.FileName, req.WorkId, err)
 		return &pb.DownloadAssignmentFileResponse{Error: fmt.Sprintf("Ошибка открытия файла: %v", err)}, nil
