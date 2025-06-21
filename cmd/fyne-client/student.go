@@ -11,8 +11,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"google.golang.org/grpc"
 	"image/color"
-	"io"
+
 	"log"
+	"net/http"
 	"net/url"
 	"strconv"
 	"time"
@@ -435,20 +436,13 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			}
 			defer reader.Close()
 
-			fileData, err := io.ReadAll(reader)
-			if err != nil {
-				log.Printf("Ошибка чтения файла: %v", err)
-				dialog.ShowError(fmt.Errorf("Не удалось прочитать файл: %v", err), w)
-				return
-			}
-
 			fileName := reader.URI().Name()
 
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			conn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
 			if err != nil {
-				log.Printf("Не удалось подключиться к WorkAssignmentService: %v", err)
+				log.Printf("Не удалось подключиться к сервису: %v", err)
 				dialog.ShowError(fmt.Errorf("Ошибка подключения к сервису: %v", err), w)
 				return
 			}
@@ -456,50 +450,57 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 
 			client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
 
+			// Создание работы
 			userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
 			if err != nil {
 				log.Printf("Invalid user ID: %v", err)
+				dialog.ShowError(fmt.Errorf("Неверный ID пользователя: %v", err), w)
+				return
 			}
 			studentID32 := int32(userIDint64)
 			createResp, err := client.CreateWork(ctx, &workassignmentpb.CreateWorkRequest{
 				StudentId: studentID32,
 				TaskId:    TaskID,
 			})
-			if err != nil {
-				log.Printf("Ошибка создания работы для task_id %d: %v", TaskID, err)
+			if err != nil || createResp.Error != "" {
+				log.Printf("Ошибка создания работы: %v, %s", err, createResp.Error)
 				dialog.ShowError(fmt.Errorf("Не удалось создать работу: %v", err), w)
 				return
 			}
-			if createResp.Error != "" {
-				log.Printf("Ошибка от сервера при создании работы: %s", createResp.Error)
-				dialog.ShowError(fmt.Errorf("Ошибка сервера: %s", createResp.Error), w)
-				return
-			}
 			workID := createResp.WorkId
-			WorkID = workID
 
-			uploadResp, err := client.DownloadAssignmentFile(ctx, &workassignmentpb.DownloadAssignmentFileRequest{
+			// Запрос pre-signed URL
+			urlResp, err := client.GenerateUploadURL(ctx, &workassignmentpb.GenerateUploadURLRequest{
 				WorkId:   workID,
 				FileName: fileName,
-				Content:  fileData,
 			})
-			if err != nil {
-				log.Printf("Ошибка отправки файла для работы %d: %v", workID, err)
-				dialog.ShowError(fmt.Errorf("Не удалось отправить файл: %v", err), w)
-				return
-			}
-			if uploadResp.Error != "" {
-				log.Printf("Ошибка от сервера при загрузке файла: %s", uploadResp.Error)
-				dialog.ShowError(fmt.Errorf("Ошибка сервера: %s", uploadResp.Error), w)
+			if err != nil || urlResp.Error != "" {
+				log.Printf("Ошибка получения URL: %v, %s", err, urlResp.Error)
+				dialog.ShowError(fmt.Errorf("Не удалось получить URL: %v", err), w)
 				return
 			}
 
-			log.Printf("Файл %s успешно загружен для работы %d в %s", fileName, workID, time.Now().Format("15:04:05 02-01-2006"))
+			// Загрузка файла в S3 через pre-signed URL
+			httpClient := &http.Client{}
+			req, err := http.NewRequestWithContext(ctx, "PUT", urlResp.Url, reader)
+			if err != nil {
+				log.Printf("Ошибка создания HTTP-запроса: %v", err)
+				dialog.ShowError(fmt.Errorf("Ошибка загрузки файла: %v", err), w)
+				return
+			}
+			resp, err := httpClient.Do(req)
+			if err != nil || resp.StatusCode != http.StatusOK {
+				log.Printf("Ошибка отправки файла в S3: %v, статус: %d", err, resp.StatusCode)
+				dialog.ShowError(fmt.Errorf("Не удалось загрузить файл в S3"), w)
+				return
+			}
+			defer resp.Body.Close()
+
+			log.Printf("Файл %s успешно загружен для работы %d", fileName, workID)
 			dialog.ShowInformation("Успех", fmt.Sprintf("Файл %s успешно загружен", fileName), w)
 		}, w)
 		fileDialog.Show()
 	})
-
 	// Кнопка для просмотра файла
 	viewButton := widget.NewButton("Просмотреть работу", func() {
 		w := state.window

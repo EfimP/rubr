@@ -59,6 +59,27 @@ func initS3Client() {
 	log.Printf("S3 клиент инициализирован с регионом: %s и endpoint: %s", cfg.Region, "https://s3.ru1.storage.beget.cloud")
 }
 
+func (s *server) GenerateUploadURL(ctx context.Context, req *pb.GenerateUploadURLRequest) (*pb.GenerateUploadURLResponse, error) {
+	// Генерация уникального ключа для файла в S3
+	key := fmt.Sprintf("works/%d/%s", req.WorkId, req.FileName)
+
+	// Создание pre-signed URL
+	presigner := s3.NewPresignClient(S3Client)
+	presignReq, err := presigner.PresignPutObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(myBucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return &pb.GenerateUploadURLResponse{
+			Error: fmt.Sprintf("Ошибка генерации URL: %v", err),
+		}, nil
+	}
+
+	return &pb.GenerateUploadURLResponse{
+		Url: presignReq.URL,
+	}, nil
+}
+
 func (s *server) GetWorksForAssistant(ctx context.Context, req *pb.GetWorksForAssistantRequest) (*pb.GetWorksForAssistantResponse, error) {
 	assistantID := req.AssistantId
 

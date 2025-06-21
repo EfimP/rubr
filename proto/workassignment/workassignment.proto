@@ -13,6 +13,18 @@ service WorkAssignmentService {
   rpc GetAssignmentFileURL (GetAssignmentFileURLRequest) returns (GetAssignmentFileURLResponse);
   rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
   rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
+
+  rpc GenerateUploadURL(GenerateUploadURLRequest) returns (GenerateUploadURLResponse);
+}
+
+message GenerateUploadURLRequest {
+  int32 work_id = 1;
+  string file_name = 2;
+}
+
+message GenerateUploadURLResponse {
+  string url = 1;
+  string error = 2;
 }
 
 message GetWorksForAssistantRequest {
