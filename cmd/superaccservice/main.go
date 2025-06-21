@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/lib/pq"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"os"
@@ -133,38 +135,75 @@ func (s *Service) RemoveUser(ctx context.Context, req *pb.RemoveUserRequest) (*p
 	return &pb.RemoveUserResponse{Message: "User removed successfully", Success: true}, nil
 }
 
-func (r *Repository) GetGroupStaff(ctx context.Context, groupID int32) (*pb.GetGroupStaffResponse, error) {
-	query := `
-        SELECT seminarist_id, assistant_id 
-        FROM groups_in_disciplines 
-        WHERE group_id = $1`
-	row := r.db.QueryRowContext(ctx, query, groupID)
+func (s *Service) GetGroupStaff(ctx context.Context, req *pb.GetGroupStaffRequest) (*pb.GetGroupStaffResponse, error) {
+	// Валидация входного параметра
+	if req.GroupId <= 0 {
+		return &pb.GetGroupStaffResponse{Message: "invalid group ID", Success: false}, status.Errorf(codes.InvalidArgument, "group ID must be positive")
+	}
 
-	var seminaristID, assistantID sql.NullInt32
-	err := row.Scan(&seminaristID, &assistantID)
+	// SQL-запрос для поиска семинариста и ассистента в группе
+	query := `
+        SELECT u.id
+        FROM users_in_groups ug
+        JOIN users u ON ug.user_id = u.id
+        WHERE ug.group_id = $1 AND u.role IN ('seminarist', 'assistant')
+    `
+	rows, err := s.repo.db.QueryContext(ctx, query, req.GroupId)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return &pb.GetGroupStaffResponse{Success: true, SeminaristId: 0, AssistantId: 0}, nil
+		log.Printf("Failed to query group staff: %v", err)
+		return &pb.GetGroupStaffResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "database query failed")
+	}
+	defer rows.Close()
+
+	var seminaristID, assistantID int32
+	foundSeminarist, foundAssistant := false, false
+
+	for rows.Next() {
+		var userID int32
+		var role string
+		err := rows.Scan(&userID)
+		if err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			return &pb.GetGroupStaffResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "scan failed")
 		}
-		return nil, err
+
+		// Получаем роль пользователя для определения seminarist или assistant
+		roleQuery := "SELECT role FROM users WHERE id = $1"
+		err = s.repo.db.QueryRowContext(ctx, roleQuery, userID).Scan(&role)
+		if err != nil {
+			log.Printf("Failed to get user role: %v", err)
+			continue
+		}
+
+		if role == "seminarist" && !foundSeminarist {
+			seminaristID = userID
+			foundSeminarist = true
+		} else if role == "assistant" && !foundAssistant {
+			assistantID = userID
+			foundAssistant = true
+		}
+
+		// Если оба найдены, можно прервать цикл
+		if foundSeminarist && foundAssistant {
+			break
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Rows iteration error: %v", err)
+		return &pb.GetGroupStaffResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "rows iteration failed")
+	}
+
+	// Если ни один пользователь не найден, возвращаем нули
+	if !foundSeminarist && !foundAssistant {
+		return &pb.GetGroupStaffResponse{Success: true, SeminaristId: 0, AssistantId: 0}, nil
 	}
 
 	return &pb.GetGroupStaffResponse{
 		Success:      true,
-		SeminaristId: seminaristID.Int32,
-		AssistantId:  assistantID.Int32,
+		SeminaristId: seminaristID,
+		AssistantId:  assistantID,
 	}, nil
-}
-
-func (s *Service) GetGroupStaff(ctx context.Context, req *pb.GetGroupStaffRequest) (*pb.GetGroupStaffResponse, error) {
-	if req.GroupId <= 0 {
-		return &pb.GetGroupStaffResponse{Message: "invalid group ID", Success: false}, nil
-	}
-	resp, err := s.repo.GetGroupStaff(ctx, req.GroupId)
-	if err != nil {
-		return &pb.GetGroupStaffResponse{Message: err.Error(), Success: false}, err
-	}
-	return resp, nil
 }
 
 func (r *Repository) UpdateUserRole(ctx context.Context, userID int, role string) error {
