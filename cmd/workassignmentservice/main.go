@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -44,8 +45,8 @@ func initS3Client() {
 					SigningRegion: "ru1",                                // Можно оставить по умолчанию
 				}, nil
 			},
-		),
-		))
+		)),
+	)
 	if err != nil {
 		log.Fatalf("Ошибка инициализации S3 клиента: %v, Config: %+v", err, cfg)
 	}
@@ -379,18 +380,27 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 	bucket := "fa9d45a5ad42-flexible-kenji"
 	key := fmt.Sprintf("works/%d/%s-%s", req.WorkId, time.Now().Format("20060102-150405"), req.FileName)
 
-	// Загрузка файла в S3
+	// Вычисление SHA-256 хеша содержимого
+	hash := sha256.New()
+	if _, err := hash.Write(req.Content); err != nil {
+		log.Printf("Ошибка вычисления хеша для work_id %d: %v", req.WorkId, err)
+		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка обработки данных"}, nil
+	}
+	//contentSha256 := hex.EncodeToString(hash.Sum(nil))
+
+	// Загрузка файла в S3 с установкой Cache-Control
 	uploader := manager.NewUploader(S3Client, func(u *manager.Uploader) {
 		u.PartSize = 5 * 1024 * 1024 // 5MB части, можно настроить
 		u.LeavePartsOnError = false  // Очистка при ошибке
 	})
 
-	// Используем поток для передачи данных
 	_, err := uploader.Upload(ctx, &s3.PutObjectInput{
-		Bucket: &bucket,
-		Key:    &key,
-		Body:   bytes.NewReader(req.Content),
+		Bucket:       &bucket,
+		Key:          &key,
+		Body:         bytes.NewReader(req.Content),
+		CacheControl: aws.String("no-cache"), // Установка Cache-Control: no-cache
 	})
+	
 	if err != nil {
 		log.Printf("Ошибка загрузки файла для work_id %d: %v", req.WorkId, err)
 		return &pb.DownloadAssignmentFileResponse{Error: fmt.Sprintf("Ошибка загрузки: %v", err)}, nil
