@@ -6,7 +6,6 @@ option go_package = "./proto/user;user";
 service UserService {
   rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse) {}
   rpc Login (LoginRequest) returns (LoginResponse) {}
-  rpc GetUser (GetUserRequest) returns (GetUserResponse) {}
 }
 
 message RegisterUserRequest {
@@ -41,13 +40,4 @@ message user {
   string patronymic = 4;
   string email = 5;
   string role = 6;
-}
-
-message GetUserRequest {
-  string userId = 1;
-}
-
-message GetUserResponse {
-  user User = 1;
-  string Error = 2;
 }
