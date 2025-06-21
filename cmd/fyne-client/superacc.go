@@ -215,6 +215,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 											}
 										}
 									}
+									log.Printf("Updated")
 									w.SetContent(createContent(state))
 								}
 							}
@@ -399,6 +400,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 															}
 														}
 													}
+													log.Printf("Updated")
 													w.SetContent(createContent(state))
 												}
 											}
