@@ -378,7 +378,7 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 	}
 
 	// Открытие файла
-	baseDir := "C:\\Users\\User\\Documents\\"
+	baseDir := "C:/Users/User/Documents"
 	fullPath := filepath.Join(baseDir, req.FileName)
 	f, err := os.Open(fullPath)
 	if err != nil {
