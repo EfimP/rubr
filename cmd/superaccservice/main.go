@@ -137,7 +137,7 @@ func (r *Repository) GetGroupStaff(ctx context.Context, groupID int32) (*pb.GetG
 	query := `
         SELECT seminarist_id, assistant_id 
         FROM groups_in_disciplines 
-        WHERE group_id = $1 LIMIT 1`
+        WHERE group_id = $1`
 	row := r.db.QueryRowContext(ctx, query, groupID)
 
 	var seminaristID, assistantID sql.NullInt32
@@ -625,7 +625,6 @@ func (r *Repository) DetachDisciplinesFromGroup(ctx context.Context, groupID int
 	return tx.Commit()
 }
 
-// В структуре Service
 func (s *Service) DetachDisciplinesFromGroup(ctx context.Context, req *pb.DetachDisciplinesFromGroupRequest) (*pb.DetachDisciplinesFromGroupResponse, error) {
 	if req.GroupId <= 0 {
 		return &pb.DetachDisciplinesFromGroupResponse{Message: "invalid group ID", Success: false}, nil

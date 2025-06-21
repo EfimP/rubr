@@ -267,6 +267,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 				seminaristID = respSeminarists.SeminaristId
 				assistantID = respSeminarists.AssistantId
 			}
+			log.Printf("Sem: %v, Ass: %v", seminaristID, assistantID)
 
 			var checkItems []fyne.CanvasObject
 			var checks []*widget.Check
@@ -388,26 +389,21 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 												log.Printf("Дисциплины успешно прикреплены к группе %s", group.Name)
 												// Обновляем список дисциплин
 												connUpdate, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
-												if err != nil {
-													log.Printf("Не удалось подключиться к superaccservice: %v", err)
-													return
-												}
-												defer connUpdate.Close()
-
-												log.Printf("Updated1")
-												clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
-												respUpdate, err := clientUpdate.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
 												if err == nil {
-													log.Printf("Updated2")
-													for _, g := range respUpdate.Groups {
-														if g.Id == group.Id {
-															commentEntry.SetText(strings.Join(g.Disciplines, ", "))
-															break
+													defer connUpdate.Close()
+													clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
+													respUpdate, err := clientUpdate.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
+													if err == nil {
+														for _, g := range respUpdate.Groups {
+															if g.Id == group.Id {
+																commentEntry.SetText(strings.Join(g.Disciplines, ", "))
+																break
+															}
 														}
 													}
+													log.Printf("Updated")
+													w.SetContent(createContent(state))
 												}
-												log.Printf("Updated3")
-												w.SetContent(createContent(state))
 											}
 										}
 									}
@@ -473,6 +469,8 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 											}
 										}
 									}
+									log.Printf("Updated")
+									w.SetContent(createContent(state))
 								}
 							}
 						}
