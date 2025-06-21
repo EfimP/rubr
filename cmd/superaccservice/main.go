@@ -320,42 +320,6 @@ func (r *Repository) ListUsersByGroup(ctx context.Context, groupName string) ([]
 	return users, nil
 }
 
-func (r *Repository) ManageGroup(ctx context.Context, groupID int, action string, userID int, role string) error {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	// Проверяем, существует ли группа
-	var exists bool
-	err = tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM student_groups WHERE id = $1)", groupID).Scan(&exists)
-	if err != nil || !exists {
-		return fmt.Errorf("group with ID %d not found", groupID)
-	}
-
-	if action == "add" {
-		query := "INSERT INTO users_in_groups (user_id, group_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
-		_, err = tx.ExecContext(ctx, query, userID, groupID)
-	} else if action == "remove" {
-		query := "DELETE FROM users_in_groups WHERE user_id = $1 AND group_id = $2"
-		_, err = tx.ExecContext(ctx, query, userID, groupID)
-	}
-	if err != nil {
-		return err
-	}
-
-	// Обновляем роль, если указано
-	if role != "" {
-		_, err = tx.ExecContext(ctx, "UPDATE users SET role = $1 WHERE id = $2", role, userID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return tx.Commit()
-}
-
 func (r *Repository) ListGroups(ctx context.Context) ([]*pb.Group, error) {
 	rows, err := r.db.QueryContext(ctx, "SELECT g.id, g.name, g.description FROM student_groups g")
 	if err != nil {
@@ -385,6 +349,78 @@ func (r *Repository) ListGroups(ctx context.Context) ([]*pb.Group, error) {
 		groups = append(groups, &pb.Group{Id: id, Name: name, Description: description, Disciplines: disciplines})
 	}
 	return groups, nil
+}
+
+func (s *Service) ManageGroup(ctx context.Context, req *pb.ManageGroupRequest) (*pb.ManageGroupResponse, error) {
+	if req.GroupId <= 0 || req.UserId <= 0 || req.Action == "" || req.Role == "" {
+		return &pb.ManageGroupResponse{Message: "invalid input parameters", Success: false}, status.Errorf(codes.InvalidArgument, "group ID, user ID, action, and role must be valid")
+	}
+	if req.Action != "add" && req.Action != "remove" {
+		return &pb.ManageGroupResponse{Message: "invalid action", Success: false}, status.Errorf(codes.InvalidArgument, "action must be 'add' or 'remove'")
+	}
+
+	tx, err := s.repo.db.BeginTx(ctx, nil)
+	if err != nil {
+		return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "failed to begin transaction")
+	}
+	defer tx.Rollback()
+
+	// Проверяем существование группы
+	var exists bool
+	err = tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM student_groups WHERE id = $1)", req.GroupId).Scan(&exists)
+	if err != nil || !exists {
+		return &pb.ManageGroupResponse{Message: fmt.Sprintf("group with ID %d not found", req.GroupId), Success: false}, status.Errorf(codes.NotFound, "group not found")
+	}
+
+	if req.Action == "add" {
+		// Альтернативная проверка с JOIN
+		var count int
+		err = tx.QueryRowContext(ctx, `
+			SELECT COUNT(*) 
+			FROM users_in_groups ug 
+			LEFT JOIN users u ON ug.user_id = u.id 
+			WHERE ug.group_id = $1 AND ug.user_id = $2`, req.GroupId, req.UserId).Scan(&count)
+		if err != nil {
+			return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "failed to check user in group")
+		}
+		if count > 0 {
+			return &pb.ManageGroupResponse{Message: fmt.Sprintf("user with ID %d is already in group with ID %d", req.UserId, req.GroupId), Success: false}, nil
+		}
+
+		_, err = tx.ExecContext(ctx, "INSERT INTO users_in_groups (user_id, group_id) VALUES ($1, $2)", req.UserId, req.GroupId)
+		if err != nil {
+			return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "failed to add user to group")
+		}
+
+		if req.Role != "" {
+			_, err = tx.ExecContext(ctx, "UPDATE users SET role = $1 WHERE id = $2", req.Role, req.UserId)
+			if err != nil {
+				return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "failed to update user role")
+			}
+		}
+	} else if req.Action == "remove" {
+		result, err := tx.ExecContext(ctx, "DELETE FROM users_in_groups WHERE user_id = $1 AND group_id = $2", req.UserId, req.GroupId)
+		if err != nil {
+			return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "failed to remove user from group")
+		}
+		if rowsAffected, _ := result.RowsAffected(); rowsAffected == 0 {
+			return &pb.ManageGroupResponse{Message: fmt.Sprintf("user with ID %d not found in group with ID %d", req.UserId, req.GroupId), Success: false}, nil
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, status.Errorf(codes.Internal, "failed to commit transaction")
+	}
+
+	return &pb.ManageGroupResponse{Message: "Group managed successfully", Success: true}, nil
+}
+
+func (s *Service) ListGroups(ctx context.Context, req *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {
+	groups, err := s.repo.ListGroups(ctx)
+	if err != nil {
+		return &pb.ListGroupsResponse{Message: err.Error(), Success: false}, err
+	}
+	return &pb.ListGroupsResponse{Success: true, Groups: groups}, nil
 }
 
 func (r *Repository) ManageGroupEntity(ctx context.Context, groupID int32, name, description, action string) (int32, error) {
@@ -425,28 +461,6 @@ func (r *Repository) ManageGroupEntity(ctx context.Context, groupID int32, name,
 		return 0, err
 	}
 	return newGroupID, nil
-}
-
-func (s *Service) ManageGroup(ctx context.Context, req *pb.ManageGroupRequest) (*pb.ManageGroupResponse, error) {
-	if req.GroupId <= 0 || req.UserId <= 0 || req.Action == "" || req.Role == "" {
-		return &pb.ManageGroupResponse{Message: "invalid input parameters", Success: false}, nil
-	}
-	if req.Action != "add" && req.Action != "remove" {
-		return &pb.ManageGroupResponse{Message: "invalid action", Success: false}, nil
-	}
-	err := s.repo.ManageGroup(ctx, int(req.GroupId), req.Action, int(req.UserId), req.Role)
-	if err != nil {
-		return &pb.ManageGroupResponse{Message: err.Error(), Success: false}, err
-	}
-	return &pb.ManageGroupResponse{Message: "Group managed successfully", Success: true}, nil
-}
-
-func (s *Service) ListGroups(ctx context.Context, req *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {
-	groups, err := s.repo.ListGroups(ctx)
-	if err != nil {
-		return &pb.ListGroupsResponse{Message: err.Error(), Success: false}, err
-	}
-	return &pb.ListGroupsResponse{Success: true, Groups: groups}, nil
 }
 
 func (s *Service) ManageGroupEntity(ctx context.Context, req *pb.ManageGroupEntityRequest) (*pb.ManageGroupEntityResponse, error) {
