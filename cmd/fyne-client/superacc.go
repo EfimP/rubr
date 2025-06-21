@@ -215,6 +215,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 											}
 										}
 									}
+									w.SetContent(createContent(state))
 								}
 							}
 						}
@@ -398,6 +399,7 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 															}
 														}
 													}
+													w.SetContent(createContent(state))
 												}
 											}
 										}
