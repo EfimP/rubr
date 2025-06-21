@@ -387,11 +387,15 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 											} else {
 												log.Printf("Дисциплины успешно прикреплены к группе %s", group.Name)
 												// Обновляем список дисциплин
-												//connUpdate, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
-												//if err == nil {
+												connUpdate, err := grpc.Dial("89.169.39.161:50052", grpc.WithInsecure())
+												if err != nil {
+													log.Printf("Не удалось подключиться к superaccservice: %v", err)
+													return
+												}
+												defer connUpdate.Close()
+
 												log.Printf("Updated1")
-												//defer connUpdate.Close()
-												clientUpdate := superaccpb.NewSuperAccServiceClient(connFinal)
+												clientUpdate := superaccpb.NewSuperAccServiceClient(connUpdate)
 												respUpdate, err := clientUpdate.ListGroups(context.Background(), &superaccpb.ListGroupsRequest{})
 												if err == nil {
 													log.Printf("Updated2")
@@ -401,10 +405,9 @@ func СreateGroupListPage(state *AppState) fyne.CanvasObject {
 															break
 														}
 													}
-													//}
-													log.Printf("Updated3")
-													w.SetContent(createContent(state))
 												}
+												log.Printf("Updated3")
+												w.SetContent(createContent(state))
 											}
 										}
 									}
