@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -28,21 +29,21 @@ type server struct {
 	db *sql.DB
 }
 
+var myBucket = "fa9d45a5ad42-flexible-kenji"
+var accessKey = "UNQCCBCI5X4I8IHAI9XF"
+var accessSecret = "KddoCXMG5LHQvrO6GSB5UXFRrxP7rqtbuA1JyMm1"
+
 var S3Client *s3.Client
 
 func initS3Client() {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("ru1"), // Уточните у Beget, если регион требуется
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			"UNQCCBCI5X4I8IHAI9XF",                     // Ваш ключ доступа от Beget
-			"KddoCXMG5LHQvrO6GSB5UXFRrxP7rqtbuA1JyMm1", // Ваш секретный ключ от Beget
-			"",
-		)),
+		config.WithRegion("ru1"),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, accessSecret, "")),
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
 			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 				return aws.Endpoint{
-					URL:           "https://s3.ru1.storage.beget.cloud", // Единый endpoint Beget
-					SigningRegion: "ru1",                                // Можно оставить по умолчанию
+					URL:           "https://s3.ru1.storage.beget.cloud",
+					SigningRegion: "ru1",
 				}, nil
 			},
 		)),
@@ -51,9 +52,8 @@ func initS3Client() {
 		log.Fatalf("Ошибка инициализации S3 клиента: %v, Config: %+v", err, cfg)
 	}
 
-	// Создание клиента с принудительным стилем пути
 	S3Client = s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.UsePathStyle = true // Использовать стиль пути (bucket в запросе, а не в домене)
+		o.UsePathStyle = true
 	})
 	log.Printf("S3 клиент инициализирован с регионом: %s и endpoint: %s", cfg.Region, "https://s3.ru1.storage.beget.cloud")
 }
@@ -376,31 +376,45 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 		return &pb.DownloadAssignmentFileResponse{Error: "Request canceled"}, nil
 	}
 
-	// Генерация уникального ключа (например, с текущей датой и временем)
-	bucket := "fa9d45a5ad42-flexible-kenji"
+	// Открытие файла
+	f, err := os.Open(req.FileName)
+	if err != nil {
+		log.Printf("Ошибка открытия файла %q для work_id %d: %v", req.FileName, req.WorkId, err)
+		return &pb.DownloadAssignmentFileResponse{Error: fmt.Sprintf("Ошибка открытия файла: %v", err)}, nil
+	}
+	defer f.Close()
+
+	// Генерация уникального ключа
 	key := fmt.Sprintf("works/%d/%s-%s", req.WorkId, time.Now().Format("20060102-150405"), req.FileName)
 
-	// Вычисление SHA-256 хеша содержимого
+	// Вычисление SHA-256 хеша (опционально, для целостности)
 	hash := sha256.New()
-	if _, err := hash.Write(req.Content); err != nil {
+	if _, err := io.Copy(hash, f); err != nil {
 		log.Printf("Ошибка вычисления хеша для work_id %d: %v", req.WorkId, err)
 		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка обработки данных"}, nil
 	}
-	//contentSha256 := hex.EncodeToString(hash.Sum(nil))
+	contentSha256 := hex.EncodeToString(hash.Sum(nil))
+	log.Printf("Вычисленный хеш для work_id %d: %s", req.WorkId, contentSha256)
 
-	// Загрузка файла в S3 с установкой Cache-Control
+	// Перемотка файла в начало
+	if _, err := f.Seek(0, 0); err != nil {
+		log.Printf("Ошибка перемотки файла для work_id %d: %v", req.WorkId, err)
+		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка подготовки файла"}, nil
+	}
+
+	// Настройка uploader
 	uploader := manager.NewUploader(S3Client, func(u *manager.Uploader) {
-		u.PartSize = 5 * 1024 * 1024 // 5MB части, можно настроить
-		u.LeavePartsOnError = false  // Очистка при ошибке
+		u.PartSize = 5 * 1024 * 1024 // 5MB части
+		u.Concurrency = 2            // Количество параллельных загрузок
 	})
 
-	_, err := uploader.Upload(ctx, &s3.PutObjectInput{
-		Bucket:       &bucket,
-		Key:          &key,
-		Body:         bytes.NewReader(req.Content),
+	// Загрузка файла в S3
+	_, err = uploader.Upload(ctx, &s3.PutObjectInput{
+		Bucket:       aws.String(myBucket),
+		Key:          aws.String(key),
+		Body:         f,
 		CacheControl: aws.String("no-cache"), // Установка Cache-Control: no-cache
 	})
-	
 	if err != nil {
 		log.Printf("Ошибка загрузки файла для work_id %d: %v", req.WorkId, err)
 		return &pb.DownloadAssignmentFileResponse{Error: fmt.Sprintf("Ошибка загрузки: %v", err)}, nil
@@ -417,13 +431,13 @@ func (s *server) DownloadAssignmentFile(ctx context.Context, req *pb.DownloadAss
 		return &pb.DownloadAssignmentFileResponse{Error: "Ошибка обновления базы данных"}, nil
 	}
 
-	// Генерация временной ссылки (presigned URL)
+	// Генерация presigned URL
 	presigner := s3.NewPresignClient(S3Client)
 	presignResult, err := presigner.PresignGetObject(ctx, &s3.GetObjectInput{
-		Bucket: &bucket,
-		Key:    &key,
+		Bucket: aws.String(myBucket),
+		Key:    aws.String(key),
 	}, func(opts *s3.PresignOptions) {
-		opts.Expires = 24 * time.Hour // Ссылка действительна 24 часа
+		opts.Expires = 24 * time.Hour
 	})
 	if err != nil {
 		log.Printf("Ошибка генерации presigned URL для work_id %d: %v", req.WorkId, err)
