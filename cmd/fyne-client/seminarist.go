@@ -11,7 +11,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"google.golang.org/grpc"
 	"image/color"
+	"io"
 	"log"
+	"net/http"
 	"net/url"
 	gradingpb "rubr/proto/grade"
 	rubricpb "rubr/proto/rubric"
@@ -305,6 +307,7 @@ func createWorksTable(works []Work, separatorColor color.Color, state *AppState)
 
 	return container.NewVBox(tableContent...)
 }
+
 func createTasksTable(tasks []Task, separatorColor color.Color, state *AppState) fyne.CanvasObject {
 	var tableContent []fyne.CanvasObject
 	for i, task := range tasks {
@@ -369,6 +372,7 @@ func createTasksTable(tasks []Task, separatorColor color.Color, state *AppState)
 
 	return container.NewVBox(tableContent...)
 }
+
 func CreateTaskDetailsPage(state *AppState, taskID int32) fyne.CanvasObject {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -854,6 +858,145 @@ func CreateSeminaristBlockingCriteriaGradingPage(state *AppState, workID int32, 
 	scrollableCriteria := container.NewVScroll(criteriaListContainer)
 	scrollableCriteria.SetMinSize(fyne.NewSize(0, 400))
 
+	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	//defer cancel()
+
+	conn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к сервису: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+	}
+	defer conn.Close()
+
+	client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
+	respView, err := client.GetWorkDetails(ctx, &workassignmentpb.GetWorkDetailsRequest{WorkId: workID})
+	if err != nil {
+		log.Printf("Не удалось получить детали работы: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка загрузки деталей работы"))
+	}
+	if respView.Error != "" {
+		log.Printf("Ошибка от сервиса: %s", respView.Error)
+		return container.NewVBox(widget.NewLabel(respView.Error))
+	}
+
+	parts := strings.Split(respView.ContentUrl, "/")
+	if len(parts) < 3 {
+		log.Printf("неверный формат пути: %s, ожидается works/<work_id>/filename", respView.ContentUrl)
+	}
+
+	// Проверяем, что вторая часть соответствует workID
+	idPart := parts[1]
+	if id, err := strconv.Atoi(idPart); err != nil || int32(id) != workID {
+		log.Printf("ID в пути (%s) не соответствует workID (%d)", idPart, workID)
+	}
+
+	// Возвращаем имя файла (последний элемент)
+	fileName := parts[len(parts)-1]
+
+	downloadButton := widget.NewButton("Загрузить работу", func() {
+		w := state.window
+		if workID == 0 {
+			dialog.ShowError(fmt.Errorf("Работа не создана"), w)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		conn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Не удалось подключиться к сервису: %v", err)
+			dialog.ShowError(fmt.Errorf("Ошибка подключения к сервису: %v", err), w)
+			return
+		}
+		defer conn.Close()
+
+		client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
+
+		urlResp, err := client.GenerateDownloadURL(ctx, &workassignmentpb.GenerateDownloadURLRequest{
+			WorkId: workID,
+		})
+		if err != nil {
+			log.Printf("Ошибка получения URL для work_id %d: %v", workID, err)
+			dialog.ShowError(fmt.Errorf("Ошибка получения ссылки: %v", err), w)
+			return
+		}
+		if urlResp.Error != "" {
+			log.Printf("Ошибка от сервера при получении URL: %s", urlResp.Error)
+			dialog.ShowError(fmt.Errorf("Ошибка сервера: %s", urlResp.Error), w)
+			return
+		}
+
+		// Диалог для выбора директории и имени файла
+		fileDialog := dialog.NewFileSave(func(writer fyne.URIWriteCloser, err error) {
+			if err != nil || writer == nil {
+				log.Printf("Ошибка при выборе директории: %v", err)
+				dialog.ShowError(fmt.Errorf("Не удалось выбрать директорию: %v", err), w)
+				return
+			}
+			defer writer.Close()
+
+			filePath := writer.URI().Path()
+			if filePath == "" {
+				log.Printf("Пустой путь для сохранения файла work_id %d", workID)
+				dialog.ShowError(fmt.Errorf("Не указан путь для сохранения"), w)
+				return
+			}
+
+			downloadCtx, downloadCancel := context.WithTimeout(context.Background(), 300*time.Second) // 5 минут
+			defer downloadCancel()
+
+			// Скачивание файла через HTTP
+			httpClient := &http.Client{}
+			req, err := http.NewRequestWithContext(downloadCtx, "GET", urlResp.Url, nil)
+			if err != nil {
+				log.Printf("Ошибка создания HTTP-запроса для work_id %d: %v", workID, err)
+				dialog.ShowError(fmt.Errorf("Ошибка создания запроса: %v", err), w)
+				return
+			}
+
+			resp, err := httpClient.Do(req)
+			if err != nil {
+				log.Printf("Ошибка скачивания файла для work_id %d: %v", workID, err)
+				dialog.ShowError(fmt.Errorf("Не удалось скачать файл: %v", err), w)
+				return
+			}
+			if resp == nil {
+				log.Printf("Ответ от сервера для work_id %d отсутствует", workID)
+				dialog.ShowError(fmt.Errorf("Сервер не вернул данные"), w)
+				return
+			}
+			if resp.StatusCode != http.StatusOK {
+				log.Printf("Ошибка скачивания файла для work_id %d: статус: %d", workID, resp.StatusCode)
+				dialog.ShowError(fmt.Errorf("Не удалось скачать файл: код состояния %d", resp.StatusCode), w)
+				defer resp.Body.Close()
+				return
+			}
+			defer resp.Body.Close()
+
+			log.Printf("here")
+			// Сохранение файла в выбранную директорию
+			_, err = io.Copy(writer, resp.Body)
+			if err != nil {
+				log.Printf("Ошибка записи файла для work_id %d: %v", workID, err)
+				dialog.ShowError(fmt.Errorf("Ошибка записи файла: %v", err), w)
+				return
+			}
+
+			log.Printf("Файл успешно скачан для работы %d в %s", workID, filePath)
+			dialog.ShowInformation("Успех", fmt.Sprintf("Файл успешно скачан в %s", filePath), w)
+
+			//// Открытие скачанного файла (опционально)
+			//if err := fyne.CurrentApp().OpenURL(fyne.NewURI("file://" + filePath)); err != nil {
+			//	log.Printf("Ошибка открытия файла %s для work_id %d: %v", filePath, workID, err)
+			//	dialog.ShowError(fmt.Errorf("Не удалось открыть файл: %v", err), w)
+			//}
+		}, w)
+		// Установка имени файла по умолчанию
+		fileDialog.SetFileName(fileName)
+		fileDialog.Show()
+	})
+
 	// Кнопка "Далее"
 	nextButton := widget.NewButton("Далее", func() {
 		// Создаем новый контекст и соединение для сохранения данных
@@ -907,6 +1050,7 @@ func CreateSeminaristBlockingCriteriaGradingPage(state *AppState, workID int32, 
 	// Нижняя панель с кнопкой "Далее"
 	bottomButtons := container.New(layout.NewHBoxLayout(),
 		layout.NewSpacer(),
+		downloadButton,
 		nextButton,
 	)
 	bottomButtonsWithPadding := container.NewPadded(bottomButtons)
@@ -1395,6 +1539,7 @@ func calculateGrade(ctx context.Context, workID int32, taskID int32, gradingClie
 	}
 	return "0.00"
 }
+
 func CreateTaskStudentWorksPage(state *AppState, taskID int32) fyne.CanvasObject {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
