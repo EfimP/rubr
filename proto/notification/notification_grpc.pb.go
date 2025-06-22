@@ -7,7 +7,10 @@
 package notification
 
 import (
+	context "context"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -15,10 +18,19 @@ import (
 // Requires gRPC-Go v1.64.0 or later.
 const _ = grpc.SupportPackageIsVersion9
 
+const (
+	NotificationService_SendTaskNotification_FullMethodName          = "/notification.NotificationService/SendTaskNotification"
+	NotificationService_SendRegistrationNotification_FullMethodName  = "/notification.NotificationService/SendRegistrationNotification"
+	NotificationService_SendPasswordResetNotification_FullMethodName = "/notification.NotificationService/SendPasswordResetNotification"
+)
+
 // NotificationServiceClient is the client API for NotificationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationServiceClient interface {
+	SendTaskNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error)
+	SendRegistrationNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error)
+	SendPasswordResetNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -29,10 +41,43 @@ func NewNotificationServiceClient(cc grpc.ClientConnInterface) NotificationServi
 	return &notificationServiceClient{cc}
 }
 
+func (c *notificationServiceClient) SendTaskNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NotificationResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendTaskNotification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) SendRegistrationNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NotificationResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendRegistrationNotification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) SendPasswordResetNotification(ctx context.Context, in *NotificationRequest, opts ...grpc.CallOption) (*NotificationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NotificationResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendPasswordResetNotification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
 type NotificationServiceServer interface {
+	SendTaskNotification(context.Context, *NotificationRequest) (*NotificationResponse, error)
+	SendRegistrationNotification(context.Context, *NotificationRequest) (*NotificationResponse, error)
+	SendPasswordResetNotification(context.Context, *NotificationRequest) (*NotificationResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -43,6 +88,15 @@ type NotificationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedNotificationServiceServer struct{}
 
+func (UnimplementedNotificationServiceServer) SendTaskNotification(context.Context, *NotificationRequest) (*NotificationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendTaskNotification not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendRegistrationNotification(context.Context, *NotificationRequest) (*NotificationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendRegistrationNotification not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendPasswordResetNotification(context.Context, *NotificationRequest) (*NotificationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPasswordResetNotification not implemented")
+}
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
 
@@ -64,13 +118,80 @@ func RegisterNotificationServiceServer(s grpc.ServiceRegistrar, srv Notification
 	s.RegisterService(&NotificationService_ServiceDesc, srv)
 }
 
+func _NotificationService_SendTaskNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendTaskNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendTaskNotification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendTaskNotification(ctx, req.(*NotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_SendRegistrationNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendRegistrationNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendRegistrationNotification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendRegistrationNotification(ctx, req.(*NotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_SendPasswordResetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendPasswordResetNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendPasswordResetNotification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendPasswordResetNotification(ctx, req.(*NotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var NotificationService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "notification.NotificationService",
 	HandlerType: (*NotificationServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "proto/notification/notification.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SendTaskNotification",
+			Handler:    _NotificationService_SendTaskNotification_Handler,
+		},
+		{
+			MethodName: "SendRegistrationNotification",
+			Handler:    _NotificationService_SendRegistrationNotification_Handler,
+		},
+		{
+			MethodName: "SendPasswordResetNotification",
+			Handler:    _NotificationService_SendPasswordResetNotification_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "proto/notification/notification.proto",
 }

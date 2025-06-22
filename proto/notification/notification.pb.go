@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
+	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -20,17 +21,162 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type NotificationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NotificationRequest) Reset() {
+	*x = NotificationRequest{}
+	mi := &file_proto_notification_notification_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationRequest) ProtoMessage() {}
+
+func (x *NotificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_notification_notification_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationRequest.ProtoReflect.Descriptor instead.
+func (*NotificationRequest) Descriptor() ([]byte, []int) {
+	return file_proto_notification_notification_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *NotificationRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *NotificationRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *NotificationRequest) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *NotificationRequest) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type NotificationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Error         string                 `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NotificationResponse) Reset() {
+	*x = NotificationResponse{}
+	mi := &file_proto_notification_notification_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationResponse) ProtoMessage() {}
+
+func (x *NotificationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_notification_notification_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationResponse.ProtoReflect.Descriptor instead.
+func (*NotificationResponse) Descriptor() ([]byte, []int) {
+	return file_proto_notification_notification_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *NotificationResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 var File_proto_notification_notification_proto protoreflect.FileDescriptor
 
 const file_proto_notification_notification_proto_rawDesc = "" +
 	"\n" +
-	"%proto/notification/notification.proto\x12\fnotification2\x15\n" +
-	"\x13NotificationServiceB#Z!./proto/notification;notificationb\x06proto3"
+	"%proto/notification/notification.proto\x12\fnotification\"}\n" +
+	"\x13NotificationRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\tR\tcreatedAt\",\n" +
+	"\x14NotificationResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\tR\x05error2\xc3\x02\n" +
+	"\x13NotificationService\x12]\n" +
+	"\x14SendTaskNotification\x12!.notification.NotificationRequest\x1a\".notification.NotificationResponse\x12e\n" +
+	"\x1cSendRegistrationNotification\x12!.notification.NotificationRequest\x1a\".notification.NotificationResponse\x12f\n" +
+	"\x1dSendPasswordResetNotification\x12!.notification.NotificationRequest\x1a\".notification.NotificationResponseB#Z!./proto/notification;notificationb\x06proto3"
 
-var file_proto_notification_notification_proto_goTypes = []any{}
+var (
+	file_proto_notification_notification_proto_rawDescOnce sync.Once
+	file_proto_notification_notification_proto_rawDescData []byte
+)
+
+func file_proto_notification_notification_proto_rawDescGZIP() []byte {
+	file_proto_notification_notification_proto_rawDescOnce.Do(func() {
+		file_proto_notification_notification_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_notification_notification_proto_rawDesc), len(file_proto_notification_notification_proto_rawDesc)))
+	})
+	return file_proto_notification_notification_proto_rawDescData
+}
+
+var file_proto_notification_notification_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_notification_notification_proto_goTypes = []any{
+	(*NotificationRequest)(nil),  // 0: notification.NotificationRequest
+	(*NotificationResponse)(nil), // 1: notification.NotificationResponse
+}
 var file_proto_notification_notification_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
+	0, // 0: notification.NotificationService.SendTaskNotification:input_type -> notification.NotificationRequest
+	0, // 1: notification.NotificationService.SendRegistrationNotification:input_type -> notification.NotificationRequest
+	0, // 2: notification.NotificationService.SendPasswordResetNotification:input_type -> notification.NotificationRequest
+	1, // 3: notification.NotificationService.SendTaskNotification:output_type -> notification.NotificationResponse
+	1, // 4: notification.NotificationService.SendRegistrationNotification:output_type -> notification.NotificationResponse
+	1, // 5: notification.NotificationService.SendPasswordResetNotification:output_type -> notification.NotificationResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -47,12 +193,13 @@ func file_proto_notification_notification_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_notification_notification_proto_rawDesc), len(file_proto_notification_notification_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   0,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_notification_notification_proto_goTypes,
 		DependencyIndexes: file_proto_notification_notification_proto_depIdxs,
+		MessageInfos:      file_proto_notification_notification_proto_msgTypes,
 	}.Build()
 	File_proto_notification_notification_proto = out.File
 	file_proto_notification_notification_proto_goTypes = nil
