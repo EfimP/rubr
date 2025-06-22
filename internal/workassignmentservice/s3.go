@@ -64,6 +64,19 @@ func (s *Server) GenerateUploadURL(ctx context.Context, req *Pb.GenerateUploadUR
 		}, nil
 	}
 
+	// Сохранение content_url в базе данных
+	_, err = s.Db.ExecContext(ctx, `
+		UPDATE student_works 
+		SET content_url = $1 
+		WHERE id = $2`,
+		key, req.WorkId)
+	if err != nil {
+		log.Printf("Ошибка обновления content_url для work_id %d: %v", req.WorkId, err)
+		return &Pb.GenerateUploadURLResponse{
+			Error: "Ошибка обновления базы данных",
+		}, nil
+	}
+
 	return &Pb.GenerateUploadURLResponse{
 		Url: presignReq.URL,
 	}, nil
