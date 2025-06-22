@@ -82,6 +82,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
+
   workassignmentservice:
     build:
       context: .
@@ -98,12 +99,12 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
 
-  gradingservice:
+  notificationservice:
     build:
       context: .
-      dockerfile: ./cmd/gradingservice/Dockerfile
+      dockerfile: ./cmd/notificationservice/Dockerfile
     ports:
-      - "50057:50057"
+      - "50056:50056"
     depends_on:
       postgres:
         condition: service_healthy
@@ -114,12 +115,13 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=rubrlocal
 
-  notificationservice:
+
+  gradingservice:
     build:
       context: .
-      dockerfile: ./cmd/notificationservice/Dockerfile
+      dockerfile: ./cmd/gradingservice/Dockerfile
     ports:
-      - "50056:50056"
+      - "50057:50057"
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,4 +1,4 @@
-package notificationservice
+package main
 
 import (
 	"database/sql"
