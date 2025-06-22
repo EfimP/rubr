@@ -108,9 +108,10 @@ message CheckExistingWorkRequest {
 message CheckExistingWorkResponse {
   bool exists = 1;     // Существует ли работа
   int32 work_id = 2;   // ID работы, если существует
-  string content_url = 3; // URL контента работы из S3
-  int32 student_id = 4; // ID студента для проверки
-  string error = 5;    // Сообщение об ошибке, если есть
+  string status = 3;
+  string content_url = 4; // URL контента работы из S3
+  int32 student_id = 5; // ID студента для проверки
+  string error = 6;    // Сообщение об ошибке, если есть
 }
 
 message GenerateDownloadURLRequest {

@@ -180,13 +180,15 @@ func (s *Server) CheckExistingWork(ctx context.Context, req *Pb.CheckExistingWor
 	var exists bool
 	var workID int64
 	var contentURL string
+	var state string
 	err := s.Db.QueryRowContext(ctx, `
         SELECT EXISTS(SELECT 1 FROM student_works WHERE student_id = $1 AND task_id = $2),
                id,
+               status,
                content_url
         FROM student_works 
         WHERE student_id = $1 AND task_id = $2`,
-		req.StudentId, req.TaskId).Scan(&exists, &workID, &contentURL)
+		req.StudentId, req.TaskId).Scan(&exists, &workID, &state, &contentURL)
 	if err != nil && err != sql.ErrNoRows {
 		log.Printf("Ошибка проверки работы для student_id %d и task_id %d: %v", req.StudentId, req.TaskId, err)
 		return &Pb.CheckExistingWorkResponse{Error: "Ошибка сервера"}, nil
@@ -197,6 +199,7 @@ func (s *Server) CheckExistingWork(ctx context.Context, req *Pb.CheckExistingWor
 	return &Pb.CheckExistingWorkResponse{
 		Exists:     true,
 		WorkId:     int32(workID),
+		Status:     state,
 		ContentUrl: contentURL,
 		StudentId:  req.StudentId,
 	}, nil

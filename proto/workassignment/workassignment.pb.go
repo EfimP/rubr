@@ -939,11 +939,12 @@ func (x *CheckExistingWorkRequest) GetTaskId() int32 {
 
 type CheckExistingWorkResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`                          // Существует ли работа
-	WorkId        int32                  `protobuf:"varint,2,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`            // ID работы, если существует
-	ContentUrl    string                 `protobuf:"bytes,3,opt,name=content_url,json=contentUrl,proto3" json:"content_url,omitempty"` // URL контента работы из S3
-	StudentId     int32                  `protobuf:"varint,4,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`   // ID студента для проверки
-	Error         string                 `protobuf:"bytes,5,opt,name=error,proto3" json:"error,omitempty"`                             // Сообщение об ошибке, если есть
+	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`               // Существует ли работа
+	WorkId        int32                  `protobuf:"varint,2,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"` // ID работы, если существует
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	ContentUrl    string                 `protobuf:"bytes,4,opt,name=content_url,json=contentUrl,proto3" json:"content_url,omitempty"` // URL контента работы из S3
+	StudentId     int32                  `protobuf:"varint,5,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`   // ID студента для проверки
+	Error         string                 `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`                             // Сообщение об ошибке, если есть
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -990,6 +991,13 @@ func (x *CheckExistingWorkResponse) GetWorkId() int32 {
 		return x.WorkId
 	}
 	return 0
+}
+
+func (x *CheckExistingWorkResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 func (x *CheckExistingWorkResponse) GetContentUrl() string {
@@ -1185,15 +1193,16 @@ const file_proto_workassignment_workassignment_proto_rawDesc = "" +
 	"\x18CheckExistingWorkRequest\x12\x1d\n" +
 	"\n" +
 	"student_id\x18\x01 \x01(\x05R\tstudentId\x12\x17\n" +
-	"\atask_id\x18\x02 \x01(\x05R\x06taskId\"\xa2\x01\n" +
+	"\atask_id\x18\x02 \x01(\x05R\x06taskId\"\xba\x01\n" +
 	"\x19CheckExistingWorkResponse\x12\x16\n" +
 	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x17\n" +
-	"\awork_id\x18\x02 \x01(\x05R\x06workId\x12\x1f\n" +
-	"\vcontent_url\x18\x03 \x01(\tR\n" +
+	"\awork_id\x18\x02 \x01(\x05R\x06workId\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x1f\n" +
+	"\vcontent_url\x18\x04 \x01(\tR\n" +
 	"contentUrl\x12\x1d\n" +
 	"\n" +
-	"student_id\x18\x04 \x01(\x05R\tstudentId\x12\x14\n" +
-	"\x05error\x18\x05 \x01(\tR\x05error\"5\n" +
+	"student_id\x18\x05 \x01(\x05R\tstudentId\x12\x14\n" +
+	"\x05error\x18\x06 \x01(\tR\x05error\"5\n" +
 	"\x1aGenerateDownloadURLRequest\x12\x17\n" +
 	"\awork_id\x18\x01 \x01(\x05R\x06workId\"E\n" +
 	"\x1bGenerateDownloadURLResponse\x12\x10\n" +
