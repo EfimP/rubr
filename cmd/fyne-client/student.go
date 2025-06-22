@@ -25,38 +25,8 @@ import (
 	workassignmentpb "rubr/proto/workassignment"
 )
 
-// Структура для хранения предмета
-type Subject struct {
-	Name    string
-	Grades  []float32
-	Average float32
-	Details string
-}
-
-// Структура для хранения задания
-type Assignment struct {
-	Title       string
-	Description string
-	Deadline    time.Time
-	Submission  time.Time
-	FilePath    string
-}
-
-// Структура для хранения работы
 var WorkID int32
-var TaskID int32
-var prevPage string
-
-func getStudentWorks(studentID int32) (*pbWork.ListWorksForStudentResponse, error) {
-	connWork, err := grpc.Dial("89.169.39.161:50053", grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-	defer connWork.Close()
-
-	workClient := pbWork.NewWorkServiceClient(connWork)
-	return workClient.ListWorksForStudent(context.Background(), &pbWork.ListWorksForStudentRequest{StudentId: studentID})
-}
+var taskID int32
 
 func СreateStudentGradesPage(state *AppState) fyne.CanvasObject {
 	myWindow := state.window
@@ -340,8 +310,7 @@ func СreateStudentWorksPage(state *AppState) fyne.CanvasObject {
 		statusLabel := widget.NewLabel(task.Status)
 		detailsButton := widget.NewButton("Подробнее", func(w *pbWork.Tasks) func() {
 			return func() {
-				TaskID = task.Id
-				prevPage = "student_works"
+				taskID = task.Id
 				state.currentPage = "student_assignment"
 				myWindow.SetContent(createContent(state))
 			}
@@ -382,7 +351,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	defer conn.Close()
 
 	client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
-	resp, err := client.GetTaskDetails(ctx, &workassignmentpb.GetTaskDetailsRequest{TaskId: TaskID})
+	resp, err := client.GetTaskDetails(ctx, &workassignmentpb.GetTaskDetailsRequest{TaskId: taskID})
 	if err != nil {
 		log.Printf("Не удалось получить детали работы: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка загрузки деталей работы"))
@@ -461,7 +430,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			studentID32 := int32(userIDint64)
 			createResp, err := client.CreateWork(ctx, &workassignmentpb.CreateWorkRequest{
 				StudentId: studentID32,
-				TaskId:    TaskID,
+				TaskId:    taskID,
 			})
 			if err != nil || createResp.Error != "" {
 				log.Printf("Ошибка создания работы: %v, %s", err, createResp.Error)
@@ -697,7 +666,7 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 	}
 
 	// Загрузка блокирующих критериев
-	resp, err := rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: TaskID})
+	resp, err := rubricClient.LoadTaskBlockingCriterias(ctx, &rubricpb.LoadTaskBlockingCriteriasRequest{TaskId: taskID})
 	if err != nil {
 		log.Printf("Failed to load blocking criteria: %v", err)
 		return container.NewVBox(widget.NewLabel("Ошибка загрузки критериев: " + err.Error()))
@@ -883,7 +852,7 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 	}
 
 	// Загрузка основных критериев
-	resp, err := rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: TaskID})
+	resp, err := rubricClient.LoadTaskMainCriterias(ctx, &rubricpb.LoadTaskMainCriteriasRequest{TaskId: taskID})
 	if err != nil || resp.Error != "" {
 		errorMsg := resp.Error
 		if err != nil {

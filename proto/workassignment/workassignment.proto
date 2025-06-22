@@ -11,8 +11,8 @@ service WorkAssignmentService {
   rpc GenerateDownloadURL(GenerateDownloadURLRequest) returns (GenerateDownloadURLResponse);
   rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
   rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
-
   rpc GenerateUploadURL(GenerateUploadURLRequest) returns (GenerateUploadURLResponse);
+  rpc CheckStudentWorkExists(CheckStudentWorkExistsRequest) returns (CheckStudentWorkExistsResponse);
 }
 
 message GenerateUploadURLRequest {
@@ -120,4 +120,15 @@ message GenerateDownloadURLRequest {
 message GenerateDownloadURLResponse {
   string url = 1;
   string error = 2;
+}
+
+message CheckStudentWorkExistsRequest {
+  int32 user_id = 1;
+  int32 task_id = 2;
+}
+
+message CheckStudentWorkExistsResponse {
+  bool exists = 1;
+  int32 work_id = 2;
+  string error = 3;
 }
