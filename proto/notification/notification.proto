@@ -1,0 +1,21 @@
+syntax = "proto3";
+package notification;
+
+option go_package = "./proto/notification;notification";
+
+service NotificationService {
+  rpc SendTaskNotification (NotificationRequest) returns (NotificationResponse);
+  rpc SendRegistrationNotification (NotificationRequest) returns (NotificationResponse);
+  rpc SendPasswordResetNotification (NotificationRequest) returns (NotificationResponse);
+}
+
+message NotificationRequest {
+  int32 user_id = 1;
+  string email = 2;
+  string message = 3;
+  string created_at = 4;
+}
+
+message NotificationResponse {
+  string error = 1;
+}

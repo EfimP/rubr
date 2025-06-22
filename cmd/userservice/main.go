@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	dbHost := os.Getenv("DB_HOST")
 	dbPortStr := os.Getenv("DB_PORT")
 	dbUser := os.Getenv("DB_USER")
