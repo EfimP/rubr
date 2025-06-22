@@ -23,14 +23,14 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	// конвертируем порт из строки в число, чтобы работал sql.open
-	DbPort, err := strconv.Atoi(dbPortStr)
+	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
 		log.Fatalf("Invalid DB_PORT value: %v", err)
 	}
 
 	// Формирование строки подключения
-	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s Dbname=%s sslmode=disable",
-		dbHost, DbPort, dbUser, dbPassword, dbName)
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
 	log.Printf("Trying to connect to: %s", connStr) // Для отладки
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
