@@ -15,26 +15,26 @@ import (
 
 func main() {
 
-	DbHost := os.Getenv("Db_HOST")
-	DbPortStr := os.Getenv("Db_PORT")
-	DbUser := os.Getenv("Db_USER")
-	DbPassword := os.Getenv("Db_PASSWORD")
-	DbName := os.Getenv("Db_NAME")
+	dbHost := os.Getenv("DB_HOST")
+	dbPortStr := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
 	// конвертируем порт из строки в число, чтобы работал sql.open
-	DbPort, err := strconv.Atoi(DbPortStr)
+	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
-		log.Fatalf("Invalid Db_PORT value: %v", err)
+		log.Fatalf("Invalid DB_PORT value: %v", err)
 	}
 
 	// Формирование строки подключения
-	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s Dbname=%s sslmode=disable",
-		DbHost, DbPort, DbUser, DbPassword, DbName)
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s DBname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
 	log.Printf("Trying to connect to: %s", connStr) // Для отладки
-	Db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer Db.Close()
+	defer db.Close()
 
 	// Настройка сервера gRPC
 	lis, err := net.Listen("tcp", ":50055")
@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	Pb.RegisterRubricServiceServer(s, &rubricservice.Server{Db: Db})
+	Pb.RegisterRubricServiceServer(s, &rubricservice.Server{Db: db})
 
 	log.Println("RubricService starting on :50055")
 	if err := s.Serve(lis); err != nil {
