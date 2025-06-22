@@ -503,7 +503,6 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 		}, w)
 		fileDialog.Show()
 	})
-	// Кнопка для просмотра файла
 	// Кнопка для просмотра файла (скачивание с выбором директории)
 	viewButton := widget.NewButton("Просмотреть работу", func() {
 		w := state.window
@@ -525,7 +524,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 
 		client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
 
-		// Запрос pre-signed URL для скачивания
+		startTime := time.Now()
 		urlResp, err := client.GenerateDownloadURL(ctx, &workassignmentpb.GenerateDownloadURLRequest{
 			WorkId: WorkID,
 		})
@@ -556,9 +555,12 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 				return
 			}
 
+			downloadCtx, downloadCancel := context.WithTimeout(context.Background(), 300*time.Second) // 5 минут
+			defer downloadCancel()
+
 			// Скачивание файла через HTTP
 			httpClient := &http.Client{}
-			req, err := http.NewRequestWithContext(ctx, "GET", urlResp.Url, nil)
+			req, err := http.NewRequestWithContext(downloadCtx, "GET", urlResp.Url, nil)
 			if err != nil {
 				log.Printf("Ошибка создания HTTP-запроса для work_id %d: %v", WorkID, err)
 				dialog.ShowError(fmt.Errorf("Ошибка создания запроса: %v", err), w)
@@ -566,13 +568,28 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			}
 
 			resp, err := httpClient.Do(req)
-			if err != nil || resp.StatusCode != http.StatusOK {
-				log.Printf("Ошибка скачивания файла для work_id %d: %v, статус: %d", WorkID, err, resp.StatusCode)
-				dialog.ShowError(fmt.Errorf("Не удалось скачать файл"), w)
+			log.Printf("Ответ от сервера для work_id %d: %v", WorkID, resp)
+			if err != nil {
+				log.Printf("Файл успешно скачан для работы %d в %s, общее время: %v", WorkID, filePath, time.Since(startTime))
+				log.Printf("Ошибка скачивания файла для work_id %d: %v", WorkID, err)
+				dialog.ShowError(fmt.Errorf("Не удалось скачать файл: %v", err), w)
+				return
+			}
+			if resp == nil {
+				log.Printf("Ответ от сервера для work_id %d отсутствует", WorkID)
+				dialog.ShowError(fmt.Errorf("Сервер не вернул данные"), w)
+				return
+			}
+			if resp.StatusCode != http.StatusOK {
+				log.Printf("Файл успешно скачан для работы %d в %s, общее время: %v", WorkID, filePath, time.Since(startTime))
+				log.Printf("Ошибка скачивания файла для work_id %d: статус: %d", WorkID, resp.StatusCode)
+				dialog.ShowError(fmt.Errorf("Не удалось скачать файл: код состояния %d", resp.StatusCode), w)
+				defer resp.Body.Close()
 				return
 			}
 			defer resp.Body.Close()
 
+			log.Printf("here")
 			// Сохранение файла в выбранную директорию
 			_, err = io.Copy(writer, resp.Body)
 			if err != nil {

@@ -6,11 +6,8 @@ option go_package = "./proto/workassignment;workassignment";
 service WorkAssignmentService {
   rpc GetWorksForAssistant (GetWorksForAssistantRequest) returns (GetWorksForAssistantResponse);
   rpc GetWorkDetails (GetWorkDetailsRequest) returns (GetWorkDetailsResponse);
-  rpc UploadAssignmentFile (UploadAssignmentFileRequest) returns (UploadAssignmentFileResponse);
   rpc SubmitWork (SubmitWorkRequest) returns (SubmitWorkResponse);
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse);
-  rpc DownloadAssignmentFile (DownloadAssignmentFileRequest) returns (DownloadAssignmentFileResponse);
-  rpc GetAssignmentFileURL (GetAssignmentFileURLRequest) returns (GetAssignmentFileURLResponse);
   rpc GenerateDownloadURL(GenerateDownloadURLRequest) returns (GenerateDownloadURLResponse);
   rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
   rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
@@ -62,15 +59,7 @@ message WorkAssignment {
   string student_surname = 7;
   string student_patronymic = 8;
 }
-message UploadAssignmentFileRequest {
-  int32 work_id = 1;
-  string file_path = 2;
-}
 
-message UploadAssignmentFileResponse {
-  bool success = 1;
-  string error = 2;
-}
 message SubmitWorkRequest {
   int32 work_id = 1;
   string file_path = 2;
@@ -100,27 +89,6 @@ message GetTaskDetailsResponse {
   repeated CriteriaGroup main_criteria_groups = 6;    // Основные группы критериев
   repeated CriteriaGroup blocking_criteria_groups = 7; // Блокирующие группы критериев
   string error = 8;              // Сообщение об ошибке, если есть
-}
-
-message DownloadAssignmentFileRequest {
-  int32 work_id = 1;      // ID работы (student_works.id)
-  string file_name = 2;   // Имя файла
-  bytes content = 3;      // Содержимое файла
-}
-
-message DownloadAssignmentFileResponse {
-  string content_url = 1; // URL файла в S3
-  string error = 2;       // Сообщение об ошибке, если есть
-}
-
-message GetAssignmentFileURLRequest {
-  int32 work_id = 1;      // ID работы
-  string file_name = 2;   // Имя файла
-}
-
-message GetAssignmentFileURLResponse {
-  string url = 1;         // Временная ссылка на файл
-  string error = 2;       // Сообщение об ошибке, если есть
 }
 
 message CreateWorkRequest {
