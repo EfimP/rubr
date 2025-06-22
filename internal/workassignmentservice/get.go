@@ -179,60 +179,25 @@ func (s *Server) CheckExistingWork(ctx context.Context, req *Pb.CheckExistingWor
 
 	var exists bool
 	var workID int64
+	var contentURL string
 	err := s.Db.QueryRowContext(ctx, `
         SELECT EXISTS(SELECT 1 FROM student_works WHERE student_id = $1 AND task_id = $2),
-               id
+               id,
+               content_url
         FROM student_works 
         WHERE student_id = $1 AND task_id = $2`,
-		req.StudentId, req.TaskId).Scan(&exists, &workID)
+		req.StudentId, req.TaskId).Scan(&exists, &workID, &contentURL)
 	if err != nil && err != sql.ErrNoRows {
 		log.Printf("Ошибка проверки работы для student_id %d и task_id %d: %v", req.StudentId, req.TaskId, err)
 		return &Pb.CheckExistingWorkResponse{Error: "Ошибка сервера"}, nil
 	}
-
 	if !exists {
 		return &Pb.CheckExistingWorkResponse{Exists: false, StudentId: req.StudentId}, nil
 	}
-
 	return &Pb.CheckExistingWorkResponse{
-		Exists:    true,
-		WorkId:    int32(workID),
-		StudentId: req.StudentId,
+		Exists:     true,
+		WorkId:     int32(workID),
+		ContentUrl: contentURL,
+		StudentId:  req.StudentId,
 	}, nil
-}
-
-func (s *Server) CheckStudentWorkExists(ctx context.Context, req *Pb.CheckStudentWorkExistsRequest) (*Pb.CheckStudentWorkExistsResponse, error) {
-	if ctx.Err() != nil {
-		return &Pb.CheckStudentWorkExistsResponse{Exists: false, Error: "Request canceled"}, nil
-	}
-
-	// Начало транзакции
-	tx, err := s.Db.BeginTx(ctx, nil)
-	if err != nil {
-		log.Printf("Ошибка начала транзакции: %v", err)
-		return &Pb.CheckStudentWorkExistsResponse{Exists: false, Error: "Ошибка сервера"}, nil
-	}
-	defer tx.Rollback()
-
-	var workID int64
-	err = tx.QueryRowContext(ctx, `
-        SELECT id FROM student_works WHERE student_id = $1 AND task_id = $2 FOR UPDATE`,
-		req.UserId, req.TaskId).Scan(&workID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Printf("Работа для student_id %d и task_id %d не найдена", req.UserId, req.TaskId)
-			return &Pb.CheckStudentWorkExistsResponse{Exists: false}, nil
-		}
-		log.Printf("Ошибка проверки работы для student_id %d и task_id %d: %v", req.UserId, req.TaskId, err)
-		return &Pb.CheckStudentWorkExistsResponse{Exists: false, Error: "Ошибка сервера"}, nil
-	}
-
-	// Фиксация транзакции
-	if err = tx.Commit(); err != nil {
-		log.Printf("Ошибка фиксации транзакции: %v", err)
-		return &Pb.CheckStudentWorkExistsResponse{Exists: false, Error: "Ошибка сервера"}, nil
-	}
-
-	log.Printf("Работа с ID %d для student_id %d и task_id %d успешно найдена", workID, req.UserId, req.TaskId)
-	return &Pb.CheckStudentWorkExistsResponse{Exists: true, WorkId: int32(workID)}, nil
 }

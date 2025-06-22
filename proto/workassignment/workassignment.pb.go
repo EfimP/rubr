@@ -939,10 +939,11 @@ func (x *CheckExistingWorkRequest) GetTaskId() int32 {
 
 type CheckExistingWorkResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`                        // Существует ли работа
-	WorkId        int32                  `protobuf:"varint,2,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`          // ID работы, если существует
-	StudentId     int32                  `protobuf:"varint,3,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"` // ID студента для проверки
-	Error         string                 `protobuf:"bytes,4,opt,name=error,proto3" json:"error,omitempty"`                           // Сообщение об ошибке, если есть
+	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`                          // Существует ли работа
+	WorkId        int32                  `protobuf:"varint,2,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`            // ID работы, если существует
+	ContentUrl    string                 `protobuf:"bytes,3,opt,name=content_url,json=contentUrl,proto3" json:"content_url,omitempty"` // URL контента работы из S3
+	StudentId     int32                  `protobuf:"varint,4,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`   // ID студента для проверки
+	Error         string                 `protobuf:"bytes,5,opt,name=error,proto3" json:"error,omitempty"`                             // Сообщение об ошибке, если есть
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -989,6 +990,13 @@ func (x *CheckExistingWorkResponse) GetWorkId() int32 {
 		return x.WorkId
 	}
 	return 0
+}
+
+func (x *CheckExistingWorkResponse) GetContentUrl() string {
+	if x != nil {
+		return x.ContentUrl
+	}
+	return ""
 }
 
 func (x *CheckExistingWorkResponse) GetStudentId() int32 {
@@ -1101,118 +1109,6 @@ func (x *GenerateDownloadURLResponse) GetError() string {
 	return ""
 }
 
-type CheckStudentWorkExistsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	TaskId        int32                  `protobuf:"varint,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CheckStudentWorkExistsRequest) Reset() {
-	*x = CheckStudentWorkExistsRequest{}
-	mi := &file_proto_workassignment_workassignment_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CheckStudentWorkExistsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CheckStudentWorkExistsRequest) ProtoMessage() {}
-
-func (x *CheckStudentWorkExistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_workassignment_workassignment_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CheckStudentWorkExistsRequest.ProtoReflect.Descriptor instead.
-func (*CheckStudentWorkExistsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_workassignment_workassignment_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *CheckStudentWorkExistsRequest) GetUserId() int32 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *CheckStudentWorkExistsRequest) GetTaskId() int32 {
-	if x != nil {
-		return x.TaskId
-	}
-	return 0
-}
-
-type CheckStudentWorkExistsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`
-	WorkId        int32                  `protobuf:"varint,2,opt,name=work_id,json=workId,proto3" json:"work_id,omitempty"`
-	Error         string                 `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CheckStudentWorkExistsResponse) Reset() {
-	*x = CheckStudentWorkExistsResponse{}
-	mi := &file_proto_workassignment_workassignment_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CheckStudentWorkExistsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CheckStudentWorkExistsResponse) ProtoMessage() {}
-
-func (x *CheckStudentWorkExistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_workassignment_workassignment_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CheckStudentWorkExistsResponse.ProtoReflect.Descriptor instead.
-func (*CheckStudentWorkExistsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_workassignment_workassignment_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *CheckStudentWorkExistsResponse) GetExists() bool {
-	if x != nil {
-		return x.Exists
-	}
-	return false
-}
-
-func (x *CheckStudentWorkExistsResponse) GetWorkId() int32 {
-	if x != nil {
-		return x.WorkId
-	}
-	return 0
-}
-
-func (x *CheckStudentWorkExistsResponse) GetError() string {
-	if x != nil {
-		return x.Error
-	}
-	return ""
-}
-
 var File_proto_workassignment_workassignment_proto protoreflect.FileDescriptor
 
 const file_proto_workassignment_workassignment_proto_rawDesc = "" +
@@ -1289,25 +1185,20 @@ const file_proto_workassignment_workassignment_proto_rawDesc = "" +
 	"\x18CheckExistingWorkRequest\x12\x1d\n" +
 	"\n" +
 	"student_id\x18\x01 \x01(\x05R\tstudentId\x12\x17\n" +
-	"\atask_id\x18\x02 \x01(\x05R\x06taskId\"\x81\x01\n" +
+	"\atask_id\x18\x02 \x01(\x05R\x06taskId\"\xa2\x01\n" +
 	"\x19CheckExistingWorkResponse\x12\x16\n" +
 	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x17\n" +
-	"\awork_id\x18\x02 \x01(\x05R\x06workId\x12\x1d\n" +
+	"\awork_id\x18\x02 \x01(\x05R\x06workId\x12\x1f\n" +
+	"\vcontent_url\x18\x03 \x01(\tR\n" +
+	"contentUrl\x12\x1d\n" +
 	"\n" +
-	"student_id\x18\x03 \x01(\x05R\tstudentId\x12\x14\n" +
-	"\x05error\x18\x04 \x01(\tR\x05error\"5\n" +
+	"student_id\x18\x04 \x01(\x05R\tstudentId\x12\x14\n" +
+	"\x05error\x18\x05 \x01(\tR\x05error\"5\n" +
 	"\x1aGenerateDownloadURLRequest\x12\x17\n" +
 	"\awork_id\x18\x01 \x01(\x05R\x06workId\"E\n" +
 	"\x1bGenerateDownloadURLResponse\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error\"Q\n" +
-	"\x1dCheckStudentWorkExistsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x17\n" +
-	"\atask_id\x18\x02 \x01(\x05R\x06taskId\"g\n" +
-	"\x1eCheckStudentWorkExistsResponse\x12\x16\n" +
-	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x17\n" +
-	"\awork_id\x18\x02 \x01(\x05R\x06workId\x12\x14\n" +
-	"\x05error\x18\x03 \x01(\tR\x05error2\xb3\a\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error2\xba\x06\n" +
 	"\x15WorkAssignmentService\x12q\n" +
 	"\x14GetWorksForAssistant\x12+.workassignment.GetWorksForAssistantRequest\x1a,.workassignment.GetWorksForAssistantResponse\x12_\n" +
 	"\x0eGetWorkDetails\x12%.workassignment.GetWorkDetailsRequest\x1a&.workassignment.GetWorkDetailsResponse\x12S\n" +
@@ -1318,8 +1209,7 @@ const file_proto_workassignment_workassignment_proto_rawDesc = "" +
 	"\n" +
 	"CreateWork\x12!.workassignment.CreateWorkRequest\x1a\".workassignment.CreateWorkResponse\x12h\n" +
 	"\x11CheckExistingWork\x12(.workassignment.CheckExistingWorkRequest\x1a).workassignment.CheckExistingWorkResponse\x12h\n" +
-	"\x11GenerateUploadURL\x12(.workassignment.GenerateUploadURLRequest\x1a).workassignment.GenerateUploadURLResponse\x12w\n" +
-	"\x16CheckStudentWorkExists\x12-.workassignment.CheckStudentWorkExistsRequest\x1a..workassignment.CheckStudentWorkExistsResponseB'Z%./proto/workassignment;workassignmentb\x06proto3"
+	"\x11GenerateUploadURL\x12(.workassignment.GenerateUploadURLRequest\x1a).workassignment.GenerateUploadURLResponseB'Z%./proto/workassignment;workassignmentb\x06proto3"
 
 var (
 	file_proto_workassignment_workassignment_proto_rawDescOnce sync.Once
@@ -1333,28 +1223,26 @@ func file_proto_workassignment_workassignment_proto_rawDescGZIP() []byte {
 	return file_proto_workassignment_workassignment_proto_rawDescData
 }
 
-var file_proto_workassignment_workassignment_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_proto_workassignment_workassignment_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_proto_workassignment_workassignment_proto_goTypes = []any{
-	(*GenerateUploadURLRequest)(nil),       // 0: workassignment.GenerateUploadURLRequest
-	(*GenerateUploadURLResponse)(nil),      // 1: workassignment.GenerateUploadURLResponse
-	(*GetWorksForAssistantRequest)(nil),    // 2: workassignment.GetWorksForAssistantRequest
-	(*GetWorksForAssistantResponse)(nil),   // 3: workassignment.GetWorksForAssistantResponse
-	(*GetWorkDetailsRequest)(nil),          // 4: workassignment.GetWorkDetailsRequest
-	(*GetWorkDetailsResponse)(nil),         // 5: workassignment.GetWorkDetailsResponse
-	(*WorkAssignment)(nil),                 // 6: workassignment.WorkAssignment
-	(*SubmitWorkRequest)(nil),              // 7: workassignment.SubmitWorkRequest
-	(*SubmitWorkResponse)(nil),             // 8: workassignment.SubmitWorkResponse
-	(*GetTaskDetailsRequest)(nil),          // 9: workassignment.GetTaskDetailsRequest
-	(*CriteriaGroup)(nil),                  // 10: workassignment.CriteriaGroup
-	(*GetTaskDetailsResponse)(nil),         // 11: workassignment.GetTaskDetailsResponse
-	(*CreateWorkRequest)(nil),              // 12: workassignment.CreateWorkRequest
-	(*CreateWorkResponse)(nil),             // 13: workassignment.CreateWorkResponse
-	(*CheckExistingWorkRequest)(nil),       // 14: workassignment.CheckExistingWorkRequest
-	(*CheckExistingWorkResponse)(nil),      // 15: workassignment.CheckExistingWorkResponse
-	(*GenerateDownloadURLRequest)(nil),     // 16: workassignment.GenerateDownloadURLRequest
-	(*GenerateDownloadURLResponse)(nil),    // 17: workassignment.GenerateDownloadURLResponse
-	(*CheckStudentWorkExistsRequest)(nil),  // 18: workassignment.CheckStudentWorkExistsRequest
-	(*CheckStudentWorkExistsResponse)(nil), // 19: workassignment.CheckStudentWorkExistsResponse
+	(*GenerateUploadURLRequest)(nil),     // 0: workassignment.GenerateUploadURLRequest
+	(*GenerateUploadURLResponse)(nil),    // 1: workassignment.GenerateUploadURLResponse
+	(*GetWorksForAssistantRequest)(nil),  // 2: workassignment.GetWorksForAssistantRequest
+	(*GetWorksForAssistantResponse)(nil), // 3: workassignment.GetWorksForAssistantResponse
+	(*GetWorkDetailsRequest)(nil),        // 4: workassignment.GetWorkDetailsRequest
+	(*GetWorkDetailsResponse)(nil),       // 5: workassignment.GetWorkDetailsResponse
+	(*WorkAssignment)(nil),               // 6: workassignment.WorkAssignment
+	(*SubmitWorkRequest)(nil),            // 7: workassignment.SubmitWorkRequest
+	(*SubmitWorkResponse)(nil),           // 8: workassignment.SubmitWorkResponse
+	(*GetTaskDetailsRequest)(nil),        // 9: workassignment.GetTaskDetailsRequest
+	(*CriteriaGroup)(nil),                // 10: workassignment.CriteriaGroup
+	(*GetTaskDetailsResponse)(nil),       // 11: workassignment.GetTaskDetailsResponse
+	(*CreateWorkRequest)(nil),            // 12: workassignment.CreateWorkRequest
+	(*CreateWorkResponse)(nil),           // 13: workassignment.CreateWorkResponse
+	(*CheckExistingWorkRequest)(nil),     // 14: workassignment.CheckExistingWorkRequest
+	(*CheckExistingWorkResponse)(nil),    // 15: workassignment.CheckExistingWorkResponse
+	(*GenerateDownloadURLRequest)(nil),   // 16: workassignment.GenerateDownloadURLRequest
+	(*GenerateDownloadURLResponse)(nil),  // 17: workassignment.GenerateDownloadURLResponse
 }
 var file_proto_workassignment_workassignment_proto_depIdxs = []int32{
 	6,  // 0: workassignment.GetWorksForAssistantResponse.works:type_name -> workassignment.WorkAssignment
@@ -1368,18 +1256,16 @@ var file_proto_workassignment_workassignment_proto_depIdxs = []int32{
 	12, // 8: workassignment.WorkAssignmentService.CreateWork:input_type -> workassignment.CreateWorkRequest
 	14, // 9: workassignment.WorkAssignmentService.CheckExistingWork:input_type -> workassignment.CheckExistingWorkRequest
 	0,  // 10: workassignment.WorkAssignmentService.GenerateUploadURL:input_type -> workassignment.GenerateUploadURLRequest
-	18, // 11: workassignment.WorkAssignmentService.CheckStudentWorkExists:input_type -> workassignment.CheckStudentWorkExistsRequest
-	3,  // 12: workassignment.WorkAssignmentService.GetWorksForAssistant:output_type -> workassignment.GetWorksForAssistantResponse
-	5,  // 13: workassignment.WorkAssignmentService.GetWorkDetails:output_type -> workassignment.GetWorkDetailsResponse
-	8,  // 14: workassignment.WorkAssignmentService.SubmitWork:output_type -> workassignment.SubmitWorkResponse
-	11, // 15: workassignment.WorkAssignmentService.GetTaskDetails:output_type -> workassignment.GetTaskDetailsResponse
-	17, // 16: workassignment.WorkAssignmentService.GenerateDownloadURL:output_type -> workassignment.GenerateDownloadURLResponse
-	13, // 17: workassignment.WorkAssignmentService.CreateWork:output_type -> workassignment.CreateWorkResponse
-	15, // 18: workassignment.WorkAssignmentService.CheckExistingWork:output_type -> workassignment.CheckExistingWorkResponse
-	1,  // 19: workassignment.WorkAssignmentService.GenerateUploadURL:output_type -> workassignment.GenerateUploadURLResponse
-	19, // 20: workassignment.WorkAssignmentService.CheckStudentWorkExists:output_type -> workassignment.CheckStudentWorkExistsResponse
-	12, // [12:21] is the sub-list for method output_type
-	3,  // [3:12] is the sub-list for method input_type
+	3,  // 11: workassignment.WorkAssignmentService.GetWorksForAssistant:output_type -> workassignment.GetWorksForAssistantResponse
+	5,  // 12: workassignment.WorkAssignmentService.GetWorkDetails:output_type -> workassignment.GetWorkDetailsResponse
+	8,  // 13: workassignment.WorkAssignmentService.SubmitWork:output_type -> workassignment.SubmitWorkResponse
+	11, // 14: workassignment.WorkAssignmentService.GetTaskDetails:output_type -> workassignment.GetTaskDetailsResponse
+	17, // 15: workassignment.WorkAssignmentService.GenerateDownloadURL:output_type -> workassignment.GenerateDownloadURLResponse
+	13, // 16: workassignment.WorkAssignmentService.CreateWork:output_type -> workassignment.CreateWorkResponse
+	15, // 17: workassignment.WorkAssignmentService.CheckExistingWork:output_type -> workassignment.CheckExistingWorkResponse
+	1,  // 18: workassignment.WorkAssignmentService.GenerateUploadURL:output_type -> workassignment.GenerateUploadURLResponse
+	11, // [11:19] is the sub-list for method output_type
+	3,  // [3:11] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1396,7 +1282,7 @@ func file_proto_workassignment_workassignment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_workassignment_workassignment_proto_rawDesc), len(file_proto_workassignment_workassignment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

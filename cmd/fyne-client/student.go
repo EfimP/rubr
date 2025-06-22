@@ -25,7 +25,7 @@ import (
 	workassignmentpb "rubr/proto/workassignment"
 )
 
-var WorkID int32
+var workID int32
 var taskID int32
 
 func СreateStudentGradesPage(state *AppState) fyne.CanvasObject {
@@ -361,6 +361,35 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 		return container.NewVBox(widget.NewLabel(resp.Error))
 	}
 
+	connExist, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
+	if err != nil {
+		log.Printf("Не удалось подключиться к сервису: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка подключения к сервису"))
+	}
+	defer conn.Close()
+
+	clientExist := workassignmentpb.NewWorkAssignmentServiceClient(connExist)
+
+	userIDint64, err := strconv.ParseInt(state.userID, 10, 32)
+	if err != nil {
+		log.Printf("Некорректный ID пользователя: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка: некорректный ID пользователя"))
+	}
+	userID := int32(userIDint64)
+
+	respExist, err := clientExist.CheckExistingWork(ctx, &workassignmentpb.CheckExistingWorkRequest{StudentId: userID, TaskId: taskID})
+	if err != nil {
+		log.Printf("Не удалось проверить существование работы: %v", err)
+		return container.NewVBox(widget.NewLabel("Ошибка загрузки деталей работы"))
+	}
+	if respExist.Error != "" {
+		log.Printf("Ошибка от сервиса: %s", respExist.Error)
+		return container.NewVBox(widget.NewLabel(respExist.Error))
+	}
+	if respExist.Exists {
+		workID = respExist.WorkId
+	}
+
 	// Настройка заголовка
 	headerTextColor := color.White
 	logoText := canvas.NewText("ВШЭ", headerTextColor)
@@ -407,6 +436,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			defer reader.Close()
 
 			fileName = reader.URI().Name()
+			log.Printf("%s", fileName)
 
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
@@ -437,14 +467,14 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 				dialog.ShowError(fmt.Errorf("Не удалось создать работу: %v", err), w)
 				return
 			}
-			WorkID = createResp.WorkId
+			workID = createResp.WorkId
 
 			// Запрос pre-signed URL
 			urlResp, err := client.GenerateUploadURL(ctx, &workassignmentpb.GenerateUploadURLRequest{
-				WorkId:   WorkID,
+				WorkId:   workID,
 				FileName: fileName,
 			})
-			log.Printf("ID: %v, Name: %s", WorkID, fileName)
+			log.Printf("ID: %v, Name: %s", workID, fileName)
 			if err != nil || urlResp.Error != "" {
 				log.Printf("Ошибка получения URL: %v, %s", err, urlResp.Error)
 				dialog.ShowError(fmt.Errorf("Не удалось получить URL: %v", err), w)
@@ -467,7 +497,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			}
 			defer resp.Body.Close()
 
-			log.Printf("Файл %s успешно загружен для работы %d", fileName, WorkID)
+			log.Printf("Файл %s успешно загружен для работы %d", fileName, workID)
 			dialog.ShowInformation("Успех", fmt.Sprintf("Файл %s успешно загружен", fileName), w)
 		}, w)
 		fileDialog.Show()
@@ -475,7 +505,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	// Кнопка для просмотра файла (скачивание с выбором директории)
 	viewButton := widget.NewButton("Просмотреть работу", func() {
 		w := state.window
-		if WorkID == 0 {
+		if workID == 0 {
 			dialog.ShowError(fmt.Errorf("Работа не создана"), w)
 			return
 		}
@@ -493,12 +523,11 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 
 		client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
 
-		startTime := time.Now()
 		urlResp, err := client.GenerateDownloadURL(ctx, &workassignmentpb.GenerateDownloadURLRequest{
-			WorkId: WorkID,
+			WorkId: workID,
 		})
 		if err != nil {
-			log.Printf("Ошибка получения URL для work_id %d: %v", WorkID, err)
+			log.Printf("Ошибка получения URL для work_id %d: %v", workID, err)
 			dialog.ShowError(fmt.Errorf("Ошибка получения ссылки: %v", err), w)
 			return
 		}
@@ -519,7 +548,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 
 			filePath := writer.URI().Path()
 			if filePath == "" {
-				log.Printf("Пустой путь для сохранения файла work_id %d", WorkID)
+				log.Printf("Пустой путь для сохранения файла work_id %d", workID)
 				dialog.ShowError(fmt.Errorf("Не указан путь для сохранения"), w)
 				return
 			}
@@ -531,27 +560,24 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			httpClient := &http.Client{}
 			req, err := http.NewRequestWithContext(downloadCtx, "GET", urlResp.Url, nil)
 			if err != nil {
-				log.Printf("Ошибка создания HTTP-запроса для work_id %d: %v", WorkID, err)
+				log.Printf("Ошибка создания HTTP-запроса для work_id %d: %v", workID, err)
 				dialog.ShowError(fmt.Errorf("Ошибка создания запроса: %v", err), w)
 				return
 			}
 
 			resp, err := httpClient.Do(req)
-			log.Printf("Ответ от сервера для work_id %d: %v", WorkID, resp)
 			if err != nil {
-				log.Printf("Файл успешно скачан для работы %d в %s, общее время: %v", WorkID, filePath, time.Since(startTime))
-				log.Printf("Ошибка скачивания файла для work_id %d: %v", WorkID, err)
+				log.Printf("Ошибка скачивания файла для work_id %d: %v", workID, err)
 				dialog.ShowError(fmt.Errorf("Не удалось скачать файл: %v", err), w)
 				return
 			}
 			if resp == nil {
-				log.Printf("Ответ от сервера для work_id %d отсутствует", WorkID)
+				log.Printf("Ответ от сервера для work_id %d отсутствует", workID)
 				dialog.ShowError(fmt.Errorf("Сервер не вернул данные"), w)
 				return
 			}
 			if resp.StatusCode != http.StatusOK {
-				log.Printf("Файл успешно скачан для работы %d в %s, общее время: %v", WorkID, filePath, time.Since(startTime))
-				log.Printf("Ошибка скачивания файла для work_id %d: статус: %d", WorkID, resp.StatusCode)
+				log.Printf("Ошибка скачивания файла для work_id %d: статус: %d", workID, resp.StatusCode)
 				dialog.ShowError(fmt.Errorf("Не удалось скачать файл: код состояния %d", resp.StatusCode), w)
 				defer resp.Body.Close()
 				return
@@ -562,17 +588,17 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			// Сохранение файла в выбранную директорию
 			_, err = io.Copy(writer, resp.Body)
 			if err != nil {
-				log.Printf("Ошибка записи файла для work_id %d: %v", WorkID, err)
+				log.Printf("Ошибка записи файла для work_id %d: %v", workID, err)
 				dialog.ShowError(fmt.Errorf("Ошибка записи файла: %v", err), w)
 				return
 			}
 
-			log.Printf("Файл успешно скачан для работы %d в %s", WorkID, filePath)
+			log.Printf("Файл успешно скачан для работы %d в %s", workID, filePath)
 			dialog.ShowInformation("Успех", fmt.Sprintf("Файл успешно скачан в %s", filePath), w)
 
 			//// Открытие скачанного файла (опционально)
 			//if err := fyne.CurrentApp().OpenURL(fyne.NewURI("file://" + filePath)); err != nil {
-			//	log.Printf("Ошибка открытия файла %s для work_id %d: %v", filePath, WorkID, err)
+			//	log.Printf("Ошибка открытия файла %s для work_id %d: %v", filePath, workID, err)
 			//	dialog.ShowError(fmt.Errorf("Не удалось открыть файл: %v", err), w)
 			//}
 		}, w)
@@ -639,7 +665,7 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 
 	marksMap := make(map[int32]gradingpb.CriterionMark)
 
-	if WorkID != 0 {
+	if workID != 0 {
 		gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Failed to connect to gradingservice: %v", err)
@@ -649,13 +675,13 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 		gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
 		//Загрузка существующих оценок
-		marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: WorkID})
+		marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: workID})
 		if err != nil {
-			log.Printf("Не удалось загрузить оценки для работы %d: %v", WorkID, err)
+			log.Printf("Не удалось загрузить оценки для работы %d: %v", workID, err)
 			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + err.Error()))
 		}
 		if marksResp.Error != "" {
-			log.Printf("Ошибка загрузки оценок для работы %d: %s", WorkID, marksResp.Error)
+			log.Printf("Ошибка загрузки оценок для работы %d: %s", workID, marksResp.Error)
 			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + marksResp.Error))
 		}
 
@@ -722,7 +748,7 @@ func CreateStudentBlockingCriteriaPage(state *AppState) fyne.CanvasObject {
 
 		textCommentEntry := ""
 		textEvaluationEntry := ""
-		if WorkID != 0 {
+		if workID != 0 {
 			//Загружаем существующие данные
 			if mark, exists := marksMap[crit.Id]; exists {
 				textCommentEntry = mark.Comment
@@ -825,7 +851,7 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 	rubricClient := rubricpb.NewRubricServiceClient(rubricConn)
 
 	marksMap := make(map[int32]gradingpb.CriterionMark)
-	if WorkID != 0 {
+	if workID != 0 {
 		gradingConn, err := grpc.Dial("89.169.39.161:50057", grpc.WithInsecure())
 		if err != nil {
 			log.Printf("Не удалось подключиться к GradingService: %v", err)
@@ -835,13 +861,13 @@ func CreateStudentMainCriteriaPage(state *AppState) fyne.CanvasObject {
 		gradingClient := gradingpb.NewGradingServiceClient(gradingConn)
 
 		// Загрузка существующих оценок
-		marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: WorkID})
+		marksResp, err := gradingClient.GetCriteriaMarks(ctx, &gradingpb.GetCriteriaMarksRequest{WorkId: workID})
 		if err != nil {
-			log.Printf("Не удалось загрузить оценки для работы %d: %v", WorkID, err)
+			log.Printf("Не удалось загрузить оценки для работы %d: %v", workID, err)
 			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + err.Error()))
 		}
 		if marksResp.Error != "" {
-			log.Printf("Ошибка загрузки оценок для работы %d: %s", WorkID, marksResp.Error)
+			log.Printf("Ошибка загрузки оценок для работы %d: %s", workID, marksResp.Error)
 			return container.NewVBox(widget.NewLabel("Ошибка загрузки оценок: " + marksResp.Error))
 		}
 

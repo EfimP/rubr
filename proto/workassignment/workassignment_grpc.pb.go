@@ -19,15 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkAssignmentService_GetWorksForAssistant_FullMethodName   = "/workassignment.WorkAssignmentService/GetWorksForAssistant"
-	WorkAssignmentService_GetWorkDetails_FullMethodName         = "/workassignment.WorkAssignmentService/GetWorkDetails"
-	WorkAssignmentService_SubmitWork_FullMethodName             = "/workassignment.WorkAssignmentService/SubmitWork"
-	WorkAssignmentService_GetTaskDetails_FullMethodName         = "/workassignment.WorkAssignmentService/GetTaskDetails"
-	WorkAssignmentService_GenerateDownloadURL_FullMethodName    = "/workassignment.WorkAssignmentService/GenerateDownloadURL"
-	WorkAssignmentService_CreateWork_FullMethodName             = "/workassignment.WorkAssignmentService/CreateWork"
-	WorkAssignmentService_CheckExistingWork_FullMethodName      = "/workassignment.WorkAssignmentService/CheckExistingWork"
-	WorkAssignmentService_GenerateUploadURL_FullMethodName      = "/workassignment.WorkAssignmentService/GenerateUploadURL"
-	WorkAssignmentService_CheckStudentWorkExists_FullMethodName = "/workassignment.WorkAssignmentService/CheckStudentWorkExists"
+	WorkAssignmentService_GetWorksForAssistant_FullMethodName = "/workassignment.WorkAssignmentService/GetWorksForAssistant"
+	WorkAssignmentService_GetWorkDetails_FullMethodName       = "/workassignment.WorkAssignmentService/GetWorkDetails"
+	WorkAssignmentService_SubmitWork_FullMethodName           = "/workassignment.WorkAssignmentService/SubmitWork"
+	WorkAssignmentService_GetTaskDetails_FullMethodName       = "/workassignment.WorkAssignmentService/GetTaskDetails"
+	WorkAssignmentService_GenerateDownloadURL_FullMethodName  = "/workassignment.WorkAssignmentService/GenerateDownloadURL"
+	WorkAssignmentService_CreateWork_FullMethodName           = "/workassignment.WorkAssignmentService/CreateWork"
+	WorkAssignmentService_CheckExistingWork_FullMethodName    = "/workassignment.WorkAssignmentService/CheckExistingWork"
+	WorkAssignmentService_GenerateUploadURL_FullMethodName    = "/workassignment.WorkAssignmentService/GenerateUploadURL"
 )
 
 // WorkAssignmentServiceClient is the client API for WorkAssignmentService service.
@@ -42,7 +41,6 @@ type WorkAssignmentServiceClient interface {
 	CreateWork(ctx context.Context, in *CreateWorkRequest, opts ...grpc.CallOption) (*CreateWorkResponse, error)
 	CheckExistingWork(ctx context.Context, in *CheckExistingWorkRequest, opts ...grpc.CallOption) (*CheckExistingWorkResponse, error)
 	GenerateUploadURL(ctx context.Context, in *GenerateUploadURLRequest, opts ...grpc.CallOption) (*GenerateUploadURLResponse, error)
-	CheckStudentWorkExists(ctx context.Context, in *CheckStudentWorkExistsRequest, opts ...grpc.CallOption) (*CheckStudentWorkExistsResponse, error)
 }
 
 type workAssignmentServiceClient struct {
@@ -133,16 +131,6 @@ func (c *workAssignmentServiceClient) GenerateUploadURL(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *workAssignmentServiceClient) CheckStudentWorkExists(ctx context.Context, in *CheckStudentWorkExistsRequest, opts ...grpc.CallOption) (*CheckStudentWorkExistsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CheckStudentWorkExistsResponse)
-	err := c.cc.Invoke(ctx, WorkAssignmentService_CheckStudentWorkExists_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // WorkAssignmentServiceServer is the server API for WorkAssignmentService service.
 // All implementations must embed UnimplementedWorkAssignmentServiceServer
 // for forward compatibility.
@@ -155,7 +143,6 @@ type WorkAssignmentServiceServer interface {
 	CreateWork(context.Context, *CreateWorkRequest) (*CreateWorkResponse, error)
 	CheckExistingWork(context.Context, *CheckExistingWorkRequest) (*CheckExistingWorkResponse, error)
 	GenerateUploadURL(context.Context, *GenerateUploadURLRequest) (*GenerateUploadURLResponse, error)
-	CheckStudentWorkExists(context.Context, *CheckStudentWorkExistsRequest) (*CheckStudentWorkExistsResponse, error)
 	mustEmbedUnimplementedWorkAssignmentServiceServer()
 }
 
@@ -189,9 +176,6 @@ func (UnimplementedWorkAssignmentServiceServer) CheckExistingWork(context.Contex
 }
 func (UnimplementedWorkAssignmentServiceServer) GenerateUploadURL(context.Context, *GenerateUploadURLRequest) (*GenerateUploadURLResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateUploadURL not implemented")
-}
-func (UnimplementedWorkAssignmentServiceServer) CheckStudentWorkExists(context.Context, *CheckStudentWorkExistsRequest) (*CheckStudentWorkExistsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckStudentWorkExists not implemented")
 }
 func (UnimplementedWorkAssignmentServiceServer) mustEmbedUnimplementedWorkAssignmentServiceServer() {}
 func (UnimplementedWorkAssignmentServiceServer) testEmbeddedByValue()                               {}
@@ -358,24 +342,6 @@ func _WorkAssignmentService_GenerateUploadURL_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WorkAssignmentService_CheckStudentWorkExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckStudentWorkExistsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WorkAssignmentServiceServer).CheckStudentWorkExists(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WorkAssignmentService_CheckStudentWorkExists_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkAssignmentServiceServer).CheckStudentWorkExists(ctx, req.(*CheckStudentWorkExistsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // WorkAssignmentService_ServiceDesc is the grpc.ServiceDesc for WorkAssignmentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -414,10 +380,6 @@ var WorkAssignmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateUploadURL",
 			Handler:    _WorkAssignmentService_GenerateUploadURL_Handler,
-		},
-		{
-			MethodName: "CheckStudentWorkExists",
-			Handler:    _WorkAssignmentService_CheckStudentWorkExists_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

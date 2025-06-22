@@ -12,7 +12,6 @@ service WorkAssignmentService {
   rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
   rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
   rpc GenerateUploadURL(GenerateUploadURLRequest) returns (GenerateUploadURLResponse);
-  rpc CheckStudentWorkExists(CheckStudentWorkExistsRequest) returns (CheckStudentWorkExistsResponse);
 }
 
 message GenerateUploadURLRequest {
@@ -109,8 +108,9 @@ message CheckExistingWorkRequest {
 message CheckExistingWorkResponse {
   bool exists = 1;     // Существует ли работа
   int32 work_id = 2;   // ID работы, если существует
-  int32 student_id = 3; // ID студента для проверки
-  string error = 4;    // Сообщение об ошибке, если есть
+  string content_url = 3; // URL контента работы из S3
+  int32 student_id = 4; // ID студента для проверки
+  string error = 5;    // Сообщение об ошибке, если есть
 }
 
 message GenerateDownloadURLRequest {
@@ -120,15 +120,4 @@ message GenerateDownloadURLRequest {
 message GenerateDownloadURLResponse {
   string url = 1;
   string error = 2;
-}
-
-message CheckStudentWorkExistsRequest {
-  int32 user_id = 1;
-  int32 task_id = 2;
-}
-
-message CheckStudentWorkExistsResponse {
-  bool exists = 1;
-  int32 work_id = 2;
-  string error = 3;
 }
