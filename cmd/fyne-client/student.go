@@ -11,10 +11,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"google.golang.org/grpc"
 	"image/color"
+	"io"
 
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 
@@ -426,6 +426,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	}
 	deadlineLabel := widget.NewLabel("Дедлайн: " + deadlineTime.Format("02.01.2006 15:04"))
 
+	fileName := ""
 	downloadButton := widget.NewButton("Загрузить работу", func() {
 		w := state.window
 		fileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -436,7 +437,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			}
 			defer reader.Close()
 
-			fileName := reader.URI().Name()
+			fileName = reader.URI().Name()
 
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
@@ -467,13 +468,14 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 				dialog.ShowError(fmt.Errorf("Не удалось создать работу: %v", err), w)
 				return
 			}
-			workID := createResp.WorkId
+			WorkID = createResp.WorkId
 
 			// Запрос pre-signed URL
 			urlResp, err := client.GenerateUploadURL(ctx, &workassignmentpb.GenerateUploadURLRequest{
-				WorkId:   workID,
+				WorkId:   WorkID,
 				FileName: fileName,
 			})
+			log.Printf("ID: %v, Name: %s", WorkID, fileName)
 			if err != nil || urlResp.Error != "" {
 				log.Printf("Ошибка получения URL: %v, %s", err, urlResp.Error)
 				dialog.ShowError(fmt.Errorf("Не удалось получить URL: %v", err), w)
@@ -496,12 +498,13 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			}
 			defer resp.Body.Close()
 
-			log.Printf("Файл %s успешно загружен для работы %d", fileName, workID)
+			log.Printf("Файл %s успешно загружен для работы %d", fileName, WorkID)
 			dialog.ShowInformation("Успех", fmt.Sprintf("Файл %s успешно загружен", fileName), w)
 		}, w)
 		fileDialog.Show()
 	})
 	// Кнопка для просмотра файла
+	// Кнопка для просмотра файла (скачивание с выбором директории)
 	viewButton := widget.NewButton("Просмотреть работу", func() {
 		w := state.window
 		if WorkID == 0 {
@@ -509,9 +512,22 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		urlResp, err := client.GetAssignmentFileURL(ctx, &workassignmentpb.GetAssignmentFileURLRequest{
-			WorkId:   WorkID,
-			FileName: "work_file", // Замените на динамическое имя файла, если нужно
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		conn, err := grpc.Dial("89.169.39.161:50054", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Не удалось подключиться к сервису: %v", err)
+			dialog.ShowError(fmt.Errorf("Ошибка подключения к сервису: %v", err), w)
+			return
+		}
+		defer conn.Close()
+
+		client := workassignmentpb.NewWorkAssignmentServiceClient(conn)
+
+		// Запрос pre-signed URL для скачивания
+		urlResp, err := client.GenerateDownloadURL(ctx, &workassignmentpb.GenerateDownloadURLRequest{
+			WorkId: WorkID,
 		})
 		if err != nil {
 			log.Printf("Ошибка получения URL для work_id %d: %v", WorkID, err)
@@ -524,19 +540,60 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 			return
 		}
 
-		// Открытие ссылки в браузере
-		parsedURL, err := url.Parse(urlResp.Url)
-		if err != nil {
-			log.Printf("Ошибка парсинга URL для work_id %d: %v", WorkID, err)
-			dialog.ShowError(fmt.Errorf("Неверный формат ссылки: %v", err), w)
-			return
-		}
+		// Диалог для выбора директории и имени файла
+		fileDialog := dialog.NewFileSave(func(writer fyne.URIWriteCloser, err error) {
+			if err != nil || writer == nil {
+				log.Printf("Ошибка при выборе директории: %v", err)
+				dialog.ShowError(fmt.Errorf("Не удалось выбрать директорию: %v", err), w)
+				return
+			}
+			defer writer.Close()
 
-		// Открытие ссылки в браузере
-		if err := fyne.CurrentApp().OpenURL(parsedURL); err != nil {
-			log.Printf("Ошибка открытия URL для work_id %d: %v", WorkID, err)
-			dialog.ShowError(fmt.Errorf("Не удалось открыть файл: %v", err), w)
-		}
+			filePath := writer.URI().Path()
+			if filePath == "" {
+				log.Printf("Пустой путь для сохранения файла work_id %d", WorkID)
+				dialog.ShowError(fmt.Errorf("Не указан путь для сохранения"), w)
+				return
+			}
+
+			// Скачивание файла через HTTP
+			httpClient := &http.Client{}
+			req, err := http.NewRequestWithContext(ctx, "GET", urlResp.Url, nil)
+			if err != nil {
+				log.Printf("Ошибка создания HTTP-запроса для work_id %d: %v", WorkID, err)
+				dialog.ShowError(fmt.Errorf("Ошибка создания запроса: %v", err), w)
+				return
+			}
+
+			resp, err := httpClient.Do(req)
+			if err != nil || resp.StatusCode != http.StatusOK {
+				log.Printf("Ошибка скачивания файла для work_id %d: %v, статус: %d", WorkID, err, resp.StatusCode)
+				dialog.ShowError(fmt.Errorf("Не удалось скачать файл"), w)
+				return
+			}
+			defer resp.Body.Close()
+
+			// Сохранение файла в выбранную директорию
+			_, err = io.Copy(writer, resp.Body)
+			if err != nil {
+				log.Printf("Ошибка записи файла для work_id %d: %v", WorkID, err)
+				dialog.ShowError(fmt.Errorf("Ошибка записи файла: %v", err), w)
+				return
+			}
+
+			log.Printf("Файл успешно скачан для работы %d в %s", WorkID, filePath)
+			dialog.ShowInformation("Успех", fmt.Sprintf("Файл успешно скачан в %s", filePath), w)
+
+			//// Открытие скачанного файла (опционально)
+			//if err := fyne.CurrentApp().OpenURL(fyne.NewURI("file://" + filePath)); err != nil {
+			//	log.Printf("Ошибка открытия файла %s для work_id %d: %v", filePath, WorkID, err)
+			//	dialog.ShowError(fmt.Errorf("Не удалось открыть файл: %v", err), w)
+			//}
+		}, w)
+
+		// Установка имени файла по умолчанию
+		fileDialog.SetFileName(fileName)
+		fileDialog.Show()
 	})
 
 	backButton := widget.NewButton("Назад", func() {

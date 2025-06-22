@@ -11,6 +11,7 @@ service WorkAssignmentService {
   rpc GetTaskDetails (GetTaskDetailsRequest) returns (GetTaskDetailsResponse);
   rpc DownloadAssignmentFile (DownloadAssignmentFileRequest) returns (DownloadAssignmentFileResponse);
   rpc GetAssignmentFileURL (GetAssignmentFileURLRequest) returns (GetAssignmentFileURLResponse);
+  rpc GenerateDownloadURL(GenerateDownloadURLRequest) returns (GenerateDownloadURLResponse);
   rpc CreateWork (CreateWorkRequest) returns (CreateWorkResponse);
   rpc CheckExistingWork (CheckExistingWorkRequest) returns (CheckExistingWorkResponse);
 
@@ -142,4 +143,13 @@ message CheckExistingWorkResponse {
   int32 work_id = 2;   // ID работы, если существует
   int32 student_id = 3; // ID студента для проверки
   string error = 4;    // Сообщение об ошибке, если есть
+}
+
+message GenerateDownloadURLRequest {
+  int32 work_id = 1;
+}
+
+message GenerateDownloadURLResponse {
+  string url = 1;
+  string error = 2;
 }
