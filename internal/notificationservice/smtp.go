@@ -66,7 +66,7 @@ func (s *Server) SendRegistrationNotification(ctx context.Context, req *pb.Notif
 	_, err = s.Db.ExecContext(ctx, `
 		INSERT INTO notifications (user_id, message, created_at)
 		VALUES ($1, $2, $3)`,
-		req.UserId, "Регистрация аккаунта", req.CreatedAt)
+		req.UserId, "Регистрация аккаунта", time.Now()) //req.CreatedAt)
 	if err != nil {
 		log.Printf("Failed to log notification for user %d: %v", req.UserId, err)
 		return &pb.NotificationResponse{Error: fmt.Sprintf("failed to log notification: %v", err)}, nil
