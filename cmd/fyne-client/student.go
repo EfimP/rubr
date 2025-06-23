@@ -430,19 +430,23 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	}
 	deadlineLabel := widget.NewLabel("Дедлайн: " + deadlineTime.Format("02.01.2006 15:04"))
 
-	parts := strings.Split(content_url, "/")
-	if len(parts) < 3 {
-		log.Printf("неверный формат пути: %s, ожидается works/<work_id>/filename", content_url)
-	}
+	var fileName string
+	if content_url != "" {
+		parts := strings.Split(content_url, "/")
+		if len(parts) < 3 {
+			log.Printf("неверный формат пути: %s, ожидается works/<work_id>/filename", content_url)
+		}
 
-	// Проверяем, что вторая часть соответствует workID
-	idPart := parts[1]
-	if id, err := strconv.Atoi(idPart); err != nil || int32(id) != workID {
-		log.Printf("ID в пути (%s) не соответствует workID (%d)", idPart, workID)
-	}
+		// Проверяем, что вторая часть соответствует workID
+		idPart := parts[1]
+		if id, err := strconv.Atoi(idPart); err != nil || int32(id) != workID {
+			log.Printf("ID в пути (%s) не соответствует workID (%d)", idPart, workID)
+		}
 
-	// Возвращаем имя файла (последний элемент)
-	fileName := parts[len(parts)-1]
+		// Возвращаем имя файла (последний элемент)
+		fileName = parts[len(parts)-1]
+
+	}
 
 	var downloadButton *widget.Button
 	var viewButton *widget.Button
@@ -648,7 +652,7 @@ func CreateStudentWorkDetailsPage(state *AppState) fyne.CanvasObject {
 	} else {
 		buttonsContainer = container.NewHBox(backButton, layout.NewSpacer(), nextButton)
 	}
-	
+
 	inputGrid := container.NewVBox(
 		titleLabel,
 		scrollableDescription,
