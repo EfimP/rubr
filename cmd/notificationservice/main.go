@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -27,7 +28,6 @@ func main() {
 	// Формирование строки подключения
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPassword, dbName)
-	log.Println(connStr)
 	log.Printf("Trying to connect to: %s", connStr) // Для отладки
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
