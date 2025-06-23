@@ -13,7 +13,7 @@ const (
 	smtpHost = "smtp.gmail.com"
 	smtpPort = "587"
 	smtpUser = "rubrnotifications@gmail.com"
-	smtpPass = "RubrAVE0744"
+	smtpPass = "fvkm edzq kpvd avcd"
 )
 
 // NotificationRequest представляет общий запрос для уведомлений

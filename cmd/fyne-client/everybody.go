@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"time"
 
-	userpb "rubr/proto/user"
 	notifypb "rubr/proto/notification"
+	userpb "rubr/proto/user"
 )
 
 func CreateGreetingPage(state *AppState) fyne.CanvasObject {
