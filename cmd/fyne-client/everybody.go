@@ -111,6 +111,12 @@ func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
 	})
 	enterButton.Importance = widget.HighImportance
 
+	resetPasswordButton := widget.NewButton("Сброс пароля", func() {
+		state.currentPage = "password_reset"
+		state.window.SetContent(createContent(state))
+	})
+	resetPasswordButton.Importance = widget.MediumImportance
+
 	backButton := widget.NewButton("← Назад", func() {
 		state.currentPage = "greeting"
 		state.window.SetContent(createContent(state))
@@ -123,6 +129,7 @@ func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
 		loginEntry,
 		passwordEntry,
 		enterButton,
+		resetPasswordButton,
 		layout.NewSpacer(),
 	)
 
@@ -142,6 +149,7 @@ func CreateAuthorizationPage(state *AppState) fyne.CanvasObject {
 
 	return container.New(layout.NewGridLayout(2), leftContent, rightContainer)
 }
+
 func CreateRegistrationPage(state *AppState) fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(resourceHselogoSvg)
 	logo.FillMode = canvas.ImageFillOriginal
@@ -223,12 +231,6 @@ func CreateRegistrationPage(state *AppState) fyne.CanvasObject {
 	})
 	enterButton.Importance = widget.HighImportance
 
-	resetPasswordButton := widget.NewButton("Сброс пароля", func() {
-		state.currentPage = "password_reset"
-		state.window.SetContent(createContent(state))
-	})
-	resetPasswordButton.Importance = widget.MediumImportance
-
 	backButton := widget.NewButton("← Назад", func() {
 		state.currentPage = "greeting"
 		state.window.SetContent(createContent(state))
@@ -244,7 +246,6 @@ func CreateRegistrationPage(state *AppState) fyne.CanvasObject {
 		emailEntry,
 		passwordEntry,
 		enterButton,
-		resetPasswordButton,
 		layout.NewSpacer(),
 	)
 
@@ -275,89 +276,107 @@ func CreatePasswordResetPage(state *AppState) fyne.CanvasObject {
 
 	var tempPasswordEntry *widget.Entry
 	var newPasswordEntry *widget.Entry
+	var confirmButton *widget.Button
+	var currentForm fyne.CanvasObject
 
-	enterButton := widget.NewButton("Далее", func() {
-		conn, err := grpc.Dial("89.169.39.161:50056", grpc.WithInsecure()) // Предполагаемый порт для NotificationService
-		if err != nil {
-			log.Printf("Failed to connect to notificationservice: %v", err)
-			return
-		}
-		defer conn.Close()
+	// Правая часть окна (константная часть)
+	rightBackground := canvas.NewRectangle(color.RGBA{23, 44, 101, 255})
+	rightText := canvas.NewText("Сброс пароля", color.White)
+	rightText.TextSize = 32
+	rightText.TextStyle = fyne.TextStyle{Bold: true}
+	rightContent := container.NewCenter(rightText)
+	rightContainer := container.NewStack(rightBackground, rightContent)
 
-		client := notifypb.NewNotificationServiceClient(conn)
-		// Генерируем случайный 4-значный пароль
-		b := make([]byte, 3)
-		_, err = rand.Read(b)
-		if err != nil {
-			log.Printf("Failed to generate random password: %v", err)
-			return
-		}
-		tempPassword := fmt.Sprintf("%04d", int(b[0])%10000)
-		createdAt := time.Now().Format(time.RFC3339)
-
-		_, err = client.SendPasswordResetNotification(context.Background(), &notifypb.NotificationRequest{
-			Email:     emailEntry.Text,
-			Message:   fmt.Sprintf("Ваш временный пароль: %s\nВведите его в приложении для создания нового пароля.", tempPassword),
-			CreatedAt: createdAt,
-		})
-		if err != nil {
-			log.Printf("Password reset notification failed: %v", err)
-			return
-		}
-
-		// Показываем поле для ввода временного пароля
-		tempPasswordEntry = widget.NewPasswordEntry()
-		tempPasswordEntry.SetPlaceHolder("Введите временный пароль")
-		newPasswordEntry = widget.NewPasswordEntry()
-		newPasswordEntry.SetPlaceHolder("Введите новый пароль")
-
-		confirmButton := widget.NewButton("Подтвердить", func() {
-			if tempPasswordEntry.Text == "" || newPasswordEntry.Text == "" {
-				dialog.ShowInformation("Ошибка", "Заполните все поля", state.window)
-				return
-			}
-
-			// Здесь предположим, что проверка временного пароля происходит на сервере
-			// Для простоты эмулируем проверку на клиенте
-			if tempPasswordEntry.Text != tempPassword {
-				dialog.ShowInformation("Ошибка", "Неверный временный пароль", state.window)
-				return
-			}
-
-			// Обновляем пароль (предполагаем вызов сервиса users)
-			userConn, err := grpc.Dial("89.169.39.161:50051", grpc.WithInsecure())
+	// Изначальный контейнер для первого этапа (ввод email)
+	initialForm := container.NewVBox(
+		logo,
+		layout.NewSpacer(),
+		emailEntry,
+		widget.NewButton("Далее", func() {
+			conn, err := grpc.Dial("89.169.39.161:50056", grpc.WithInsecure())
 			if err != nil {
-				log.Printf("Failed to connect to userservice: %v", err)
+				log.Printf("Failed to connect to notificationservice: %v", err)
 				return
 			}
-			defer userConn.Close()
+			defer conn.Close()
 
-			userClient := userpb.NewUserServiceClient(userConn)
-			_, err = userClient.UpdatePassword(context.Background(), &userpb.UpdatePasswordRequest{
-				Email:    emailEntry.Text,
-				Password: newPasswordEntry.Text,
+			client := notifypb.NewNotificationServiceClient(conn)
+			// Генерируем случайный 4-значный пароль
+			b := make([]byte, 3)
+			_, err = rand.Read(b)
+			if err != nil {
+				log.Printf("Failed to generate random password: %v", err)
+				return
+			}
+			tempPassword := fmt.Sprintf("%04d", int(b[0])%10000)
+			createdAt := time.Now().Format(time.RFC3339)
+
+			_, err = client.SendPasswordResetNotification(context.Background(), &notifypb.NotificationRequest{
+				Email:     emailEntry.Text,
+				Message:   fmt.Sprintf("Ваш временный пароль: %s\nВведите его в приложении для создания нового пароля.", tempPassword),
+				CreatedAt: createdAt,
 			})
 			if err != nil {
-				log.Printf("Failed to update password: %v", err)
+				log.Printf("Password reset notification failed: %v", err)
 				return
 			}
-			dialog.ShowInformation("Успех", "Пароль успешно обновлён", state.window)
-			state.currentPage = "authorization"
-			state.window.SetContent(createContent(state))
-		})
 
-		form := container.NewVBox(
-			logo,
-			layout.NewSpacer(),
-			tempPasswordEntry,
-			newPasswordEntry,
-			confirmButton,
-			layout.NewSpacer(),
-		)
-		leftContent := container.NewBorder(nil, nil, nil, nil, container.NewCenter(form))
-		state.window.SetContent(container.New(layout.NewGridLayout(2), leftContent)) //, rightContainer))
-	})
-	enterButton.Importance = widget.HighImportance
+			// Инициализируем поля для второго этапа
+			tempPasswordEntry = widget.NewPasswordEntry()
+			tempPasswordEntry.SetPlaceHolder("Введите временный пароль")
+			newPasswordEntry = widget.NewPasswordEntry()
+			newPasswordEntry.SetPlaceHolder("Введите новый пароль")
+
+			confirmButton = widget.NewButton("Подтвердить", func() {
+				if tempPasswordEntry.Text == "" || newPasswordEntry.Text == "" {
+					dialog.ShowInformation("Ошибка", "Заполните все поля", state.window)
+					return
+				}
+
+				// Проверка временного пароля (эмуляция на клиенте)
+				if tempPasswordEntry.Text != tempPassword {
+					dialog.ShowInformation("Ошибка", "Неверный временный пароль", state.window)
+					return
+				}
+
+				// Обновляем пароль
+				userConn, err := grpc.Dial("89.169.39.161:50051", grpc.WithInsecure())
+				if err != nil {
+					log.Printf("Failed to connect to userservice: %v", err)
+					return
+				}
+				defer userConn.Close()
+
+				userClient := userpb.NewUserServiceClient(userConn)
+				_, err = userClient.UpdatePassword(context.Background(), &userpb.UpdatePasswordRequest{
+					Email:    emailEntry.Text,
+					Password: newPasswordEntry.Text,
+				})
+				if err != nil {
+					log.Printf("Failed to update password: %v", err)
+					return
+				}
+				dialog.ShowInformation("Успех", "Пароль успешно обновлён", state.window)
+				state.currentPage = "authorization"
+				state.window.SetContent(createContent(state))
+			})
+			confirmButton.Importance = widget.HighImportance
+
+			// Перестраиваем форму для второго этапа
+			secondForm := container.NewVBox(
+				logo,
+				layout.NewSpacer(),
+				tempPasswordEntry,
+				newPasswordEntry,
+				confirmButton,
+				layout.NewSpacer(),
+			)
+			currentForm = secondForm
+			leftContent := container.NewBorder(nil, nil, nil, nil, container.NewCenter(secondForm))
+			state.window.SetContent(container.New(layout.NewGridLayout(2), leftContent, rightContainer))
+		}),
+		layout.NewSpacer(),
+	)
 
 	backButton := widget.NewButton("← Назад", func() {
 		state.currentPage = "authorization"
@@ -365,25 +384,16 @@ func CreatePasswordResetPage(state *AppState) fyne.CanvasObject {
 	})
 	backFull := container.NewHBox(backButton)
 
-	form := container.NewVBox(
-		logo,
-		layout.NewSpacer(),
-		emailEntry,
-		enterButton,
-		layout.NewSpacer(),
-	)
-
+	// Изначальный leftContent
 	leftContent := container.NewBorder(
 		nil, backFull, nil, nil,
-		container.NewCenter(form),
+		container.NewCenter(initialForm),
 	)
+	currentForm = initialForm
 
-	rightBackground := canvas.NewRectangle(color.RGBA{23, 44, 101, 255})
-	rightText := canvas.NewText("Сброс пароля", color.White)
-	rightText.TextSize = 32
-	rightText.TextStyle = fyne.TextStyle{Bold: true}
-	rightContent := container.NewCenter(rightText)
-	rightContainer := container.NewStack(rightBackground, rightContent)
+	if currentForm == initialForm {
+
+	}
 
 	return container.New(layout.NewGridLayout(2), leftContent, rightContainer)
 }
