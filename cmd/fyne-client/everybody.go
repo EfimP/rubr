@@ -10,8 +10,11 @@ import (
 	"google.golang.org/grpc"
 	"image/color"
 	"log"
+	"strconv"
+	"time"
 
 	userpb "rubr/proto/user"
+	notifypb "rubr/proto/notification"
 )
 
 func CreateGreetingPage(state *AppState) fyne.CanvasObject {
@@ -180,6 +183,37 @@ func CreateRegistrationPage(state *AppState) fyne.CanvasObject {
 			log.Println("Registration error:", resp.Error)
 			return
 		}
+
+		connNotificate, err := grpc.Dial("89.169.39.161:50056", grpc.WithInsecure())
+		if err != nil {
+			log.Printf("Failed to connect to userservice: %v", err)
+			return
+		}
+		defer conn.Close()
+
+		userIDint64, err := strconv.ParseInt(resp.UserId, 10, 32)
+		if err != nil {
+			log.Printf("Некорректный ID пользователя: %v", err)
+			return
+		}
+		userID := int32(userIDint64)
+
+		clientNotificate := notifypb.NewNotificationServiceClient(connNotificate)
+		respNotificate, err := clientNotificate.SendRegistrationNotification(context.Background(), &notifypb.NotificationRequest{
+			UserId:    userID,
+			Email:     emailEntry.Text,
+			Message:   "Created new account",
+			CreatedAt: time.Now().GoString(),
+		})
+		if err != nil {
+			log.Printf("Notification failed: %v", err)
+			return
+		}
+		if respNotificate.Error != "" {
+			log.Println("Notification error:", respNotificate.Error)
+			return
+		}
+
 		log.Printf("Registration successful, UserID: %s", resp.UserId)
 		state.currentPage = "greeting"
 		state.window.SetContent(createContent(state))

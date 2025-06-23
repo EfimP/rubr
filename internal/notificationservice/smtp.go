@@ -12,8 +12,8 @@ import (
 const (
 	smtpHost = "smtp.gmail.com"
 	smtpPort = "587"
-	smtpUser = "your-email@gmail.com"
-	smtpPass = "your-app-password"
+	smtpUser = "rubrnotifications@gmail.com"
+	smtpPass = "RubrAVE0744"
 )
 
 // NotificationRequest представляет общий запрос для уведомлений
