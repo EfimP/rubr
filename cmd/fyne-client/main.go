@@ -41,6 +41,8 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return CreateAuthorizationPage(state)
 	case "registration":
 		return CreateRegistrationPage(state)
+	case "password_reset":
+		return CreatePasswordResetPage(state)
 	//superacc
 	case "superacc-groups":
 		return СreateGroupListPage(state)
@@ -65,7 +67,7 @@ func createContent(state *AppState) fyne.CanvasObject {
 		return CreateStudentBlockingCriteriaPage(state)
 	case "student_main_criteria":
 		return CreateStudentMainCriteriaPage(state)
-  //seminarist  
+		//seminarist
 	case "seminarist_works":
 		return CreateSeminaristWorksPage(state)
 	default:

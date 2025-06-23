@@ -6,6 +6,7 @@ option go_package = "./proto/user;user";
 service UserService {
   rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse) {}
   rpc Login (LoginRequest) returns (LoginResponse) {}
+  rpc UpdatePassword (UpdatePasswordRequest) returns (UpdatePasswordResponse) {}
 }
 
 message RegisterUserRequest {
@@ -40,4 +41,13 @@ message user {
   string patronymic = 4;
   string email = 5;
   string role = 6;
+}
+
+message UpdatePasswordRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message UpdatePasswordResponse {
+  string error = 1;
 }
